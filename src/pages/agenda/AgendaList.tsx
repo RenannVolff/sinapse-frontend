@@ -130,7 +130,9 @@ export function AgendaList() {
 
                 {/* Info Direita: Ação */}
                 <div className="flex items-center">
+                  {/* --- ADICIONADO O onClick AQUI --- */}
                   <button 
+                    onClick={() => navigate(`/agenda/${sessao.id}/sessao`)}
                     className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary bg-white border border-blue-200 rounded-lg hover:bg-primary hover:text-white transition-all shadow-sm"
                   >
                     Iniciar Atividade
