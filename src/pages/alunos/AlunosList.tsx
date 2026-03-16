@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Plus, Users, ChevronRight, Loader2 } from 'lucide-react';
-import { api } from '../../services/api.ts';
-import { Button } from '../../components/ui/Button.tsx';
-import { Input } from '../../components/ui/Input.tsx';
+import { api } from '../../services/api';
+import { Button } from '../../components/ui/Button';
+import { Input } from '../../components/ui/Input';
 
 export interface Aluno {
   id: string;
@@ -40,7 +40,6 @@ export function AlunosList() {
 
   return (
     <div className="space-y-6 fade-in">
-      {/* Cabeçalho */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
@@ -55,7 +54,6 @@ export function AlunosList() {
         </Button>
       </div>
 
-      {/* Barra de Pesquisa */}
       <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex items-center gap-4">
         <div className="flex-1 max-w-md">
           <Input
@@ -71,7 +69,6 @@ export function AlunosList() {
         </div>
       </div>
 
-      {/* Tabela / Lista de Alunos */}
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
         {loading ? (
           <div className="flex justify-center p-12">
@@ -96,12 +93,19 @@ export function AlunosList() {
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {alunosFiltrados.map((aluno) => (
-                  <tr key={aluno.id} className="hover:bg-blue-50/50 transition-colors group">
+                  <tr 
+                    key={aluno.id} 
+                    className="hover:bg-blue-50/50 transition-colors group cursor-pointer"
+                    onClick={() => navigate(`/alunos/${aluno.id}`)} // <-- Linha da tabela agora é clicável
+                  >
                     <td className="p-4 font-medium text-gray-900">{aluno.nomeCompleto}</td>
                     <td className="p-4 text-gray-600">{aluno.responsavel}</td>
                     <td className="p-4 text-gray-600">{aluno.contato}</td>
                     <td className="p-4 text-right">
-                      <button className="p-2 text-gray-400 hover:text-primary bg-white rounded-lg border border-transparent hover:border-blue-100 shadow-sm opacity-0 group-hover:opacity-100 transition-all">
+                      <button 
+                        className="p-2 text-primary hover:bg-blue-100 rounded-lg transition-all shadow-sm opacity-50 group-hover:opacity-100"
+                        title="Ver Perfil"
+                      >
                         <ChevronRight className="h-5 w-5" />
                       </button>
                     </td>
