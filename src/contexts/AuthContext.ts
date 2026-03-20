@@ -1,18 +1,18 @@
 import { createContext } from 'react';
 
-// Definição dos Tipos
+// Tipagem rigorosa do usuário que fica na memória
 export interface User {
-    id: string;
-    nome: string;
-    email: string;
+  id: string;
+  nome: string;
+  email: string;
+}
+export interface AuthContextData {
+  signed: boolean;
+  user: User | null;
+  signIn: (email: string, senha: string) => Promise<void>;
+  signOut: () => void;
+  updateUser: (user: User) => void;
 }
 
-export interface AuthContextType {
-    user: User | null;
-    isAuthenticated: boolean;
-    signIn: (email: string, senha: string) => Promise<void>;
-    signOut: () => void;
-}
-
-// Criação do Contexto (exportamos daqui para ser usado no Hook e no Provider)
-export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+// Cria o contexto vazio, mas possivelmente terá o formato AuthContextData
+export const AuthContext = createContext<AuthContextData>({} as AuthContextData);

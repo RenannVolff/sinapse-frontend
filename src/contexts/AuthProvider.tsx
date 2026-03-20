@@ -1,61 +1,68 @@
-import { useState, useCallback, type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
+import { AuthContext, type User } from './AuthContext';
 import { api } from '../services/api';
-import { AuthContext, type User } from './AuthContext'; // Importa do arquivo do Passo 1
 
-interface AuthResponse {
-    access_token: string;
-    usuario: User;
+interface AuthProviderProps {
+  children: ReactNode;
 }
 
-const STORAGE_KEY_TOKEN = 'sinapse.token';
-const STORAGE_KEY_USER = 'sinapse.user';
+interface LoginResponse {
+  token: string;
+  usuario: User;
+}
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-    // Lazy Initialization
-    const [user, setUser] = useState<User | null>(() => {
-        const storedUser = localStorage.getItem(STORAGE_KEY_USER);
-        const storedToken = localStorage.getItem(STORAGE_KEY_TOKEN);
+export function AuthProvider({ children }: AuthProviderProps) {
+  
+    // Estado do usuário, inicialmente tenta puxar do localStorage para manter a sessão
+  const [user, setUser] = useState<User | null>(() => {
+    const storageUser = localStorage.getItem('@SinapseEdu:user');
+    const storageToken = localStorage.getItem('@SinapseEdu:token');
 
-        if (storedUser && storedToken) {
-            try {
-                return JSON.parse(storedUser) as User;
-            } catch {
-                return null;
-            }
-        }
-        return null;
-    });
+    if (storageUser && storageToken) {
+      // Injeta o token no Axios instantaneamente antes mesmo da tela piscar
+      api.defaults.headers.common['Authorization'] = `Bearer ${storageToken}`;
+      return JSON.parse(storageUser);
+    }
+    
+    return null;
+  });
 
-    const signIn = useCallback(async (email: string, senha: string) => {
-        const response = await api.post<AuthResponse>('/auth/login', {
-            email,
-            senha,
+  const signIn = (email: string, senha: string): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      api.post<LoginResponse>('/auth/login', { email, senha })
+        .then((response) => {
+          const { token, usuario } = response.data;
+
+          localStorage.setItem('@SinapseEdu:user', JSON.stringify(usuario));
+          localStorage.setItem('@SinapseEdu:token', token);
+
+          api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+          setUser(usuario);
+          resolve();
+        })
+        .catch((error) => {
+          reject(error);
         });
+    });
+  };
 
-        const { access_token, usuario } = response.data;
+  // Função de Logout segura
+  const signOut = () => {
+    localStorage.removeItem('@SinapseEdu:user');
+    localStorage.removeItem('@SinapseEdu:token');
+    delete api.defaults.headers.common['Authorization'];
+    setUser(null);
+  };
 
-        localStorage.setItem(STORAGE_KEY_TOKEN, access_token);
-        localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(usuario));
+  // Atualização em tempo real (Usado na tela de configurações)
+  const updateUser = (updatedUser: User) => {
+    localStorage.setItem('@SinapseEdu:user', JSON.stringify(updatedUser));
+    setUser(updatedUser);
+  };
 
-        api.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
-
-        setUser(usuario);
-    }, []);
-
-    const signOut = useCallback(() => {
-        localStorage.removeItem(STORAGE_KEY_TOKEN);
-        localStorage.removeItem(STORAGE_KEY_USER);
-
-        delete api.defaults.headers.common['Authorization'];
-
-        setUser(null);
-    }, []);
-
-    return (
-        <AuthContext.Provider
-            value={{ user, isAuthenticated: !!user, signIn, signOut }}
-        >
-            {children}
-        </AuthContext.Provider>
-    );
+  return (
+    <AuthContext.Provider value={{ signed: !!user, user, signIn, signOut, updateUser }}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
