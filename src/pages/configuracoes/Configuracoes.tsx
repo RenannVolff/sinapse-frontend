@@ -45,7 +45,7 @@ export function Configuracoes() {
     setSucesso('');
     setAviso('');
 
-    // Se o usuário digitou algo no campo de senha, torna a validação obrigatória
+    // Validação estrita de senha
     if (novaSenha.length > 0 || confirmarSenha.length > 0) {
       if (novaSenha.length < 6) {
         setErro('A nova senha deve ter no mínimo 6 caracteres.');
@@ -72,12 +72,21 @@ export function Configuracoes() {
 
     api.patch(`/usuarios/${user.id}`, payload)
       .then((response) => {
+        if (payload.senha) {
+          setSucesso('Senha alterada com sucesso! Redirecionando para o login...');
+          
+          setTimeout(() => {
+            signOut();
+            navigate('/');
+          }, 2500);
+          
+          return;
+        }
+
         setSucesso('Perfil atualizado com sucesso!');
-        // Limpa os campos de senha após o sucesso
         setNovaSenha('');
         setConfirmarSenha('');
         
-        // Atualiza o estado global instantaneamente
         updateUser({
           id: user.id,
           nome: response.data.nome,
