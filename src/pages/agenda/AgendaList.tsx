@@ -1,146 +1,84 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Calendar as CalendarIcon, 
-  Plus, 
-  Clock,
-  User, 
-  ChevronRight, 
-  Loader2 
-} from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, User, Plus, ChevronRight, CheckCircle2 } from 'lucide-react';
 import { api } from '../../services/api';
 import { Button } from '../../components/ui/Button';
 
+type StatusAtendimento = 'AGENDADO' | 'EM_ANDAMENTO' | 'CONCLUIDO' | 'CANCELADO';
 
-export interface Atendimento {
+interface Sessao {
   id: string;
   dataAtendimento: string;
   tituloSessao: string;
-  observacoes: string | null;
-  aluno: {
-    nomeCompleto: string;
-  };
+  status: StatusAtendimento;
+  concluido: boolean;
+  aluno: { nomeCompleto: string; };
 }
 
 export function AgendaList() {
   const navigate = useNavigate();
-  const [atendimentos, setAtendimentos] = useState<Atendimento[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [sessoes, setSessoes] = useState<Sessao[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchAgenda() {
-      try {
-
-        const dataAtual = new Date();
-        const mes = dataAtual.getMonth() + 1; // getMonth é de 0 a 11
-        const ano = dataAtual.getFullYear();
-
-        const response = await api.get<Atendimento[]>(`/atendimentos/calendario?mes=${mes}&ano=${ano}`);
-        
-
-        const agendamentosOrdenados = response.data.sort((a, b) => 
-          new Date(a.dataAtendimento).getTime() - new Date(b.dataAtendimento).getTime()
-        );
-
-        setAtendimentos(agendamentosOrdenados);
-      } catch (error) {
-        console.error('Erro ao buscar agenda:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchAgenda();
+    const dataAtual = new Date();
+    api.get<Sessao[]>(`/atendimentos/calendario?mes=${dataAtual.getMonth() + 1}&ano=${dataAtual.getFullYear()}`)
+      .then((res) => {
+        const pendentes = res.data.filter(s => s.status !== 'CONCLUIDO' && s.status !== 'CANCELADO');
+        setSessoes(pendentes);
+      })
+      .catch((err) => console.error(err))
+      .finally(() => setLoading(false));
   }, []);
 
-
-  const formatarData = (isoString: string) => {
-    return new Date(isoString).toLocaleDateString('pt-BR', {
-      weekday: 'long',
-      day: '2-digit',
-      month: 'long'
-    });
-  };
-
-  const formatarHora = (isoString: string) => {
-    return new Date(isoString).toLocaleTimeString('pt-BR', {
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
   return (
-    <div className="space-y-6 fade-in">
-      {/* Cabeçalho */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="max-w-6xl mx-auto space-y-6 fade-in pb-12">
+      <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <CalendarIcon className="h-6 w-6 text-primary" />
-            Agenda de Sessões
+            <CalendarIcon className="h-6 w-6 text-blue-600" /> Agenda de Pendências
           </h1>
-          <p className="text-gray-500">Acompanhe seus próximos atendimentos deste mês.</p>
+          <p className="text-gray-500 text-sm mt-1">Apenas as sessões não finalizadas aparecerão aqui.</p>
         </div>
-        <Button onClick={() => navigate('/agenda/nova')} className="w-auto px-6">
-          <Plus className="h-4 w-4 mr-2" />
-          Agendar Sessão
+        <Button onClick={() => navigate('/agenda/nova')} className="w-full md:w-auto h-12 px-6">
+          <Plus className="h-5 w-5 mr-2" /> Agendar Sessão
         </Button>
       </div>
 
-      {/* Lista de Atendimentos */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 min-h-[400px]">
         {loading ? (
-          <div className="flex justify-center p-12">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
-        ) : atendimentos.length === 0 ? (
-          <div className="text-center p-12">
-            <CalendarIcon className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-            <h3 className="text-lg font-medium text-gray-900">Sua agenda está livre</h3>
-            <p className="text-gray-500 mt-1">Não há sessões programadas para este mês.</p>
+          <div className="flex justify-center items-center h-64 text-gray-400 font-medium">Carregando...</div>
+        ) : sessoes.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-64 text-center">
+            <div className="bg-green-50 p-4 rounded-full mb-3"><CheckCircle2 className="h-10 w-10 text-green-500" /></div>
+            <h3 className="text-xl font-bold text-gray-900">Nenhuma sessão pendente!</h3>
+            <p className="text-gray-500 text-sm mt-1">Sua agenda está limpa. Bom trabalho!</p>
           </div>
         ) : (
-          <div className="divide-y divide-gray-100">
-            {atendimentos.map((sessao) => (
-              <div key={sessao.id} className="p-5 hover:bg-blue-50/50 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-4 group">
-                
-                {/* Info Esquerda: Data e Hora */}
-                <div className="flex items-center gap-4 min-w-[200px]">
-                  {/* --- O ÍCONE DE RELÓGIO FOI ADICIONADO AQUI --- */}
-                  <div className="bg-primary/10 text-primary p-2.5 rounded-lg flex items-center justify-center gap-1.5 min-w-[85px]">
-                    <Clock className="h-4 w-4" />
-                    <span className="text-sm font-bold">{formatarHora(sessao.dataAtendimento)}</span>
+          <div className="divide-y divide-gray-50">
+            {sessoes.map((sessao) => {
+              const dataObj = new Date(sessao.dataAtendimento);
+              return (
+                <div key={sessao.id} className="p-6 hover:bg-blue-50/40 transition-colors flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 group">
+                  <div className="flex gap-4 items-center">
+                    <div className="h-16 w-16 bg-blue-50 border border-blue-100 rounded-2xl flex flex-col items-center justify-center flex-shrink-0">
+                      <span className="text-xs font-bold text-blue-500 uppercase">{dataObj.toLocaleDateString('pt-BR', { month: 'short' })}</span>
+                      <span className="text-2xl font-black text-blue-700 leading-none">{dataObj.getDate()}</span>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900">{sessao.tituloSessao}</h3>
+                      <div className="flex items-center gap-3 text-sm text-gray-500 font-medium mt-1">
+                        <span className="flex items-center gap-1"><Clock className="h-4 w-4"/> {dataObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
+                        <span className="flex items-center gap-1 bg-gray-100 px-2 py-0.5 rounded-md text-gray-700"><User className="h-4 w-4"/> {sessao.aluno.nomeCompleto}</span>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-semibold text-gray-900 capitalize">
-                      {formatarData(sessao.dataAtendimento)}
-                    </p>
-                  </div>
+                  <Button variant="outline" onClick={() => navigate(`/agenda/${sessao.id}/sessao`)} className="w-full sm:w-auto">
+                    {sessao.status === 'EM_ANDAMENTO' ? 'Continuar Sessão' : 'Iniciar Sessão'} <ChevronRight className="h-4 w-4 ml-1" />
+                  </Button>
                 </div>
-
-                {/* Info Central: Aluno e Título */}
-                <div className="flex-1">
-                  <h4 className="text-base font-bold text-gray-900 flex items-center gap-2">
-                    {sessao.tituloSessao}
-                  </h4>
-                  <div className="flex items-center gap-2 mt-1 text-sm text-gray-600">
-                    <User className="h-4 w-4" />
-                    <span className="font-medium">{sessao.aluno.nomeCompleto}</span>
-                  </div>
-                </div>
-
-                {/* Info Direita: Ação */}
-                <div className="flex items-center">
-                  {/* --- ADICIONADO O onClick AQUI --- */}
-                  <button 
-                    onClick={() => navigate(`/agenda/${sessao.id}/sessao`)}
-                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary bg-white border border-blue-200 rounded-lg hover:bg-primary hover:text-white transition-all shadow-sm"
-                  >
-                    Iniciar Atividade
-                    <ChevronRight className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

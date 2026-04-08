@@ -1,21 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
-  ArrowLeft, 
-  Plus, 
-  CheckCircle2, 
-  Circle, 
-  Save, 
-  FileText, 
-  BrainCircuit, 
-  Loader2,
-  AlertTriangle
+  ArrowLeft, Plus, CheckCircle2, Circle, FileText, 
+  BrainCircuit, Loader2, AlertTriangle, CheckCheck, Save, Star, Unlock, X
 } from 'lucide-react';
 import { api } from '../../services/api';
 import { Button } from '../../components/ui/Button';
-import { Input } from '../../components/ui/Input';
 
-// --- Tipagens Rigorosas ---
 interface ItemChecklist {
   id: string;
   nome: string; 
@@ -26,7 +17,6 @@ interface Atividade {
   id: string;
   titulo: string;
   nivelDificuldade: number;
-  observacao?: string | null;
   itensChecklist: ItemChecklist[];
 }
 
@@ -34,10 +24,9 @@ interface AtendimentoDetalhe {
   id: string;
   dataAtendimento: string;
   tituloSessao: string;
-  observacoes?: string | null;
-  aluno: {
-    nomeCompleto: string;
-  };
+  status: 'AGENDADO' | 'EM_ANDAMENTO' | 'CONCLUIDO' | 'CANCELADO';
+  observacoes: string | null;
+  aluno: { nomeCompleto: string; };
   atividades: Atividade[];
 }
 
@@ -45,234 +34,256 @@ export function SessaoAtiva() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  // Estados principais
+  // Estados de Dados
   const [atendimento, setAtendimento] = useState<AtendimentoDetalhe | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string>('');
-
+  const [observacoes, setObservacoes] = useState('');
+  
+  // Estados de Controle de Interface e Requisições
+  const [loading, setLoading] = useState(true);
+  const [loadingAcao, setLoadingAcao] = useState(false);
   const [novoTitulo, setNovoTitulo] = useState('');
   const [novaDificuldade, setNovaDificuldade] = useState<number>(1);
   const [loadingAdd, setLoadingAdd] = useState(false);
 
-  const carregarSessao = async () => {
-    try {
-      setLoading(true);
-      setError('');
+  // Estados para os Modais (Pop-ups)
+  const [modalEncerrarOpen, setModalEncerrarOpen] = useState(false);
+  const [modalReabrirOpen, setModalReabrirOpen] = useState(false);
 
-      const response = await api.get<AtendimentoDetalhe>(`/atendimentos/${id}`);
-      setAtendimento(response.data);
-    } catch (err) {
-      console.error('Erro ao buscar sessão:', err);
-      setError('Não foi possível carregar os dados desta sessão. Verifique se ela existe.');
-    } finally {
-      setLoading(false);
-    }
+  const carregarSessao = () => {
+    if (!id) return;
+    setLoading(true);
+    api.get<AtendimentoDetalhe>(`/atendimentos/${id}`)
+      .then((res) => {
+        setAtendimento(res.data);
+        setObservacoes(res.data.observacoes || '');
+      })
+      .catch(() => alert('Erro ao carregar os dados da sessão.'))
+      .finally(() => setLoading(false));
   };
 
   useEffect(() => {
-    if (id) {
-      carregarSessao();
-    }
+    carregarSessao();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  const handleAddAtividade = async (e: React.FormEvent) => {
+  // Ação: Adicionar Nova Atividade
+  const handleAddAtividade = (e: FormEvent) => {
     e.preventDefault();
-    if (!novoTitulo.trim()) return;
+    if (!novoTitulo.trim() || !id) return;
 
     setLoadingAdd(true);
-    try {
-      await api.post('/atividades', {
-        atendimentoId: id,
-        titulo: novoTitulo,
-        nivelDificuldade: novaDificuldade,
-      });
-
-      setNovoTitulo('');
-      setNovaDificuldade(1);
-      
-      await carregarSessao();
-    } catch (err) {
-      console.error('Erro ao adicionar atividade:', err);
-      alert('Erro ao criar a atividade. Tente novamente.');
-    } finally {
-      setLoadingAdd(false);
-    }
+    api.post('/atividades', { 
+      atendimentoId: id, 
+      titulo: novoTitulo, 
+      nivelDificuldade: novaDificuldade 
+    })
+      .then(() => {
+        setNovoTitulo('');
+        setNovaDificuldade(1);
+        carregarSessao(); // Recarrega para mostrar a nova atividade
+      })
+      .catch(() => alert('Erro ao criar atividade.'))
+      .finally(() => setLoadingAdd(false));
   };
 
-  const handleToggleChecklist = async (atividadeId: string, itemId: string, statusAtual: boolean) => {
-    try {
+  // Ação: Marcar/Desmarcar tentativa no checklist
+  const handleToggleChecklist = (atividadeId: string, itemId: string, statusAtual: boolean) => {
+    if (atendimento?.status === 'CONCLUIDO') return;
 
-      setAtendimento((prev) => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          atividades: prev.atividades.map(ativ => {
-            if (ativ.id !== atividadeId) return ativ;
-            return {
-              ...ativ,
-              itensChecklist: ativ.itensChecklist.map(item => 
-                item.id === itemId ? { ...item, realizado: !statusAtual } : item
-              )
-            };
-          })
-        };
-      });
+    setAtendimento((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        atividades: prev.atividades.map(ativ => {
+          if (ativ.id !== atividadeId) return ativ;
+          return {
+            ...ativ,
+            itensChecklist: ativ.itensChecklist.map(item => 
+              item.id === itemId ? { ...item, realizado: !statusAtual } : item
+            )
+          };
+        })
+      };
+    });
 
-      await api.patch(`/atividades/checklist/${itemId}`, {
-        realizado: !statusAtual
-      });
-
-    } catch (err) {
-      console.error('Erro ao atualizar checklist:', err);
-
-      await carregarSessao();
-    }
+    api.patch(`/atividades/checklist/${itemId}`, { realizado: !statusAtual })
+      .catch(() => carregarSessao()); // Se falhar no banco, volta ao estado anterior
   };
 
-  // --- RENDERS DE ESTADO (Carregando e Erro) ---
-  
-  if (loading) {
-    return (
-      <div className="flex flex-col h-[60vh] items-center justify-center gap-3">
-        <Loader2 className="h-10 w-10 animate-spin text-primary" />
-        <p className="text-gray-500 font-medium">Carregando dados da sessão...</p>
-      </div>
-    );
-  }
+  // Ação: Salvar e Pausar (Mantém na agenda)
+  const handlePausar = () => {
+    if (!id) return;
+    setLoadingAcao(true);
+    api.patch(`/atendimentos/${id}`, { status: 'EM_ANDAMENTO', observacoes })
+      .then(() => navigate('/agenda'))
+      .catch(() => alert('Erro ao salvar progresso.'))
+      .finally(() => setLoadingAcao(false));
+  };
 
-  if (error || !atendimento) {
-    return (
-      <div className="flex flex-col h-[60vh] items-center justify-center text-center px-4">
-        <div className="bg-red-50 p-6 rounded-full mb-4">
-          <AlertTriangle className="h-12 w-12 text-red-500" />
-        </div>
-        <h2 className="text-xl font-bold text-gray-900 mb-2">Ops! Algo deu errado.</h2>
-        <p className="text-gray-600 mb-6 max-w-md">{error || 'Sessão não encontrada.'}</p>
-        <Button onClick={() => navigate('/agenda')} className="w-auto px-8">
-          <ArrowLeft className="h-4 w-4 mr-2" /> Voltar para Agenda
-        </Button>
-      </div>
-    );
-  }
+  // Ação: Confirmação do Modal de Encerrar
+  const confirmarEncerramento = () => {
+    if (!id) return;
+    setLoadingAcao(true);
+    
+    api.patch(`/atendimentos/${id}`, { 
+      status: 'CONCLUIDO', 
+      concluido: true, 
+      observacoes 
+    })
+      .then(() => {
+        setModalEncerrarOpen(false);
+        navigate('/agenda');
+      })
+      .catch(() => alert('Erro ao tentar encerrar a sessão.'))
+      .finally(() => setLoadingAcao(false));
+  };
 
-  // --- RENDER PRINCIPAL (Sessão Carregada) ---
+  // Ação: Confirmação do Modal de Reabrir
+  const confirmarReabertura = () => {
+    if (!id) return;
+    setLoadingAcao(true);
+
+    api.patch(`/atendimentos/${id}`, { 
+      status: 'EM_ANDAMENTO', 
+      concluido: false 
+    })
+      .then(() => {
+        setModalReabrirOpen(false);
+        carregarSessao(); // Recarrega a tela para destravar os botões
+      })
+      .catch(() => alert('Erro ao tentar reabrir a sessão.'))
+      .finally(() => setLoadingAcao(false));
+  };
+
+  if (loading) return (
+    <div className="flex flex-col h-[60vh] items-center justify-center gap-3">
+      <Loader2 className="h-10 w-10 animate-spin text-blue-600" />
+      <p className="text-gray-500 font-medium">Carregando prontuário do aprendente...</p>
+    </div>
+  );
+
+  if (!atendimento) return (
+    <div className="text-center p-12 bg-white rounded-2xl border border-dashed border-gray-200">
+      <AlertTriangle className="h-12 w-12 text-orange-400 mx-auto mb-4" />
+      <p className="text-gray-500 font-bold">Sessão não encontrada.</p>
+    </div>
+  );
+
+  const isFinalizada = atendimento.status === 'CONCLUIDO';
+
   return (
-    <div className="max-w-4xl mx-auto space-y-6 fade-in pb-12">
+    <div className="max-w-5xl mx-auto space-y-6 fade-in pb-12 relative">
       
-      {/* 1. Cabeçalho da Sessão */}
-      <div className="flex flex-col md:flex-row md:items-center gap-4 bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
-        <button 
-          onClick={() => navigate('/agenda')}
-          className="p-2 text-gray-500 hover:text-primary hover:bg-blue-50 rounded-lg transition-colors hidden md:block"
-          title="Voltar"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </button>
-        <div className="flex-1">
-          <div className="flex items-center gap-3 mb-1">
-            <h1 className="text-2xl font-bold text-gray-900">{atendimento.tituloSessao}</h1>
-            <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full uppercase tracking-wider">
-              Sessão Ativa
-            </span>
+      {/* Cabeçalho de Ações */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 rounded-2xl shadow-sm border border-gray-100 sticky top-4 z-30">
+        <div className="flex items-center gap-4">
+          <button onClick={() => navigate('/agenda')} className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all">
+            <ArrowLeft className="h-6 w-6" />
+          </button>
+          <div>
+            <h1 className="text-xl font-black text-gray-900 leading-tight">{atendimento.tituloSessao}</h1>
+            <p className="text-sm text-gray-500 font-medium">Aprendente: <span className="text-blue-600">{atendimento.aluno.nomeCompleto}</span></p>
           </div>
-          <p className="text-gray-500 flex flex-col md:flex-row md:items-center gap-1 md:gap-3 text-sm">
-            <span>Paciente: <strong className="text-gray-700">{atendimento.aluno.nomeCompleto}</strong></span>
-            <span className="hidden md:inline text-gray-300">•</span>
-            <span>Data: {new Date(atendimento.dataAtendimento).toLocaleDateString('pt-BR')}</span>
-          </p>
         </div>
-        <Button onClick={() => navigate('/agenda')} variant="outline" className="w-full md:w-auto">
-          <Save className="h-4 w-4 mr-2" /> Salvar e Fechar
-        </Button>
+        
+        <div className="flex gap-3">
+          {!isFinalizada ? (
+            <>
+              <Button variant="outline" onClick={handlePausar} isLoading={loadingAcao} className="border-blue-200 text-blue-600 hover:bg-blue-50">
+                <Save className="h-4 w-4 mr-2" /> Salvar e Pausar
+              </Button>
+              <Button onClick={() => setModalEncerrarOpen(true)} className="bg-green-600 hover:bg-green-700 shadow-lg shadow-green-600/20">
+                <CheckCheck className="h-5 w-5 mr-2" /> Encerrar Sessão
+              </Button>
+            </>
+          ) : (
+            <>
+              <div className="bg-gray-100 text-gray-500 px-4 py-2 rounded-xl font-bold flex items-center gap-2">
+                <CheckCircle2 className="h-5 w-5" /> SESSÃO CONCLUÍDA
+              </div>
+              <Button onClick={() => setModalReabrirOpen(true)} isLoading={loadingAcao} className="bg-orange-500 hover:bg-orange-600 shadow-lg shadow-orange-500/20 text-white">
+                <Unlock className="h-5 w-5 mr-2" /> Reabrir Sessão
+              </Button>
+            </>
+          )}
+        </div>
       </div>
 
-      {/* 2. Formulário para Adicionar Atividade */}
-      <form onSubmit={handleAddAtividade} className="bg-blue-50/70 p-6 rounded-xl border border-blue-100 flex flex-col md:flex-row gap-4 items-end shadow-sm">
-        <div className="flex-1 w-full">
-          <Input 
-            label="Novo Exercício / Atividade" 
-            placeholder="Ex: Jogo da Memória Numérico"
-            value={novoTitulo}
-            onChange={(e) => setNovoTitulo(e.target.value)}
-            icon={<BrainCircuit className="h-5 w-5" />}
-            required
-          />
-        </div>
-        <div className="w-full md:w-48">
-          <label className="text-sm font-semibold text-gray-700 mb-1.5 block">Nível Dificuldade</label>
-          <select 
-            value={novaDificuldade}
-            onChange={(e) => setNovaDificuldade(Number(e.target.value))}
-            className="w-full bg-white border border-gray-200 rounded-lg py-3 px-4 outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all cursor-pointer"
-          >
-            <option value={1}>1 - Muito Fácil</option>
-            <option value={2}>2 - Fácil</option>
-            <option value={3}>3 - Moderado</option>
-            <option value={4}>4 - Difícil</option>
-            <option value={5}>5 - Muito Difícil</option>
-          </select>
-        </div>
-        <Button type="submit" isLoading={loadingAdd} className="w-full md:w-auto h-[50px] px-8">
-          <Plus className="h-5 w-5 mr-2" /> Adicionar
-        </Button>
-      </form>
+      {/* Formulário de Nova Atividade */}
+      {!isFinalizada && (
+        <form onSubmit={handleAddAtividade} className="bg-gradient-to-br from-blue-600 to-indigo-700 p-5 md:p-6 rounded-3xl shadow-xl shadow-blue-900/10 flex flex-col md:flex-row gap-4 items-end">
+          <div className="flex-1 w-full">
+            <label className="text-xs font-black text-blue-100 uppercase tracking-widest ml-1 mb-2 block">Nova Atividade para esta Sessão</label>
+            <input 
+              type="text" 
+              value={novoTitulo} 
+              onChange={(e) => setNovoTitulo(e.target.value)}
+              className="w-full bg-white/10 border border-white/20 rounded-xl py-3 px-4 outline-none focus:bg-white focus:text-gray-900 transition-all text-white placeholder-white/50 font-medium"
+              placeholder="Ex: Identificação de Fonemas, Puzzle Lógico..."
+              required
+            />
+          </div>
+          <div className="w-full md:w-40">
+            <label className="text-xs font-black text-blue-100 uppercase tracking-widest ml-1 mb-2 block">Dificuldade</label>
+            <select 
+              value={novaDificuldade} 
+              onChange={(e) => setNovaDificuldade(Number(e.target.value))}
+              className="w-full bg-white/10 border border-white/20 rounded-xl py-3 px-4 outline-none focus:bg-white focus:text-gray-900 transition-all text-white font-bold cursor-pointer"
+            >
+              <option value={1} className="text-gray-900">1 - Iniciante</option>
+              <option value={2} className="text-gray-900">2 - Fácil</option>
+              <option value={3} className="text-gray-900">3 - Médio</option>
+              <option value={4} className="text-gray-900">4 - Desafiador</option>
+              <option value={5} className="text-gray-900">5 - Avançado</option>
+            </select>
+          </div>
+          <Button type="submit" isLoading={loadingAdd} className="w-full md:w-auto bg-white text-blue-600 hover:bg-blue-50 h-[50px] px-6 shadow-lg shadow-black/10">
+            <Plus className="h-5 w-5 mr-2" /> Adicionar
+          </Button>
+        </form>
+      )}
 
-      {/* 3. Lista de Atividades e Checklists */}
-      <div className="space-y-4">
+      {/* Listagem de Atividades */}
+      <div className="space-y-6">
         {atendimento.atividades.length === 0 ? (
-          <div className="text-center p-12 bg-white rounded-xl border-2 border-dashed border-gray-200">
-            <FileText className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-            <p className="text-lg text-gray-600 font-medium">Nenhuma atividade registrada ainda.</p>
-            <p className="text-sm text-gray-400 mt-1">Crie a primeira atividade acima para gerar os checklists de tentativas.</p>
+          <div className="bg-white rounded-3xl border-2 border-dashed border-gray-100 p-16 text-center">
+            <BrainCircuit className="h-16 w-16 text-gray-200 mx-auto mb-4" />
+            <h3 className="text-gray-400 font-bold text-lg">Nenhuma atividade registrada ainda.</h3>
+            <p className="text-gray-300 text-sm">Adicione uma atividade acima para começar o registro.</p>
           </div>
         ) : (
-          atendimento.atividades.map((atividade, index) => (
-            <div key={atividade.id} className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:border-blue-300 transition-all duration-300">
-              
-              {/* Cabeçalho da Atividade */}
-              <div className="flex justify-between items-start mb-6">
-                <div>
-                  <h3 className="text-lg font-bold text-gray-900 flex items-center gap-3">
-                    <span className="bg-primary text-white h-7 w-7 rounded-full flex items-center justify-center text-sm shadow-sm">
-                      {index + 1}
-                    </span>
-                    {atividade.titulo}
-                  </h3>
+          atendimento.atividades.map((atividade, idx) => (
+            <div key={atividade.id} className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden animate-in slide-in-from-bottom-4 duration-300" style={{ animationDelay: `${idx * 100}ms` }}>
+              <div className="p-6 border-b border-gray-50 flex justify-between items-center bg-gray-50/30">
+                <div className="flex items-center gap-4">
+                  <span className="h-8 w-8 bg-blue-600 text-white rounded-xl flex items-center justify-center font-black text-sm shadow-md shadow-blue-600/20">{idx + 1}</span>
+                  <h3 className="text-lg font-bold text-gray-900">{atividade.titulo}</h3>
                 </div>
-                <div className="text-right">
-                  <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Dificuldade</span>
-                  <div className="flex items-center gap-1 mt-1 justify-end" title={`Nível ${atividade.nivelDificuldade} de 5`}>
-                    {[1, 2, 3, 4, 5].map((estrela) => (
-                      <div 
-                        key={estrela} 
-                        className={`h-2.5 w-6 rounded-full transition-colors ${estrela <= atividade.nivelDificuldade ? 'bg-orange-400 shadow-sm' : 'bg-gray-100'}`}
-                      />
-                    ))}
-                  </div>
+                <div className="flex items-center gap-1 px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-full border border-indigo-100">
+                  <Star className="h-4 w-4 fill-indigo-600" />
+                  <span className="text-xs font-black uppercase tracking-tight">Nível {atividade.nivelDificuldade}</span>
                 </div>
               </div>
-
-              {/* Checklists (As 5 Caixas) */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+              
+              <div className="p-6 grid grid-cols-2 sm:grid-cols-5 gap-4">
                 {atividade.itensChecklist.map((item) => (
                   <button
                     key={item.id}
+                    type="button"
+                    disabled={isFinalizada}
                     onClick={() => handleToggleChecklist(atividade.id, item.id, item.realizado)}
-                    className={`
-                      flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all duration-200 group relative overflow-hidden
-                      ${item.realizado 
-                        ? 'border-green-500 bg-green-50 text-green-700 shadow-sm' 
-                        : 'border-gray-200 bg-white text-gray-500 hover:border-primary/50 hover:bg-blue-50'
-                      }
-                    `}
+                    className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all group relative ${
+                      item.realizado 
+                      ? 'border-green-500 bg-green-50 text-green-700 shadow-inner' 
+                      : 'border-gray-100 bg-white text-gray-400 hover:border-blue-200 hover:bg-blue-50/50'
+                    }`}
                   >
                     {item.realizado ? (
-                      <CheckCircle2 className="h-8 w-8 mb-2 text-green-500 drop-shadow-sm" />
+                      <CheckCircle2 className="h-8 w-8 mb-2 text-green-600" />
                     ) : (
-                      <Circle className="h-8 w-8 mb-2 text-gray-300 group-hover:text-primary/40 transition-colors" />
+                      <Circle className="h-8 w-8 mb-2 text-gray-200 group-hover:text-blue-300 transition-colors" />
                     )}
-                    <span className="text-sm font-bold text-center leading-tight">
+                    <span className={`text-[10px] font-black uppercase tracking-widest text-center leading-tight ${item.realizado ? 'text-green-700' : 'text-gray-400 group-hover:text-blue-600'}`}>
                       {item.nome}
                     </span>
                   </button>
@@ -282,6 +293,74 @@ export function SessaoAtiva() {
           ))
         )}
       </div>
+
+      {/* Observações Finais */}
+      <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+        <label className="text-sm font-black text-gray-700 uppercase tracking-widest flex items-center gap-2 mb-4">
+          <FileText className="h-5 w-5 text-blue-600" /> Parecer Técnico / Observações
+        </label>
+        <textarea 
+          value={observacoes}
+          onChange={(e) => setObservacoes(e.target.value)}
+          disabled={isFinalizada}
+          placeholder={isFinalizada ? "Nenhuma observação registrada." : "Descreva aqui os detalhes do desempenho, comportamento e evolução observados nesta sessão..."}
+          className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-5 outline-none focus:bg-white focus:border-blue-500 transition-all text-gray-700 leading-relaxed h-40 resize-none font-medium placeholder-gray-300 disabled:opacity-70 disabled:bg-gray-100 disabled:cursor-not-allowed"
+        />
+      </div>
+
+
+      {/* ================= MODAIS (POP-UPS) ================= */}
+
+      {/* Modal: Encerrar Sessão */}
+      {modalEncerrarOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden">
+            <div className="p-6 text-center">
+              <div className="mx-auto w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-4">
+                <CheckCheck className="h-8 w-8" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Encerrar Sessão?</h2>
+              <p className="text-gray-500 mb-6">
+                Ao encerrar, esta sessão será marcada como concluída, travada para edições e movida para o histórico do aprendente.
+              </p>
+              <div className="flex gap-3">
+                <Button variant="outline" onClick={() => setModalEncerrarOpen(false)} className="flex-1 bg-gray-50">
+                  Cancelar
+                </Button>
+                <Button onClick={confirmarEncerramento} isLoading={loadingAcao} className="flex-1 bg-green-600 hover:bg-green-700 text-white">
+                  Sim, Encerrar
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Reabrir Sessão */}
+      {modalReabrirOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden">
+            <div className="p-6 text-center relative">
+              <button onClick={() => setModalReabrirOpen(false)} className="absolute top-4 right-4 p-2 text-gray-400 hover:bg-gray-100 rounded-full transition-colors">
+                <X className="h-5 w-5" />
+              </button>
+              <div className="mx-auto w-16 h-16 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center mb-4">
+                <Unlock className="h-8 w-8" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Reabrir Sessão?</h2>
+              <p className="text-gray-500 mb-6">
+                Esta ação destravará a edição do checklist e das observações. A sessão voltará para a lista de pendências da sua agenda.
+              </p>
+              <div className="flex gap-3">
+                <Button onClick={confirmarReabertura} isLoading={loadingAcao} className="w-full bg-orange-500 hover:bg-orange-600 text-white">
+                  Sim, Reabrir e Editar
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
