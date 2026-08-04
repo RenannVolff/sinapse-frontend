@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { BrainCircuit, Mail, Lock, Loader2, AlertCircle, ArrowRight } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 
@@ -30,14 +30,14 @@ export function Login() {
 
   return (
     // Fundo Premium com Gradiente Animado (Estilo Deep Blue/Indigo)
-    <div className="min-h-screen relative overflow-hidden flex items-center justify-center bg-gradient-to-br from-slate-900 via-indigo-950 to-blue-900">
+    <div className="min-h-screen relative overflow-hidden flex items-center justify-center bg-gradient-to-br from-slate-900 via-indigo-950 to-blue-900 p-4">
       
       {/* Elementos Flutuantes de Fundo (Decoração) */}
       <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
       <div className="absolute bottom-[-10%] right-[-10%] w-[30rem] h-[30rem] bg-indigo-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
 
       {/* Card de Login (Glassmorphism sutil e Sombras Profundas) */}
-      <div className="relative z-10 w-full max-w-[420px] p-4 animate-in slide-in-from-bottom-8 duration-700 fade-in zoom-in-95">
+      <div className="relative z-10 w-full max-w-[420px] animate-in slide-in-from-bottom-8 duration-700 fade-in zoom-in-95">
         <div className="bg-white/95 backdrop-blur-xl rounded-[2rem] shadow-2xl shadow-black/50 border border-white/20 p-8 sm:p-10">
           
           {/* Logo Animada */}
@@ -90,7 +90,7 @@ export function Login() {
               </div>
             </div>
 
-            {/* Mensagem de Erro (Shake Animation nativo do Tailwind pode ser adicionado depois) */}
+            {/* Mensagem de Erro */}
             {error && (
               <div className="p-3.5 bg-red-50 text-red-700 text-sm font-bold rounded-xl border border-red-100 flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
                 <AlertCircle className="h-5 w-5 flex-shrink-0" />
@@ -122,9 +122,15 @@ export function Login() {
             </div>
           </form>
 
-          {/* Rodapé Elegante */}
-          <div className="mt-8 pt-6 border-t border-gray-100/60 text-center">
-            <p className="text-xs text-gray-400 font-semibold tracking-wide uppercase">
+          {/* Rodapé Elegante com o link para cadastro */}
+          <div className="mt-8 pt-6 border-t border-gray-100/60 text-center space-y-4">
+            <p className="text-sm text-gray-600 font-medium">
+              Não possui uma conta?{' '}
+              <Link to="/cadastro" className="text-blue-600 font-bold hover:text-blue-700 transition-colors">
+                Cadastre-se aqui
+              </Link>
+            </p>
+            <p className="text-[10px] text-gray-400 font-bold tracking-widest uppercase">
               Acesso exclusivo e monitorado
             </p>
           </div>
@@ -132,7 +138,6 @@ export function Login() {
         </div>
       </div>
 
-      {/* Tailwind Custom Keyframes (Apenas para garantir que o shimmer funcione) */}
       <style>{`
         @keyframes shimmer {
           100% { transform: translateX(100%); }

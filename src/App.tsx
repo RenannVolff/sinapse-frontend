@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthProvider';
+import { Cadastro } from './pages/Cadastro';
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
 import { DefaultLayout } from './components/layout/DefaultLayout';
@@ -23,6 +24,7 @@ export default function App() {
         <Routes>
           {/* Rota Pública */}
           <Route path="/" element={<Login />} />
+          <Route path="/cadastro" element={<Cadastro />} />
 
           {/* Rotas Privadas */}
           <Route element={<DefaultLayout />}>
