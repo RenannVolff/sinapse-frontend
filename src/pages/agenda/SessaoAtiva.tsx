@@ -26,7 +26,7 @@ interface AtendimentoDetalhe {
   tituloSessao: string;
   status: 'AGENDADO' | 'EM_ANDAMENTO' | 'CONCLUIDO' | 'CANCELADO';
   observacoes: string | null;
-  aluno: { nomeCompleto: string; };
+  aprendente: { nomeCompleto: string; };
   atividades: Atividade[];
 }
 
@@ -182,7 +182,7 @@ export function SessaoAtiva() {
           </button>
           <div>
             <h1 className="text-xl font-black text-gray-900 leading-tight">{atendimento.tituloSessao}</h1>
-            <p className="text-sm text-gray-500 font-medium">Aprendente: <span className="text-blue-600">{atendimento.aluno.nomeCompleto}</span></p>
+            <p className="text-sm text-gray-500 font-medium">Aprendente: <span className="text-blue-600">{atendimento.aprendente.nomeCompleto}</span></p>
           </div>
         </div>
         

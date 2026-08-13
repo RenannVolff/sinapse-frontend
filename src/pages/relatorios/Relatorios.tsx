@@ -8,7 +8,7 @@ import { api } from '../../services/api';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 
-interface AlunoOpcao {
+interface AprendenteOpcao {
   id: string;
   nomeCompleto: string;
 }
@@ -27,10 +27,10 @@ interface RelatorioResponse {
 type TipoGrafico = 'linha' | 'barra' | 'area';
 
 export function Relatorios() {
-  const [alunos, setAlunos] = useState<AlunoOpcao[]>([]);
-  
+  const [aprendentes, setAprendentes] = useState<AprendenteOpcao[]>([]);
+
   // Estados do Formulário
-  const [alunoSelecionado, setAlunoSelecionado] = useState<string>('');
+  const [aprendenteSelecionado, setAprendenteSelecionado] = useState<string>('');
   const [dataInicio, setDataInicio] = useState<string>('');
   const [dataFim, setDataFim] = useState<string>('');
   const [tipoGrafico, setTipoGrafico] = useState<TipoGrafico>('linha');
@@ -44,15 +44,15 @@ export function Relatorios() {
   const [loadingRelatorio, setLoadingRelatorio] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
 
-  // Busca inicial dos alunos
+  // Busca inicial dos aprendentes
   useEffect(() => {
-    api.get<AlunoOpcao[]>('/alunos')
+    api.get<AprendenteOpcao[]>('/aprendentes')
       .then((res) => {
-        setAlunos(res.data);
+        setAprendentes(res.data);
         setError('');
       })
       .catch((err) => {
-        console.error('Erro ao buscar alunos:', err);
+        console.error('Erro ao buscar aprendentes:', err);
         setError('Falha ao conectar com o servidor.');
       })
       .finally(() => {
@@ -64,7 +64,7 @@ export function Relatorios() {
   const handleGerarRelatorio = (e: FormEvent) => {
     e.preventDefault();
     
-    if (!alunoSelecionado || !dataInicio || !dataFim) {
+    if (!aprendenteSelecionado || !dataInicio || !dataFim) {
       setError('Por favor, preencha o paciente e o período selecionado.');
       return;
     }
@@ -72,7 +72,7 @@ export function Relatorios() {
     setLoadingRelatorio(true);
     setError('');
 
-    api.get<RelatorioResponse>(`/alunos/${alunoSelecionado}/relatorio-ia?inicio=${dataInicio}&fim=${dataFim}`)
+    api.get<RelatorioResponse>(`/aprendentes/${aprendenteSelecionado}/relatorio-ia?inicio=${dataInicio}&fim=${dataFim}`)
       .then((res) => {
         setDadosEvolucao(res.data.dadosGrafico);
         setResumoIa(res.data.resumoIa);
@@ -153,16 +153,16 @@ export function Relatorios() {
               <User className="h-4 w-4 text-gray-400" /> Paciente
             </label>
             <select
-              value={alunoSelecionado}
-              onChange={(e) => setAlunoSelecionado(e.target.value)}
+              value={aprendenteSelecionado}
+              onChange={(e) => setAprendenteSelecionado(e.target.value)}
               disabled={loadingDados}
               className="w-full bg-white border border-gray-200 rounded-lg py-3 px-4 outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 text-gray-900 cursor-pointer"
             >
               <option value="" disabled>
                 {loadingDados ? 'Carregando lista...' : 'Escolha o paciente...'}
               </option>
-              {alunos.map(aluno => (
-                <option key={aluno.id} value={aluno.id}>{aluno.nomeCompleto}</option>
+              {aprendentes.map(aprendente => (
+                <option key={aprendente.id} value={aprendente.id}>{aprendente.nomeCompleto}</option>
               ))}
             </select>
           </div>

@@ -21,7 +21,7 @@ interface AtendimentoHist {
   observacoes: string | null;
 }
 
-interface AlunoPerfil {
+interface AprendentePerfil {
   id: string;
   nomeCompleto: string;
   dataNascimento: string;
@@ -31,32 +31,32 @@ interface AlunoPerfil {
   atendimentos: AtendimentoHist[];
 }
 
-export function AlunoDetalhes() {
+export function AprendenteDetalhes() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  const [aluno, setAluno] = useState<AlunoPerfil | null>(null);
+  const [aprendente, setAprendente] = useState<AprendentePerfil | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
 
   useEffect(() => {
-    async function fetchAlunoDetalhes() {
+    async function fetchAprendenteDetalhes() {
       if (!id) return;
-      
+
       try {
         setLoading(true);
         setError('');
-        const response = await api.get<AlunoPerfil>(`/alunos/${id}`);
-        setAluno(response.data);
+        const response = await api.get<AprendentePerfil>(`/aprendentes/${id}`);
+        setAprendente(response.data);
       } catch (err) {
-        console.error('Erro ao buscar detalhes do aluno:', err);
+        console.error('Erro ao buscar detalhes do aprendente:', err);
         setError('Não foi possível carregar o perfil deste paciente.');
       } finally {
         setLoading(false);
       }
     }
 
-    fetchAlunoDetalhes();
+    fetchAprendenteDetalhes();
   }, [id]);
 
   // Função para calcular a idade
@@ -80,7 +80,7 @@ export function AlunoDetalhes() {
     );
   }
 
-  if (error || !aluno) {
+  if (error || !aprendente) {
     return (
       <div className="flex flex-col h-[60vh] items-center justify-center text-center px-4">
         <div className="bg-red-50 p-6 rounded-full mb-4">
@@ -88,7 +88,7 @@ export function AlunoDetalhes() {
         </div>
         <h2 className="text-xl font-bold text-gray-900 mb-2">Ops! Algo deu errado.</h2>
         <p className="text-gray-600 mb-6 max-w-md">{error}</p>
-        <Button onClick={() => navigate('/alunos')} className="w-auto px-8">
+        <Button onClick={() => navigate('/aprendentes')} className="w-auto px-8">
           <ArrowLeft className="h-4 w-4 mr-2" /> Voltar para a Lista
         </Button>
       </div>
@@ -99,17 +99,17 @@ export function AlunoDetalhes() {
     <div className="max-w-4xl mx-auto space-y-6 fade-in pb-12">
       {/* Cabeçalho */}
       <div className="flex items-center gap-4 bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
-        <button 
-          onClick={() => navigate('/alunos')}
+        <button
+          onClick={() => navigate('/aprendentes')}
           className="p-2 text-gray-500 hover:text-primary hover:bg-blue-50 rounded-lg transition-colors"
           title="Voltar"
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
         <div className="flex-1">
-          <h1 className="text-2xl font-bold text-gray-900">{aluno.nomeCompleto}</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{aprendente.nomeCompleto}</h1>
           <p className="text-gray-500 text-sm mt-1 flex items-center gap-2">
-            Paciente ativo desde {new Date(aluno.criadoEm).toLocaleDateString('pt-BR')}
+            Paciente ativo desde {new Date(aprendente.criadoEm).toLocaleDateString('pt-BR')}
           </p>
         </div>
         <Button onClick={() => navigate('/agenda/nova')} className="w-auto px-6 hidden sm:flex">
@@ -132,10 +132,10 @@ export function AlunoDetalhes() {
                 <div>
                   <p className="text-xs font-semibold text-gray-500 uppercase">Idade</p>
                   <p className="text-sm font-medium text-gray-900">
-                    {calcularIdade(aluno.dataNascimento)} anos
+                    {calcularIdade(aprendente.dataNascimento)} anos
                   </p>
                   <p className="text-xs text-gray-400">
-                    Nascido em {new Date(aluno.dataNascimento).toLocaleDateString('pt-BR')}
+                    Nascido em {new Date(aprendente.dataNascimento).toLocaleDateString('pt-BR')}
                   </p>
                 </div>
               </li>
@@ -145,7 +145,7 @@ export function AlunoDetalhes() {
                 </div>
                 <div>
                   <p className="text-xs font-semibold text-gray-500 uppercase">Responsável</p>
-                  <p className="text-sm font-medium text-gray-900">{aluno.responsavel}</p>
+                  <p className="text-sm font-medium text-gray-900">{aprendente.responsavel}</p>
                 </div>
               </li>
               <li className="flex items-start gap-3">
@@ -154,7 +154,7 @@ export function AlunoDetalhes() {
                 </div>
                 <div>
                   <p className="text-xs font-semibold text-gray-500 uppercase">Contato</p>
-                  <p className="text-sm font-medium text-gray-900">{aluno.contato}</p>
+                  <p className="text-sm font-medium text-gray-900">{aprendente.contato}</p>
                 </div>
               </li>
             </ul>
@@ -169,14 +169,14 @@ export function AlunoDetalhes() {
               Histórico de Atendimentos
             </h3>
 
-            {aluno.atendimentos.length === 0 ? (
+            {aprendente.atendimentos.length === 0 ? (
               <div className="text-center p-8 border-2 border-dashed border-gray-100 rounded-xl">
                 <FileText className="h-10 w-10 text-gray-300 mx-auto mb-2" />
                 <p className="text-gray-500 text-sm font-medium">Nenhum atendimento registrado.</p>
               </div>
             ) : (
               <div className="space-y-4">
-                {aluno.atendimentos.map((sessao) => (
+                {aprendente.atendimentos.map((sessao) => (
                   <div key={sessao.id} className="p-4 bg-gray-50 rounded-lg border border-gray-100 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center hover:bg-blue-50/50 transition-colors">
                     <div>
                       <h4 className="font-bold text-gray-900 text-sm mb-1">{sessao.tituloSessao}</h4>

@@ -5,9 +5,9 @@ import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
 import { DefaultLayout } from './components/layout/DefaultLayout';
 
-import { AlunosList } from './pages/alunos/AlunosList';
-import { NovoAluno } from './pages/alunos/NovoAluno';
-import { AlunoDetalhes } from './pages/alunos/AlunoDetalhes';
+import { AprendentesList } from './pages/aprendentes/AprendentesList';
+import { NovoAprendente } from './pages/aprendentes/NovoAprendente';
+import { AprendenteDetalhes } from './pages/aprendentes/AprendenteDetalhes';
 
 import { AgendaList } from './pages/agenda/AgendaList';
 import { NovaSessao } from './pages/agenda/NovaSessao';
@@ -30,9 +30,9 @@ export default function App() {
           <Route element={<DefaultLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
             
-            <Route path="/alunos" element={<AlunosList />} />
-            <Route path="/alunos/novo" element={<NovoAluno />} />
-            <Route path="/alunos/:id" element={<AlunoDetalhes />} />
+            <Route path="/aprendentes" element={<AprendentesList />} />
+            <Route path="/aprendentes/novo" element={<NovoAprendente />} />
+            <Route path="/aprendentes/:id" element={<AprendenteDetalhes />} />
             
             <Route path="/agenda" element={<AgendaList />} />
             <Route path="/agenda/nova" element={<NovaSessao />} />

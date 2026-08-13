@@ -6,7 +6,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 
-export function NovoAluno() {
+export function NovoAprendente() {
   const navigate = useNavigate();
   const { user } = useAuth();
   
@@ -36,7 +36,7 @@ export function NovoAluno() {
 
     setLoading(true);
 
-    api.post('/alunos', {
+    api.post('/aprendentes', {
       nomeCompleto,
       dataNascimento,
       responsavel,
@@ -45,7 +45,7 @@ export function NovoAluno() {
     })
       .then(() => {
         setSucesso('Aprendente cadastrado com sucesso! Redirecionando...');
-        setTimeout(() => navigate('/alunos'), 2000);
+        setTimeout(() => navigate('/aprendentes'), 2000);
       })
       .catch((err) => {
         console.error('Erro no cadastro:', err);
@@ -61,8 +61,8 @@ export function NovoAluno() {
       
       {/* Cabeçalho */}
       <div className="flex items-center gap-4 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-        <button 
-          onClick={() => navigate('/alunos')}
+        <button
+          onClick={() => navigate('/aprendentes')}
           className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
         >
           <ArrowLeft className="h-5 w-5" />

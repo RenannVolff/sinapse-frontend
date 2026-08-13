@@ -11,7 +11,7 @@ import {
 export function Sidebar() {
   const navItems = [
     { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { path: '/alunos', label: 'Meus Alunos', icon: Users },
+    { path: '/aprendentes', label: 'Meus Aprendentes', icon: Users },
     { path: '/agenda', label: 'Agenda', icon: Calendar },
     { path: '/relatorios', label: 'Relatórios', icon: BarChart3 },
     { path: '/configuracoes', label: 'Configurações', icon: Settings },

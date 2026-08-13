@@ -6,16 +6,16 @@ import { api } from '../../services/api';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 
-interface AlunoOpcao {
+interface AprendenteOpcao {
   id: string;
   nomeCompleto: string;
 }
 
 export function NovaSessao() {
   const navigate = useNavigate();
-  const [aprendentes, setAprendentes] = useState<AlunoOpcao[]>([]);
-  
-  const [alunoId, setAlunoId] = useState('');
+  const [aprendentes, setAprendentes] = useState<AprendenteOpcao[]>([]);
+
+  const [aprendenteId, setAprendenteId] = useState('');
   const [data, setData] = useState('');
   const [hora, setHora] = useState('');
   const [titulo, setTitulo] = useState('');
@@ -24,15 +24,15 @@ export function NovaSessao() {
   const [erro, setErro] = useState('');
 
   useEffect(() => {
-    api.get<AlunoOpcao[]>('/alunos')
+    api.get<AprendenteOpcao[]>('/aprendentes')
       .then((res) => setAprendentes(res.data))
       .catch(() => setErro('Erro ao carregar lista de aprendentes.'));
   }, []);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    
-    if (!alunoId || !data || !hora || !titulo) {
+
+    if (!aprendenteId || !data || !hora || !titulo) {
       setErro('Preencha todos os campos obrigatórios.');
       return;
     }
@@ -43,7 +43,7 @@ export function NovaSessao() {
     const dataAtendimento = new Date(`${data}T${hora}`).toISOString();
 
     api.post('/atendimentos', {
-      alunoId,
+      aprendenteId,
       dataAtendimento,
       tituloSessao: titulo,
     })
@@ -81,9 +81,9 @@ export function NovaSessao() {
           <label className="text-sm font-bold text-gray-700 flex items-center gap-2">
             <User className="h-4 w-4 text-gray-400" /> Aprendente
           </label>
-          <select 
-            value={alunoId}
-            onChange={(e) => setAlunoId(e.target.value)}
+          <select
+            value={aprendenteId}
+            onChange={(e) => setAprendenteId(e.target.value)}
             className="w-full p-3.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none bg-gray-50 focus:bg-white transition-all font-medium"
             required
             disabled={loading}

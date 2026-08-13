@@ -135,7 +135,7 @@ export function Cadastro() {
                     onChange={(e) => setSenha(e.target.value)}
                     disabled={loading || !!sucesso}
                     required
-                    placeholder="Mín. 6 char"
+                    placeholder="Mín. 8 char"
                     className="w-full bg-gray-50 border-2 border-gray-100 rounded-xl py-2.5 pl-10 pr-4 outline-none text-gray-900 text-sm font-medium transition-all duration-300 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
                   />
                 </div>

@@ -18,7 +18,7 @@ export function Dashboard() {
   const navigate = useNavigate();
 
   // Estados para Estatísticas
-  const [totalAlunos, setTotalAlunos] = useState(0);
+  const [totalAprendentes, setTotalAprendentes] = useState(0);
   const [sessoesMes, setSessoesMes] = useState(0);
 
   // Estados para a Lista de Afazeres
@@ -30,10 +30,10 @@ export function Dashboard() {
 
   // Busca as métricas reais do banco de dados (Sem async/await)
   useEffect(() => {
-    // Busca total de alunos
-    api.get('/alunos')
-      .then((res) => setTotalAlunos(res.data.length))
-      .catch((err) => console.error('Erro ao buscar alunos:', err));
+    // Busca total de aprendentes
+    api.get('/aprendentes')
+      .then((res) => setTotalAprendentes(res.data.length))
+      .catch((err) => console.error('Erro ao buscar aprendentes:', err));
 
     // Busca sessões do mês atual
     const dataAtual = new Date();
@@ -92,7 +92,7 @@ export function Dashboard() {
           </div>
           <div>
             <p className="text-sm font-semibold text-gray-500 uppercase">Total de Aprendentes</p>
-            <h3 className="text-2xl font-black text-gray-900">{totalAlunos}</h3>
+            <h3 className="text-2xl font-black text-gray-900">{totalAprendentes}</h3>
           </div>
         </div>
 
@@ -124,7 +124,7 @@ export function Dashboard() {
             Ações Rápidas
           </h2>
           
-          <button onClick={() => navigate('/alunos/novo')} className="w-full flex items-center justify-between p-4 bg-white border border-gray-100 rounded-xl shadow-sm hover:border-blue-300 hover:bg-blue-50 transition-all group">
+          <button onClick={() => navigate('/aprendentes/novo')} className="w-full flex items-center justify-between p-4 bg-white border border-gray-100 rounded-xl shadow-sm hover:border-blue-300 hover:bg-blue-50 transition-all group">
             <div className="flex items-center gap-3">
               <div className="bg-blue-100 text-blue-600 p-2 rounded-lg"><Users className="h-5 w-5" /></div>
               <span className="font-semibold text-gray-700 group-hover:text-blue-700">Novo Aprendente</span>

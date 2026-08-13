@@ -12,7 +12,7 @@ interface Sessao {
   tituloSessao: string;
   status: StatusAtendimento;
   concluido: boolean;
-  aluno: { nomeCompleto: string; };
+  aprendente: { nomeCompleto: string; };
 }
 
 export function AgendaList() {
@@ -69,7 +69,7 @@ export function AgendaList() {
                       <h3 className="text-lg font-bold text-gray-900">{sessao.tituloSessao}</h3>
                       <div className="flex items-center gap-3 text-sm text-gray-500 font-medium mt-1">
                         <span className="flex items-center gap-1"><Clock className="h-4 w-4"/> {dataObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
-                        <span className="flex items-center gap-1 bg-gray-100 px-2 py-0.5 rounded-md text-gray-700"><User className="h-4 w-4"/> {sessao.aluno.nomeCompleto}</span>
+                        <span className="flex items-center gap-1 bg-gray-100 px-2 py-0.5 rounded-md text-gray-700"><User className="h-4 w-4"/> {sessao.aprendente.nomeCompleto}</span>
                       </div>
                     </div>
                   </div>
