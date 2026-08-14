@@ -1,8 +1,8 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { BrainCircuit, Mail, Lock, User, UserPlus, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
-import { isAxiosError } from 'axios';
 import { api } from '../services/api';
+import { getErrorMessage, getSafeErrorLog } from '../services/apiError';
 
 export function Cadastro() {
   const navigate = useNavigate();
@@ -45,13 +45,8 @@ export function Cadastro() {
         }, 2000);
       })
       .catch((err: unknown) => {
-        console.error('Erro ao cadastrar:', err);
-        if (isAxiosError(err) && err.response?.data?.message) {
-          const msg = err.response.data.message;
-          setErro(Array.isArray(msg) ? msg[0] : msg);
-        } else {
-          setErro('Erro no servidor. Tente novamente.');
-        }
+        console.error('[Cadastro] Erro ao cadastrar:', getSafeErrorLog(err));
+        setErro(getErrorMessage(err, 'Erro no servidor. Tente novamente.'));
       })
       .finally(() => {
         setLoading(false);

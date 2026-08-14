@@ -5,6 +5,8 @@ import {
   BrainCircuit, Loader2, AlertTriangle, CheckCheck, Save, Star, Unlock, X
 } from 'lucide-react';
 import { api } from '../../services/api';
+import { getErrorMessage, getSafeErrorLog } from '../../services/apiError';
+import { useToast } from '../../hooks/useToast';
 import { Button } from '../../components/ui/Button';
 
 interface ItemChecklist {
@@ -33,6 +35,7 @@ interface AtendimentoDetalhe {
 export function SessaoAtiva() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { showError } = useToast();
 
   // Estados de Dados
   const [atendimento, setAtendimento] = useState<AtendimentoDetalhe | null>(null);
@@ -57,7 +60,10 @@ export function SessaoAtiva() {
         setAtendimento(res.data);
         setObservacoes(res.data.observacoes || '');
       })
-      .catch(() => alert('Erro ao carregar os dados da sessão.'))
+      .catch((err) => {
+        console.error('[SessaoAtiva] Erro ao carregar sessão:', getSafeErrorLog(err));
+        showError(getErrorMessage(err, 'Erro ao carregar os dados da sessão.'));
+      })
       .finally(() => setLoading(false));
   };
 
@@ -82,7 +88,10 @@ export function SessaoAtiva() {
         setNovaDificuldade(1);
         carregarSessao(); // Recarrega para mostrar a nova atividade
       })
-      .catch(() => alert('Erro ao criar atividade.'))
+      .catch((err) => {
+        console.error('[SessaoAtiva] Erro ao criar atividade:', getSafeErrorLog(err));
+        showError(getErrorMessage(err, 'Erro ao criar atividade.'));
+      })
       .finally(() => setLoadingAdd(false));
   };
 
@@ -107,7 +116,11 @@ export function SessaoAtiva() {
     });
 
     api.patch(`/atividades/checklist/${itemId}`, { realizado: !statusAtual })
-      .catch(() => carregarSessao()); // Se falhar no banco, volta ao estado anterior
+      .catch((err) => {
+        console.error('[SessaoAtiva] Erro ao atualizar checklist:', getSafeErrorLog(err));
+        showError(getErrorMessage(err, 'Erro ao salvar item do checklist.'));
+        carregarSessao(); // Se falhar no banco, volta ao estado anterior
+      });
   };
 
   // Ação: Salvar e Pausar (Mantém na agenda)
@@ -116,7 +129,10 @@ export function SessaoAtiva() {
     setLoadingAcao(true);
     api.patch(`/atendimentos/${id}`, { status: 'EM_ANDAMENTO', observacoes })
       .then(() => navigate('/agenda'))
-      .catch(() => alert('Erro ao salvar progresso.'))
+      .catch((err) => {
+        console.error('[SessaoAtiva] Erro ao salvar progresso:', getSafeErrorLog(err));
+        showError(getErrorMessage(err, 'Erro ao salvar progresso.'));
+      })
       .finally(() => setLoadingAcao(false));
   };
 
@@ -134,7 +150,10 @@ export function SessaoAtiva() {
         setModalEncerrarOpen(false);
         navigate('/agenda');
       })
-      .catch(() => alert('Erro ao tentar encerrar a sessão.'))
+      .catch((err) => {
+        console.error('[SessaoAtiva] Erro ao encerrar sessão:', getSafeErrorLog(err));
+        showError(getErrorMessage(err, 'Erro ao tentar encerrar a sessão.'));
+      })
       .finally(() => setLoadingAcao(false));
   };
 
@@ -151,7 +170,10 @@ export function SessaoAtiva() {
         setModalReabrirOpen(false);
         carregarSessao(); // Recarrega a tela para destravar os botões
       })
-      .catch(() => alert('Erro ao tentar reabrir a sessão.'))
+      .catch((err) => {
+        console.error('[SessaoAtiva] Erro ao reabrir sessão:', getSafeErrorLog(err));
+        showError(getErrorMessage(err, 'Erro ao tentar reabrir a sessão.'));
+      })
       .finally(() => setLoadingAcao(false));
   };
 

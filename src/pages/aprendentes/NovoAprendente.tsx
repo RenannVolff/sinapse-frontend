@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserPlus, User, Calendar, Phone, Shield, ArrowLeft, CheckCircle2, AlertCircle } from 'lucide-react';
 import { api } from '../../services/api';
+import { getErrorMessage, getSafeErrorLog } from '../../services/apiError';
 import { useAuth } from '../../hooks/useAuth';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
@@ -48,8 +49,8 @@ export function NovoAprendente() {
         setTimeout(() => navigate('/aprendentes'), 2000);
       })
       .catch((err) => {
-        console.error('Erro no cadastro:', err);
-        setErro('Ocorreu um erro ao cadastrar o aprendente. Verifique os dados.');
+        console.error('[NovoAprendente] Erro no cadastro:', getSafeErrorLog(err));
+        setErro(getErrorMessage(err, 'Ocorreu um erro ao cadastrar o aprendente. Verifique os dados.'));
       })
       .finally(() => {
         setLoading(false);

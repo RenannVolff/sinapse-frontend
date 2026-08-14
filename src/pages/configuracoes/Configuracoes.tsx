@@ -2,8 +2,8 @@ import { useState, type FormEvent } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { User, Mail, Shield, Save, LogOut, CheckCircle2, AlertCircle, Info, KeyRound } from 'lucide-react';
-import { isAxiosError } from 'axios';
 import { api } from '../../services/api';
+import { getErrorMessage, getSafeErrorLog } from '../../services/apiError';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 
@@ -96,13 +96,8 @@ export function Configuracoes() {
         setTimeout(() => setSucesso(''), 4000);
       })
       .catch((err: unknown) => {
-        console.error('Erro ao atualizar perfil:', err);
-        if (isAxiosError(err) && err.response?.data?.message) {
-          const msg = err.response.data.message;
-          setErro(Array.isArray(msg) ? msg[0] : msg);
-        } else {
-          setErro('Erro interno no servidor ao tentar salvar os dados.');
-        }
+        console.error('[Configuracoes] Erro ao atualizar perfil:', getSafeErrorLog(err));
+        setErro(getErrorMessage(err, 'Erro interno no servidor ao tentar salvar os dados.'));
       })
       .finally(() => {
         setLoading(false);

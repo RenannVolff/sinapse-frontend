@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Plus, Users, ChevronRight, Loader2, User } from 'lucide-react';
 import { api } from '../../services/api';
+import { getSafeErrorLog } from '../../services/apiError';
 import { Button } from '../../components/ui/Button';
 
 export interface Aprendente {
@@ -20,7 +21,7 @@ export function AprendentesList() {
   useEffect(() => {
     api.get<Aprendente[]>('/aprendentes')
       .then((response) => setAprendentes(response.data))
-      .catch((error) => console.error('Erro ao buscar aprendentes:', error))
+      .catch((error) => console.error('[AprendentesList] Erro ao buscar aprendentes:', getSafeErrorLog(error)))
       .finally(() => setLoading(false));
   }, []);
 

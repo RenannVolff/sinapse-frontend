@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { api } from '../services/api';
+import { getSafeErrorLog } from '../services/apiError';
 
 interface Tarefa {
   id: string;
@@ -33,13 +34,13 @@ export function Dashboard() {
     // Busca total de aprendentes
     api.get('/aprendentes')
       .then((res) => setTotalAprendentes(res.data.length))
-      .catch((err) => console.error('Erro ao buscar aprendentes:', err));
+      .catch((err) => console.error('[Dashboard] Erro ao buscar aprendentes:', getSafeErrorLog(err)));
 
     // Busca sessões do mês atual
     const dataAtual = new Date();
     api.get(`/atendimentos/calendario?mes=${dataAtual.getMonth() + 1}&ano=${dataAtual.getFullYear()}`)
       .then((res) => setSessoesMes(res.data.length))
-      .catch((err) => console.error('Erro ao buscar sessões:', err));
+      .catch((err) => console.error('[Dashboard] Erro ao buscar sessões:', getSafeErrorLog(err)));
   }, []);
 
   // Salva as tarefas no navegador sempre que a lista mudar

@@ -5,6 +5,7 @@ import {
 } from 'recharts';
 import { BarChart3, User, BrainCircuit, Calendar as CalendarIcon, Sparkles, Settings2 } from 'lucide-react';
 import { api } from '../../services/api';
+import { getErrorMessage, getSafeErrorLog } from '../../services/apiError';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 
@@ -52,8 +53,8 @@ export function Relatorios() {
         setError('');
       })
       .catch((err) => {
-        console.error('Erro ao buscar aprendentes:', err);
-        setError('Falha ao conectar com o servidor.');
+        console.error('[Relatorios] Erro ao buscar aprendentes:', getSafeErrorLog(err));
+        setError(getErrorMessage(err, 'Falha ao conectar com o servidor.'));
       })
       .finally(() => {
         setLoadingDados(false);
@@ -78,8 +79,8 @@ export function Relatorios() {
         setResumoIa(res.data.resumoIa);
       })
       .catch((err) => {
-        console.error('Erro ao gerar relatório:', err);
-        setError('Ocorreu um erro ao processar os dados.');
+        console.error('[Relatorios] Erro ao gerar relatório:', getSafeErrorLog(err));
+        setError(getErrorMessage(err, 'Ocorreu um erro ao processar os dados.'));
       })
       .finally(() => {
         setLoadingRelatorio(false);

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Calendar as CalendarIcon, Clock, User, Plus, ChevronRight, CheckCircle2 } from 'lucide-react';
 import { api } from '../../services/api';
+import { getSafeErrorLog } from '../../services/apiError';
 import { Button } from '../../components/ui/Button';
 
 type StatusAtendimento = 'AGENDADO' | 'EM_ANDAMENTO' | 'CONCLUIDO' | 'CANCELADO';
@@ -27,7 +28,7 @@ export function AgendaList() {
         const pendentes = res.data.filter(s => s.status !== 'CONCLUIDO' && s.status !== 'CANCELADO');
         setSessoes(pendentes);
       })
-      .catch((err) => console.error(err))
+      .catch((err) => console.error('[Agenda] Erro ao buscar sessões:', getSafeErrorLog(err)))
       .finally(() => setLoading(false));
   }, []);
 

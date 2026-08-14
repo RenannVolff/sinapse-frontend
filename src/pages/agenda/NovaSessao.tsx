@@ -1,8 +1,8 @@
 import { useState, useEffect, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Calendar, User, Clock, ArrowLeft, AlertCircle } from 'lucide-react';
-import { isAxiosError } from 'axios';
 import { api } from '../../services/api';
+import { getErrorMessage, getSafeErrorLog } from '../../services/apiError';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 
@@ -51,13 +51,8 @@ export function NovaSessao() {
         navigate('/agenda');
       })
       .catch((err: unknown) => {
-        console.error('Erro ao agendar:', err);
-        if (isAxiosError(err) && err.response?.data?.message) {
-          const msg = err.response.data.message;
-          setErro(Array.isArray(msg) ? msg[0] : msg);
-        } else {
-          setErro('Erro interno ao agendar a sessão. Tente novamente.');
-        }
+        console.error('[NovaSessao] Erro ao agendar:', getSafeErrorLog(err));
+        setErro(getErrorMessage(err, 'Erro interno ao agendar a sessão. Tente novamente.'));
       })
       .finally(() => {
         setLoading(false);

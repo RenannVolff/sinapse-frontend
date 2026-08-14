@@ -11,6 +11,7 @@ import {
   AlertTriangle 
 } from 'lucide-react';
 import { api } from '../../services/api';
+import { getSafeErrorLog } from '../../services/apiError';
 import { Button } from '../../components/ui/Button';
 
 // Tipagem rigorosa
@@ -49,7 +50,7 @@ export function AprendenteDetalhes() {
         const response = await api.get<AprendentePerfil>(`/aprendentes/${id}`);
         setAprendente(response.data);
       } catch (err) {
-        console.error('Erro ao buscar detalhes do aprendente:', err);
+        console.error('[AprendenteDetalhes] Erro ao buscar detalhes:', getSafeErrorLog(err));
         setError('Não foi possível carregar o perfil deste paciente.');
       } finally {
         setLoading(false);
