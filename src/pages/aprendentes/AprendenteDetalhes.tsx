@@ -1,18 +1,21 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { 
-  ArrowLeft, 
-  User, 
-  Calendar, 
-  Phone, 
-  Clock, 
-  FileText, 
-  Loader2, 
-  AlertTriangle 
+import {
+  ArrowLeft,
+  User,
+  Calendar,
+  Phone,
+  Clock,
+  FileText,
+  Loader2,
+  AlertTriangle,
+  Trash2,
 } from 'lucide-react';
 import { api } from '../../services/api';
 import { getSafeErrorLog } from '../../services/apiError';
+import { useToast } from '../../hooks/useToast';
 import { Button } from '../../components/ui/Button';
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 
 // Tipagem rigorosa
 interface AtendimentoHist {
@@ -35,10 +38,13 @@ interface AprendentePerfil {
 export function AprendenteDetalhes() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { showSuccess } = useToast();
 
   const [aprendente, setAprendente] = useState<AprendentePerfil | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
+  const [modalExcluirOpen, setModalExcluirOpen] = useState<boolean>(false);
+  const [excluindo, setExcluindo] = useState<boolean>(false);
 
   useEffect(() => {
     async function fetchAprendenteDetalhes() {
@@ -59,6 +65,19 @@ export function AprendenteDetalhes() {
 
     fetchAprendenteDetalhes();
   }, [id]);
+
+  const handleExcluirAprendente = () => {
+    if (!id) return;
+
+    setExcluindo(true);
+    api.delete(`/aprendentes/${id}`)
+      .then(() => {
+        showSuccess('Aprendente excluído com sucesso.');
+        navigate('/aprendentes');
+      })
+      .catch((err) => console.error('[AprendenteDetalhes] Erro ao excluir aprendente:', getSafeErrorLog(err)))
+      .finally(() => setExcluindo(false));
+  };
 
   // Função para calcular a idade
   const calcularIdade = (dataIso: string) => {
@@ -113,6 +132,14 @@ export function AprendenteDetalhes() {
             Paciente ativo desde {new Date(aprendente.criadoEm).toLocaleDateString('pt-BR')}
           </p>
         </div>
+        <button
+          onClick={() => setModalExcluirOpen(true)}
+          className="p-2.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+          title="Excluir aprendente"
+          aria-label="Excluir aprendente"
+        >
+          <Trash2 className="h-5 w-5" />
+        </button>
         <Button onClick={() => navigate('/agenda/nova')} className="w-auto px-6 hidden sm:flex">
           <Calendar className="h-4 w-4 mr-2" /> Agendar Sessão
         </Button>
@@ -200,6 +227,16 @@ export function AprendenteDetalhes() {
           </div>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={modalExcluirOpen}
+        title="Excluir aprendente?"
+        description={`Esta ação removerá "${aprendente.nomeCompleto}" da sua lista de aprendentes ativos, junto de seu histórico de atendimentos. Esta ação não pode ser desfeita pela interface.`}
+        confirmLabel="Sim, Excluir"
+        loading={excluindo}
+        onConfirm={handleExcluirAprendente}
+        onCancel={() => setModalExcluirOpen(false)}
+      />
     </div>
   );
 }

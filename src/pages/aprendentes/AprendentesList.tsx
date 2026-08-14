@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Plus, Users, ChevronRight, Loader2, User } from 'lucide-react';
+import { Search, Plus, Users, ChevronRight, Loader2, User, Trash2 } from 'lucide-react';
 import { api } from '../../services/api';
 import { getSafeErrorLog } from '../../services/apiError';
+import { useToast } from '../../hooks/useToast';
 import { Button } from '../../components/ui/Button';
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 
 export interface Aprendente {
   id: string;
@@ -14,9 +16,12 @@ export interface Aprendente {
 
 export function AprendentesList() {
   const navigate = useNavigate();
+  const { showSuccess } = useToast();
   const [aprendentes, setAprendentes] = useState<Aprendente[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [busca, setBusca] = useState<string>('');
+  const [aprendenteParaExcluir, setAprendenteParaExcluir] = useState<Aprendente | null>(null);
+  const [excluindo, setExcluindo] = useState<boolean>(false);
 
   useEffect(() => {
     api.get<Aprendente[]>('/aprendentes')
@@ -24,6 +29,20 @@ export function AprendentesList() {
       .catch((error) => console.error('[AprendentesList] Erro ao buscar aprendentes:', getSafeErrorLog(error)))
       .finally(() => setLoading(false));
   }, []);
+
+  const handleExcluirAprendente = () => {
+    if (!aprendenteParaExcluir) return;
+
+    setExcluindo(true);
+    api.delete(`/aprendentes/${aprendenteParaExcluir.id}`)
+      .then(() => {
+        setAprendentes((prev) => prev.filter((a) => a.id !== aprendenteParaExcluir.id));
+        showSuccess('Aprendente excluído com sucesso.');
+        setAprendenteParaExcluir(null);
+      })
+      .catch((error) => console.error('[AprendentesList] Erro ao excluir aprendente:', getSafeErrorLog(error)))
+      .finally(() => setExcluindo(false));
+  };
 
   const aprendentesFiltrados = aprendentes.filter((aprendente) =>
     aprendente.nomeCompleto.toLowerCase().includes(busca.toLowerCase())
@@ -108,9 +127,22 @@ export function AprendentesList() {
                     <td className="p-5 text-gray-600 font-medium">{aprendente.responsavel}</td>
                     <td className="p-5 text-gray-600">{aprendente.contato}</td>
                     <td className="p-5 text-right">
-                      <button className="flex items-center justify-end w-full gap-1 text-sm font-bold text-blue-600 opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0">
-                        Ver Prontuário <ChevronRight className="h-4 w-4" />
-                      </button>
+                      <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setAprendenteParaExcluir(aprendente);
+                          }}
+                          className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          title="Excluir aprendente"
+                          aria-label="Excluir aprendente"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                        <button className="flex items-center gap-1 text-sm font-bold text-blue-600">
+                          Ver Prontuário <ChevronRight className="h-4 w-4" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -119,6 +151,16 @@ export function AprendentesList() {
           </div>
         )}
       </div>
+
+      <ConfirmDialog
+        open={!!aprendenteParaExcluir}
+        title="Excluir aprendente?"
+        description={`Esta ação removerá "${aprendenteParaExcluir?.nomeCompleto}" da sua lista de aprendentes ativos. Esta ação não pode ser desfeita pela interface.`}
+        confirmLabel="Sim, Excluir"
+        loading={excluindo}
+        onConfirm={handleExcluirAprendente}
+        onCancel={() => setAprendenteParaExcluir(null)}
+      />
     </div>
   );
 }

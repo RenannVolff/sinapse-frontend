@@ -1,13 +1,14 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { 
-  ArrowLeft, Plus, CheckCircle2, Circle, FileText, 
-  BrainCircuit, Loader2, AlertTriangle, CheckCheck, Save, Star, Unlock, X
+import {
+  ArrowLeft, Plus, CheckCircle2, Circle, FileText,
+  BrainCircuit, Loader2, AlertTriangle, CheckCheck, Save, Star, Unlock, X, Trash2
 } from 'lucide-react';
 import { api } from '../../services/api';
 import { getErrorMessage, getSafeErrorLog } from '../../services/apiError';
 import { useToast } from '../../hooks/useToast';
 import { Button } from '../../components/ui/Button';
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 
 interface ItemChecklist {
   id: string;
@@ -35,7 +36,7 @@ interface AtendimentoDetalhe {
 export function SessaoAtiva() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { showError } = useToast();
+  const { showError, showSuccess } = useToast();
 
   // Estados de Dados
   const [atendimento, setAtendimento] = useState<AtendimentoDetalhe | null>(null);
@@ -51,6 +52,8 @@ export function SessaoAtiva() {
   // Estados para os Modais (Pop-ups)
   const [modalEncerrarOpen, setModalEncerrarOpen] = useState(false);
   const [modalReabrirOpen, setModalReabrirOpen] = useState(false);
+  const [modalExcluirOpen, setModalExcluirOpen] = useState(false);
+  const [excluindo, setExcluindo] = useState(false);
 
   const carregarSessao = () => {
     if (!id) return;
@@ -157,6 +160,22 @@ export function SessaoAtiva() {
       .finally(() => setLoadingAcao(false));
   };
 
+  // Ação: Confirmação do Modal de Excluir
+  const confirmarExclusao = () => {
+    if (!id) return;
+    setExcluindo(true);
+
+    api.delete(`/atendimentos/${id}`)
+      .then(() => {
+        showSuccess('Sessão excluída com sucesso.');
+        navigate('/agenda');
+      })
+      .catch((err) => {
+        console.error('[SessaoAtiva] Erro ao excluir sessão:', getSafeErrorLog(err));
+      })
+      .finally(() => setExcluindo(false));
+  };
+
   // Ação: Confirmação do Modal de Reabrir
   const confirmarReabertura = () => {
     if (!id) return;
@@ -209,6 +228,14 @@ export function SessaoAtiva() {
         </div>
         
         <div className="flex gap-3">
+          <button
+            onClick={() => setModalExcluirOpen(true)}
+            className="p-2.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
+            title="Excluir sessão"
+            aria-label="Excluir sessão"
+          >
+            <Trash2 className="h-5 w-5" />
+          </button>
           {!isFinalizada ? (
             <>
               <Button variant="outline" onClick={handlePausar} isLoading={loadingAcao} className="border-blue-200 text-blue-600 hover:bg-blue-50">
@@ -382,6 +409,17 @@ export function SessaoAtiva() {
           </div>
         </div>
       )}
+
+      {/* Modal: Excluir Sessão */}
+      <ConfirmDialog
+        open={modalExcluirOpen}
+        title="Excluir sessão?"
+        description="Esta sessão e todas as suas atividades registradas serão removidas. Esta ação não pode ser desfeita pela interface."
+        confirmLabel="Sim, Excluir"
+        loading={excluindo}
+        onConfirm={confirmarExclusao}
+        onCancel={() => setModalExcluirOpen(false)}
+      />
 
     </div>
   );

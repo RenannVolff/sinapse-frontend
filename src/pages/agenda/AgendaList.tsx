@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar as CalendarIcon, Clock, User, Plus, ChevronRight, CheckCircle2 } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, User, Plus, ChevronRight, CheckCircle2, Trash2 } from 'lucide-react';
 import { api } from '../../services/api';
 import { getSafeErrorLog } from '../../services/apiError';
+import { useToast } from '../../hooks/useToast';
 import { Button } from '../../components/ui/Button';
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 
 type StatusAtendimento = 'AGENDADO' | 'EM_ANDAMENTO' | 'CONCLUIDO' | 'CANCELADO';
 
@@ -18,8 +20,11 @@ interface Sessao {
 
 export function AgendaList() {
   const navigate = useNavigate();
+  const { showSuccess } = useToast();
   const [sessoes, setSessoes] = useState<Sessao[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sessaoParaExcluir, setSessaoParaExcluir] = useState<Sessao | null>(null);
+  const [excluindo, setExcluindo] = useState(false);
 
   useEffect(() => {
     const dataAtual = new Date();
@@ -31,6 +36,20 @@ export function AgendaList() {
       .catch((err) => console.error('[Agenda] Erro ao buscar sessões:', getSafeErrorLog(err)))
       .finally(() => setLoading(false));
   }, []);
+
+  const handleExcluirSessao = () => {
+    if (!sessaoParaExcluir) return;
+
+    setExcluindo(true);
+    api.delete(`/atendimentos/${sessaoParaExcluir.id}`)
+      .then(() => {
+        setSessoes((prev) => prev.filter((s) => s.id !== sessaoParaExcluir.id));
+        showSuccess('Sessão excluída com sucesso.');
+        setSessaoParaExcluir(null);
+      })
+      .catch((err) => console.error('[Agenda] Erro ao excluir sessão:', getSafeErrorLog(err)))
+      .finally(() => setExcluindo(false));
+  };
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 fade-in pb-12">
@@ -74,15 +93,35 @@ export function AgendaList() {
                       </div>
                     </div>
                   </div>
-                  <Button variant="outline" onClick={() => navigate(`/agenda/${sessao.id}/sessao`)} className="w-full sm:w-auto">
-                    {sessao.status === 'EM_ANDAMENTO' ? 'Continuar Sessão' : 'Iniciar Sessão'} <ChevronRight className="h-4 w-4 ml-1" />
-                  </Button>
+                  <div className="flex items-center gap-2 w-full sm:w-auto">
+                    <button
+                      onClick={() => setSessaoParaExcluir(sessao)}
+                      className="p-2.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0"
+                      title="Excluir sessão"
+                      aria-label="Excluir sessão"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                    <Button variant="outline" onClick={() => navigate(`/agenda/${sessao.id}/sessao`)} className="flex-1 sm:flex-none sm:w-auto">
+                      {sessao.status === 'EM_ANDAMENTO' ? 'Continuar Sessão' : 'Iniciar Sessão'} <ChevronRight className="h-4 w-4 ml-1" />
+                    </Button>
+                  </div>
                 </div>
               );
             })}
           </div>
         )}
       </div>
+
+      <ConfirmDialog
+        open={!!sessaoParaExcluir}
+        title="Excluir sessão?"
+        description={`A sessão "${sessaoParaExcluir?.tituloSessao}" será removida da agenda. Esta ação não pode ser desfeita pela interface.`}
+        confirmLabel="Sim, Excluir"
+        loading={excluindo}
+        onConfirm={handleExcluirSessao}
+        onCancel={() => setSessaoParaExcluir(null)}
+      />
     </div>
   );
 }
