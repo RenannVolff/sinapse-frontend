@@ -15,6 +15,7 @@ import { NovaSessao } from './pages/agenda/NovaSessao';
 import { SessaoAtiva } from './pages/agenda/SessaoAtiva';
 
 import { Relatorios } from './pages/relatorios/Relatorios';
+import { Auditoria } from './pages/auditoria/Auditoria';
 import { Configuracoes } from './pages/configuracoes/Configuracoes';
 import { NotFound } from './pages/NotFound'; // <-- Rota 404
 
@@ -41,6 +42,7 @@ export default function App() {
               <Route path="/agenda/:id/sessao" element={<SessaoAtiva />} />
 
               <Route path="/relatorios" element={<Relatorios />} />
+              <Route path="/auditoria" element={<Auditoria />} />
               <Route path="/configuracoes" element={<Configuracoes />} />
             </Route>
 

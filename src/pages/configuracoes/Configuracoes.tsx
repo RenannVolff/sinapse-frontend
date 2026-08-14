@@ -48,7 +48,7 @@ export function Configuracoes() {
     // Validação estrita de senha
     if (novaSenha.length > 0 || confirmarSenha.length > 0) {
       if (novaSenha.length < 6) {
-        setErro('A nova senha deve ter no mínimo 6 caracteres.');
+        setErro('A nova senha deve ter no mínimo 8 caracteres.');
         return;
       }
       if (novaSenha !== confirmarSenha) {
@@ -168,7 +168,7 @@ export function Configuracoes() {
                 type="password" 
                 value={novaSenha}
                 onChange={(e) => setNovaSenha(e.target.value)}
-                placeholder="Mín. 6 caracteres" 
+                placeholder="Mín. 8 caracteres" 
                 icon={<KeyRound className="h-5 w-5" />} 
               />
               
