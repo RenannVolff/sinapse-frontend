@@ -1,8 +1,8 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { BrainCircuit, Mail, Lock, User, UserPlus, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
-import { isAxiosError } from 'axios';
 import { api } from '../services/api';
+import { getErrorMessage, getSafeErrorLog } from '../services/apiError';
 
 export function Cadastro() {
   const navigate = useNavigate();
@@ -45,13 +45,8 @@ export function Cadastro() {
         }, 2000);
       })
       .catch((err: unknown) => {
-        console.error('Erro ao cadastrar:', err);
-        if (isAxiosError(err) && err.response?.data?.message) {
-          const msg = err.response.data.message;
-          setErro(Array.isArray(msg) ? msg[0] : msg);
-        } else {
-          setErro('Erro no servidor. Tente novamente.');
-        }
+        console.error('[Cadastro] Erro ao cadastrar:', getSafeErrorLog(err));
+        setErro(getErrorMessage(err, 'Erro no servidor. Tente novamente.'));
       })
       .finally(() => {
         setLoading(false);
@@ -135,7 +130,7 @@ export function Cadastro() {
                     onChange={(e) => setSenha(e.target.value)}
                     disabled={loading || !!sucesso}
                     required
-                    placeholder="Mín. 6 char"
+                    placeholder="Mín. 8 char"
                     className="w-full bg-gray-50 border-2 border-gray-100 rounded-xl py-2.5 pl-10 pr-4 outline-none text-gray-900 text-sm font-medium transition-all duration-300 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
                   />
                 </div>

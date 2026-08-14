@@ -1,11 +1,14 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { 
-  ArrowLeft, Plus, CheckCircle2, Circle, FileText, 
-  BrainCircuit, Loader2, AlertTriangle, CheckCheck, Save, Star, Unlock, X
+import {
+  ArrowLeft, Plus, CheckCircle2, Circle, FileText,
+  BrainCircuit, Loader2, AlertTriangle, CheckCheck, Save, Star, Unlock, X, Trash2
 } from 'lucide-react';
 import { api } from '../../services/api';
+import { getErrorMessage, getSafeErrorLog } from '../../services/apiError';
+import { useToast } from '../../hooks/useToast';
 import { Button } from '../../components/ui/Button';
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 
 interface ItemChecklist {
   id: string;
@@ -26,13 +29,14 @@ interface AtendimentoDetalhe {
   tituloSessao: string;
   status: 'AGENDADO' | 'EM_ANDAMENTO' | 'CONCLUIDO' | 'CANCELADO';
   observacoes: string | null;
-  aluno: { nomeCompleto: string; };
+  aprendente: { nomeCompleto: string; };
   atividades: Atividade[];
 }
 
 export function SessaoAtiva() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { showError, showSuccess } = useToast();
 
   // Estados de Dados
   const [atendimento, setAtendimento] = useState<AtendimentoDetalhe | null>(null);
@@ -48,6 +52,8 @@ export function SessaoAtiva() {
   // Estados para os Modais (Pop-ups)
   const [modalEncerrarOpen, setModalEncerrarOpen] = useState(false);
   const [modalReabrirOpen, setModalReabrirOpen] = useState(false);
+  const [modalExcluirOpen, setModalExcluirOpen] = useState(false);
+  const [excluindo, setExcluindo] = useState(false);
 
   const carregarSessao = () => {
     if (!id) return;
@@ -57,7 +63,10 @@ export function SessaoAtiva() {
         setAtendimento(res.data);
         setObservacoes(res.data.observacoes || '');
       })
-      .catch(() => alert('Erro ao carregar os dados da sessão.'))
+      .catch((err) => {
+        console.error('[SessaoAtiva] Erro ao carregar sessão:', getSafeErrorLog(err));
+        showError(getErrorMessage(err, 'Erro ao carregar os dados da sessão.'));
+      })
       .finally(() => setLoading(false));
   };
 
@@ -82,7 +91,10 @@ export function SessaoAtiva() {
         setNovaDificuldade(1);
         carregarSessao(); // Recarrega para mostrar a nova atividade
       })
-      .catch(() => alert('Erro ao criar atividade.'))
+      .catch((err) => {
+        console.error('[SessaoAtiva] Erro ao criar atividade:', getSafeErrorLog(err));
+        showError(getErrorMessage(err, 'Erro ao criar atividade.'));
+      })
       .finally(() => setLoadingAdd(false));
   };
 
@@ -107,7 +119,11 @@ export function SessaoAtiva() {
     });
 
     api.patch(`/atividades/checklist/${itemId}`, { realizado: !statusAtual })
-      .catch(() => carregarSessao()); // Se falhar no banco, volta ao estado anterior
+      .catch((err) => {
+        console.error('[SessaoAtiva] Erro ao atualizar checklist:', getSafeErrorLog(err));
+        showError(getErrorMessage(err, 'Erro ao salvar item do checklist.'));
+        carregarSessao(); // Se falhar no banco, volta ao estado anterior
+      });
   };
 
   // Ação: Salvar e Pausar (Mantém na agenda)
@@ -116,7 +132,10 @@ export function SessaoAtiva() {
     setLoadingAcao(true);
     api.patch(`/atendimentos/${id}`, { status: 'EM_ANDAMENTO', observacoes })
       .then(() => navigate('/agenda'))
-      .catch(() => alert('Erro ao salvar progresso.'))
+      .catch((err) => {
+        console.error('[SessaoAtiva] Erro ao salvar progresso:', getSafeErrorLog(err));
+        showError(getErrorMessage(err, 'Erro ao salvar progresso.'));
+      })
       .finally(() => setLoadingAcao(false));
   };
 
@@ -134,8 +153,27 @@ export function SessaoAtiva() {
         setModalEncerrarOpen(false);
         navigate('/agenda');
       })
-      .catch(() => alert('Erro ao tentar encerrar a sessão.'))
+      .catch((err) => {
+        console.error('[SessaoAtiva] Erro ao encerrar sessão:', getSafeErrorLog(err));
+        showError(getErrorMessage(err, 'Erro ao tentar encerrar a sessão.'));
+      })
       .finally(() => setLoadingAcao(false));
+  };
+
+  // Ação: Confirmação do Modal de Excluir
+  const confirmarExclusao = () => {
+    if (!id) return;
+    setExcluindo(true);
+
+    api.delete(`/atendimentos/${id}`)
+      .then(() => {
+        showSuccess('Sessão excluída com sucesso.');
+        navigate('/agenda');
+      })
+      .catch((err) => {
+        console.error('[SessaoAtiva] Erro ao excluir sessão:', getSafeErrorLog(err));
+      })
+      .finally(() => setExcluindo(false));
   };
 
   // Ação: Confirmação do Modal de Reabrir
@@ -151,7 +189,10 @@ export function SessaoAtiva() {
         setModalReabrirOpen(false);
         carregarSessao(); // Recarrega a tela para destravar os botões
       })
-      .catch(() => alert('Erro ao tentar reabrir a sessão.'))
+      .catch((err) => {
+        console.error('[SessaoAtiva] Erro ao reabrir sessão:', getSafeErrorLog(err));
+        showError(getErrorMessage(err, 'Erro ao tentar reabrir a sessão.'));
+      })
       .finally(() => setLoadingAcao(false));
   };
 
@@ -182,11 +223,19 @@ export function SessaoAtiva() {
           </button>
           <div>
             <h1 className="text-xl font-black text-gray-900 leading-tight">{atendimento.tituloSessao}</h1>
-            <p className="text-sm text-gray-500 font-medium">Aprendente: <span className="text-blue-600">{atendimento.aluno.nomeCompleto}</span></p>
+            <p className="text-sm text-gray-500 font-medium">Aprendente: <span className="text-blue-600">{atendimento.aprendente.nomeCompleto}</span></p>
           </div>
         </div>
         
         <div className="flex gap-3">
+          <button
+            onClick={() => setModalExcluirOpen(true)}
+            className="p-2.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
+            title="Excluir sessão"
+            aria-label="Excluir sessão"
+          >
+            <Trash2 className="h-5 w-5" />
+          </button>
           {!isFinalizada ? (
             <>
               <Button variant="outline" onClick={handlePausar} isLoading={loadingAcao} className="border-blue-200 text-blue-600 hover:bg-blue-50">
@@ -360,6 +409,17 @@ export function SessaoAtiva() {
           </div>
         </div>
       )}
+
+      {/* Modal: Excluir Sessão */}
+      <ConfirmDialog
+        open={modalExcluirOpen}
+        title="Excluir sessão?"
+        description="Esta sessão e todas as suas atividades registradas serão removidas. Esta ação não pode ser desfeita pela interface."
+        confirmLabel="Sim, Excluir"
+        loading={excluindo}
+        onConfirm={confirmarExclusao}
+        onCancel={() => setModalExcluirOpen(false)}
+      />
 
     </div>
   );

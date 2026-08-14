@@ -1,19 +1,21 @@
 import { NavLink } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Users, 
-  Calendar, 
-  BarChart3, 
+import {
+  LayoutDashboard,
+  Users,
+  Calendar,
+  BarChart3,
   BrainCircuit,
-  Settings
+  Settings,
+  History
 } from 'lucide-react';
 
 export function Sidebar() {
   const navItems = [
     { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { path: '/alunos', label: 'Meus Alunos', icon: Users },
+    { path: '/aprendentes', label: 'Meus Aprendentes', icon: Users },
     { path: '/agenda', label: 'Agenda', icon: Calendar },
     { path: '/relatorios', label: 'Relatórios', icon: BarChart3 },
+    { path: '/auditoria', label: 'Auditoria', icon: History },
     { path: '/configuracoes', label: 'Configurações', icon: Settings },
   ];
 
