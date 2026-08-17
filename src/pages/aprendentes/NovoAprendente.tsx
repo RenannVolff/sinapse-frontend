@@ -41,8 +41,7 @@ export function NovoAprendente() {
       nomeCompleto,
       dataNascimento,
       responsavel,
-      contato,
-      usuarioId: user.id
+      contato
     })
       .then(() => {
         setSucesso('Aprendente cadastrado com sucesso! Redirecionando...');

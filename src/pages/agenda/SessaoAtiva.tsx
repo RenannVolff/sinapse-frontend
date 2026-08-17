@@ -2,7 +2,8 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Plus, CheckCircle2, Circle, FileText,
-  BrainCircuit, Loader2, AlertTriangle, CheckCheck, Save, Star, Unlock, X, Trash2
+  BrainCircuit, Loader2, AlertTriangle, CheckCheck, Save, Star, Unlock, X, Trash2,
+  Ban, UserX
 } from 'lucide-react';
 import { api } from '../../services/api';
 import { getErrorMessage, getSafeErrorLog } from '../../services/apiError';
@@ -27,11 +28,20 @@ interface AtendimentoDetalhe {
   id: string;
   dataAtendimento: string;
   tituloSessao: string;
-  status: 'AGENDADO' | 'EM_ANDAMENTO' | 'CONCLUIDO' | 'CANCELADO';
+  status: 'AGENDADO' | 'EM_ANDAMENTO' | 'CONCLUIDO' | 'CANCELADO' | 'FALTA';
   observacoes: string | null;
   aprendente: { nomeCompleto: string; };
   atividades: Atividade[];
 }
+
+// Cancelado (sessão não ocorreu por decisão/impedimento) e Falta (aprendente
+// não compareceu) são status distintos — precisam de identidade visual própria
+// para o terapeuta diferenciar rapidamente ao marcar ou revisar o histórico.
+const STATUS_FINALIZADO_INFO = {
+  CONCLUIDO: { label: 'SESSÃO CONCLUÍDA', badgeClass: 'bg-gray-100 text-gray-500', Icon: CheckCircle2 },
+  CANCELADO: { label: 'SESSÃO CANCELADA', badgeClass: 'bg-slate-200 text-slate-600', Icon: Ban },
+  FALTA: { label: 'FALTA DO APRENDENTE', badgeClass: 'bg-amber-100 text-amber-700', Icon: UserX },
+} as const;
 
 export function SessaoAtiva() {
   const { id } = useParams<{ id: string }>();
@@ -53,6 +63,8 @@ export function SessaoAtiva() {
   const [modalEncerrarOpen, setModalEncerrarOpen] = useState(false);
   const [modalReabrirOpen, setModalReabrirOpen] = useState(false);
   const [modalExcluirOpen, setModalExcluirOpen] = useState(false);
+  const [modalCancelarOpen, setModalCancelarOpen] = useState(false);
+  const [modalFaltaOpen, setModalFaltaOpen] = useState(false);
   const [excluindo, setExcluindo] = useState(false);
 
   const carregarSessao = () => {
@@ -160,6 +172,46 @@ export function SessaoAtiva() {
       .finally(() => setLoadingAcao(false));
   };
 
+  // Ação: Confirmação do Modal de Cancelar Sessão
+  const confirmarCancelamento = () => {
+    if (!id) return;
+    setLoadingAcao(true);
+
+    api.patch(`/atendimentos/${id}`, {
+      status: 'CANCELADO',
+      observacoes
+    })
+      .then(() => {
+        setModalCancelarOpen(false);
+        navigate('/agenda');
+      })
+      .catch((err) => {
+        console.error('[SessaoAtiva] Erro ao cancelar sessão:', getSafeErrorLog(err));
+        showError(getErrorMessage(err, 'Erro ao tentar cancelar a sessão.'));
+      })
+      .finally(() => setLoadingAcao(false));
+  };
+
+  // Ação: Confirmação do Modal de Marcar Falta
+  const confirmarFalta = () => {
+    if (!id) return;
+    setLoadingAcao(true);
+
+    api.patch(`/atendimentos/${id}`, {
+      status: 'FALTA',
+      observacoes
+    })
+      .then(() => {
+        setModalFaltaOpen(false);
+        navigate('/agenda');
+      })
+      .catch((err) => {
+        console.error('[SessaoAtiva] Erro ao marcar falta:', getSafeErrorLog(err));
+        showError(getErrorMessage(err, 'Erro ao tentar marcar a falta do aprendente.'));
+      })
+      .finally(() => setLoadingAcao(false));
+  };
+
   // Ação: Confirmação do Modal de Excluir
   const confirmarExclusao = () => {
     if (!id) return;
@@ -210,7 +262,8 @@ export function SessaoAtiva() {
     </div>
   );
 
-  const isFinalizada = atendimento.status === 'CONCLUIDO';
+  const isFinalizada = atendimento.status === 'CONCLUIDO' || atendimento.status === 'CANCELADO' || atendimento.status === 'FALTA';
+  const finalizadoInfo = STATUS_FINALIZADO_INFO[atendimento.status as keyof typeof STATUS_FINALIZADO_INFO];
 
   return (
     <div className="max-w-5xl mx-auto space-y-6 fade-in pb-12 relative">
@@ -241,14 +294,32 @@ export function SessaoAtiva() {
               <Button variant="outline" onClick={handlePausar} isLoading={loadingAcao} className="border-blue-200 text-blue-600 hover:bg-blue-50">
                 <Save className="h-4 w-4 mr-2" /> Salvar e Pausar
               </Button>
+              <Button
+                variant="outline"
+                onClick={() => setModalFaltaOpen(true)}
+                isLoading={loadingAcao}
+                className="border-amber-200 text-amber-700 hover:bg-amber-50"
+                title="O aprendente não compareceu à sessão"
+              >
+                <UserX className="h-4 w-4 mr-2" /> Marcar Falta
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setModalCancelarOpen(true)}
+                isLoading={loadingAcao}
+                className="border-slate-200 text-slate-600 hover:bg-slate-50"
+                title="A sessão não vai ocorrer (decisão do terapeuta ou impedimento)"
+              >
+                <Ban className="h-4 w-4 mr-2" /> Cancelar
+              </Button>
               <Button onClick={() => setModalEncerrarOpen(true)} className="bg-green-600 hover:bg-green-700 shadow-lg shadow-green-600/20">
                 <CheckCheck className="h-5 w-5 mr-2" /> Encerrar Sessão
               </Button>
             </>
           ) : (
             <>
-              <div className="bg-gray-100 text-gray-500 px-4 py-2 rounded-xl font-bold flex items-center gap-2">
-                <CheckCircle2 className="h-5 w-5" /> SESSÃO CONCLUÍDA
+              <div className={`px-4 py-2 rounded-xl font-bold flex items-center gap-2 ${finalizadoInfo.badgeClass}`}>
+                <finalizadoInfo.Icon className="h-5 w-5" /> {finalizadoInfo.label}
               </div>
               <Button onClick={() => setModalReabrirOpen(true)} isLoading={loadingAcao} className="bg-orange-500 hover:bg-orange-600 shadow-lg shadow-orange-500/20 text-white">
                 <Unlock className="h-5 w-5 mr-2" /> Reabrir Sessão
@@ -403,6 +474,62 @@ export function SessaoAtiva() {
               <div className="flex gap-3">
                 <Button onClick={confirmarReabertura} isLoading={loadingAcao} className="w-full bg-orange-500 hover:bg-orange-600 text-white">
                   Sim, Reabrir e Editar
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Marcar Falta */}
+      {modalFaltaOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden">
+            <div className="p-6 text-center relative">
+              <button onClick={() => setModalFaltaOpen(false)} className="absolute top-4 right-4 p-2 text-gray-400 hover:bg-gray-100 rounded-full transition-colors">
+                <X className="h-5 w-5" />
+              </button>
+              <div className="mx-auto w-16 h-16 bg-amber-100 text-amber-700 rounded-full flex items-center justify-center mb-4">
+                <UserX className="h-8 w-8" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Marcar Falta?</h2>
+              <p className="text-gray-500 mb-6">
+                A sessão será marcada como <strong>Falta</strong> — o aprendente não compareceu. Isso é diferente de um cancelamento e ficará registrado separadamente no histórico.
+              </p>
+              <div className="flex gap-3">
+                <Button variant="outline" onClick={() => setModalFaltaOpen(false)} className="flex-1 bg-gray-50">
+                  Voltar
+                </Button>
+                <Button onClick={confirmarFalta} isLoading={loadingAcao} className="flex-1 bg-amber-600 hover:bg-amber-700 text-white">
+                  Sim, Marcar Falta
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Cancelar Sessão */}
+      {modalCancelarOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden">
+            <div className="p-6 text-center relative">
+              <button onClick={() => setModalCancelarOpen(false)} className="absolute top-4 right-4 p-2 text-gray-400 hover:bg-gray-100 rounded-full transition-colors">
+                <X className="h-5 w-5" />
+              </button>
+              <div className="mx-auto w-16 h-16 bg-slate-100 text-slate-600 rounded-full flex items-center justify-center mb-4">
+                <Ban className="h-8 w-8" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Cancelar Sessão?</h2>
+              <p className="text-gray-500 mb-6">
+                A sessão será marcada como <strong>Cancelada</strong> e removida da agenda de pendências. Use esta opção quando a sessão não ocorrer por decisão do terapeuta ou outro impedimento — não para faltas do aprendente.
+              </p>
+              <div className="flex gap-3">
+                <Button variant="outline" onClick={() => setModalCancelarOpen(false)} className="flex-1 bg-gray-50">
+                  Voltar
+                </Button>
+                <Button onClick={confirmarCancelamento} isLoading={loadingAcao} className="flex-1 bg-slate-600 hover:bg-slate-700 text-white">
+                  Sim, Cancelar
                 </Button>
               </div>
             </div>

@@ -7,7 +7,7 @@ import { useToast } from '../../hooks/useToast';
 import { Button } from '../../components/ui/Button';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 
-type StatusAtendimento = 'AGENDADO' | 'EM_ANDAMENTO' | 'CONCLUIDO' | 'CANCELADO';
+type StatusAtendimento = 'AGENDADO' | 'EM_ANDAMENTO' | 'CONCLUIDO' | 'CANCELADO' | 'FALTA';
 
 interface Sessao {
   id: string;
@@ -30,7 +30,7 @@ export function AgendaList() {
     const dataAtual = new Date();
     api.get<Sessao[]>(`/atendimentos/calendario?mes=${dataAtual.getMonth() + 1}&ano=${dataAtual.getFullYear()}`)
       .then((res) => {
-        const pendentes = res.data.filter(s => s.status !== 'CONCLUIDO' && s.status !== 'CANCELADO');
+        const pendentes = res.data.filter(s => s.status !== 'CONCLUIDO' && s.status !== 'CANCELADO' && s.status !== 'FALTA');
         setSessoes(pendentes);
       })
       .catch((err) => console.error('[Agenda] Erro ao buscar sessões:', getSafeErrorLog(err)))
