@@ -66,7 +66,7 @@ export function Relatorios() {
     e.preventDefault();
     
     if (!aprendenteSelecionado || !dataInicio || !dataFim) {
-      setError('Por favor, preencha o paciente e o período selecionado.');
+      setError('Por favor, preencha o aprendente e o período selecionado.');
       return;
     }
 
@@ -142,7 +142,7 @@ export function Relatorios() {
             <BarChart3 className="h-6 w-6 text-primary" />
             Relatório Analítico de Evolução
           </h1>
-          <p className="text-gray-500">Geração autônoma de laudos e gráficos do paciente.</p>
+          <p className="text-gray-500">Geração autônoma de laudos e gráficos do aprendente.</p>
         </div>
       </div>
 
@@ -151,7 +151,7 @@ export function Relatorios() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="flex flex-col gap-1.5 w-full md:col-span-1">
             <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-              <User className="h-4 w-4 text-gray-400" /> Paciente
+              <User className="h-4 w-4 text-gray-400" /> Aprendente
             </label>
             <select
               value={aprendenteSelecionado}
@@ -160,7 +160,7 @@ export function Relatorios() {
               className="w-full bg-white border border-gray-200 rounded-lg py-3 px-4 outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 text-gray-900 cursor-pointer"
             >
               <option value="" disabled>
-                {loadingDados ? 'Carregando lista...' : 'Escolha o paciente...'}
+                {loadingDados ? 'Carregando lista...' : 'Escolha o aprendente...'}
               </option>
               {aprendentes.map(aprendente => (
                 <option key={aprendente.id} value={aprendente.id}>{aprendente.nomeCompleto}</option>
