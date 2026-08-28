@@ -10,6 +10,7 @@ import {
   Loader2,
   AlertTriangle,
   Trash2,
+  ClipboardList,
 } from 'lucide-react';
 import { api } from '../../services/api';
 import { getSafeErrorLog } from '../../services/apiError';
@@ -140,6 +141,9 @@ export function AprendenteDetalhes() {
         >
           <Trash2 className="h-5 w-5" />
         </button>
+        <Button onClick={() => navigate(`/aprendentes/${id}/pei`)} variant="outline" className="w-auto px-6 hidden sm:flex">
+          <ClipboardList className="h-4 w-4 mr-2" /> Ver PEIs
+        </Button>
         <Button onClick={() => navigate('/agenda/nova')} className="w-auto px-6 hidden sm:flex">
           <Calendar className="h-4 w-4 mr-2" /> Agendar Sessão
         </Button>

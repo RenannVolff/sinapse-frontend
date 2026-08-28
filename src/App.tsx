@@ -10,6 +10,13 @@ import { AprendentesList } from './pages/aprendentes/AprendentesList';
 import { NovoAprendente } from './pages/aprendentes/NovoAprendente';
 import { AprendenteDetalhes } from './pages/aprendentes/AprendenteDetalhes';
 
+import { PeiList } from './pages/pei/PeiList';
+import { NovoPei } from './pages/pei/NovoPei';
+import { PeiDetalhes } from './pages/pei/PeiDetalhes';
+
+import { PeiTemplatesList } from './pages/pei-templates/PeiTemplatesList';
+import { NovoPeiTemplate } from './pages/pei-templates/NovoPeiTemplate';
+
 import { AgendaList } from './pages/agenda/AgendaList';
 import { NovaSessao } from './pages/agenda/NovaSessao';
 import { SessaoAtiva } from './pages/agenda/SessaoAtiva';
@@ -36,6 +43,13 @@ export default function App() {
               <Route path="/aprendentes" element={<AprendentesList />} />
               <Route path="/aprendentes/novo" element={<NovoAprendente />} />
               <Route path="/aprendentes/:id" element={<AprendenteDetalhes />} />
+
+              <Route path="/aprendentes/:aprendenteId/pei" element={<PeiList />} />
+              <Route path="/aprendentes/:aprendenteId/pei/novo" element={<NovoPei />} />
+              <Route path="/pei/:id" element={<PeiDetalhes />} />
+
+              <Route path="/pei-templates" element={<PeiTemplatesList />} />
+              <Route path="/pei-templates/novo" element={<NovoPeiTemplate />} />
 
               <Route path="/agenda" element={<AgendaList />} />
               <Route path="/agenda/nova" element={<NovaSessao />} />
