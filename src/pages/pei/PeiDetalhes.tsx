@@ -28,7 +28,7 @@ interface Pei {
 }
 
 const textareaClassName =
-  'w-full bg-white border border-gray-200 rounded-lg py-3 px-4 outline-none transition-all duration-200 placeholder:text-gray-400 text-gray-900 focus:border-primary focus:ring-4 focus:ring-primary/10 hover:border-gray-300 min-h-[110px] resize-y disabled:bg-gray-50 disabled:text-gray-600';
+  'w-full bg-white border border-primary-light rounded-lg py-3 px-4 outline-none transition-all duration-200 placeholder:text-text-secondary text-text-primary focus:border-primary focus:ring-4 focus:ring-primary/10 hover:border-primary/30 min-h-[110px] resize-y disabled:bg-background disabled:text-text-secondary';
 
 function toDateInputValue(iso: string | null): string {
   if (!iso) return '';
@@ -120,7 +120,7 @@ export function PeiDetalhes() {
     return (
       <div className="flex flex-col h-[60vh] items-center justify-center gap-3">
         <Loader2 className="h-10 w-10 animate-spin text-primary" />
-        <p className="text-gray-500 font-medium">Carregando PEI...</p>
+        <p className="text-text-secondary font-medium">Carregando PEI...</p>
       </div>
     );
   }
@@ -131,8 +131,8 @@ export function PeiDetalhes() {
         <div className="bg-red-50 p-6 rounded-full mb-4">
           <AlertTriangle className="h-12 w-12 text-red-500" />
         </div>
-        <h2 className="text-xl font-bold text-gray-900 mb-2">Ops! Algo deu errado.</h2>
-        <p className="text-gray-600 mb-6 max-w-md">{error}</p>
+        <h2 className="text-xl font-bold text-text-primary mb-2">Ops! Algo deu errado.</h2>
+        <p className="text-text-secondary mb-6 max-w-md">{error}</p>
         <Button onClick={() => navigate('/aprendentes')} className="w-auto px-8">
           <ArrowLeft className="h-4 w-4 mr-2" /> Voltar para a Lista
         </Button>
@@ -143,20 +143,20 @@ export function PeiDetalhes() {
   return (
     <div className="max-w-4xl mx-auto space-y-6 fade-in pb-12">
       {/* Cabeçalho */}
-      <div className="flex items-center gap-4 bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+      <div className="flex items-center gap-4 bg-white p-6 rounded-xl border border-primary-light shadow-sm">
         <button
           onClick={() => navigate(`/aprendentes/${pei.aprendenteId}/pei`)}
-          className="p-2 text-gray-500 hover:text-primary hover:bg-blue-50 rounded-lg transition-colors"
+          className="p-2 text-text-secondary hover:text-primary hover:bg-primary-light rounded-lg transition-colors"
           title="Voltar"
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
         <div className="flex-1">
-          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <ClipboardList className="h-6 w-6 text-blue-600" />
+          <h1 className="text-2xl font-bold text-text-primary flex items-center gap-2">
+            <ClipboardList className="h-6 w-6 text-primary" />
             Plano Educacional Individualizado
           </h1>
-          <p className="text-gray-500 text-sm mt-1">
+          <p className="text-text-secondary text-sm mt-1">
             Criado em {new Date(pei.criadoEm).toLocaleDateString('pt-BR')}
           </p>
         </div>
@@ -167,10 +167,10 @@ export function PeiDetalhes() {
         )}
       </div>
 
-      <form onSubmit={handleSalvar} className="bg-white p-6 md:p-8 rounded-2xl border border-gray-100 shadow-sm space-y-8">
+      <form onSubmit={handleSalvar} className="bg-white p-6 md:p-8 rounded-2xl border border-primary-light shadow-sm space-y-8">
         <div className="grid grid-cols-1 gap-6">
           <div className="flex flex-col gap-1.5 w-full">
-            <label className="text-sm font-semibold text-gray-700">Dificuldades</label>
+            <label className="text-sm font-semibold text-text-primary">Dificuldades</label>
             <textarea
               value={dificuldades}
               onChange={(e) => setDificuldades(e.target.value)}
@@ -181,7 +181,7 @@ export function PeiDetalhes() {
           </div>
 
           <div className="flex flex-col gap-1.5 w-full">
-            <label className="text-sm font-semibold text-gray-700">Objetivos</label>
+            <label className="text-sm font-semibold text-text-primary">Objetivos</label>
             <textarea
               value={objetivos}
               onChange={(e) => setObjetivos(e.target.value)}
@@ -192,7 +192,7 @@ export function PeiDetalhes() {
           </div>
 
           <div className="flex flex-col gap-1.5 w-full">
-            <label className="text-sm font-semibold text-gray-700">Estratégias</label>
+            <label className="text-sm font-semibold text-text-primary">Estratégias</label>
             <textarea
               value={estrategias}
               onChange={(e) => setEstrategias(e.target.value)}
@@ -231,7 +231,7 @@ export function PeiDetalhes() {
         )}
 
         {editando && (
-          <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-gray-100">
+          <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-primary-light">
             <Button
               type="button"
               variant="outline"

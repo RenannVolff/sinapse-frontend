@@ -29,13 +29,13 @@ export function PeiTemplatesList() {
     <div className="max-w-6xl mx-auto space-y-6 fade-in pb-12">
 
       {/* Cabeçalho */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-primary-light shadow-sm">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <LayoutTemplate className="h-6 w-6 text-blue-600" />
+          <h1 className="text-2xl font-bold text-text-primary flex items-center gap-2">
+            <LayoutTemplate className="h-6 w-6 text-primary" />
             Templates de PEI
           </h1>
-          <p className="text-gray-500 text-sm mt-1">Modelos reutilizáveis para agilizar a criação de novos PEIs.</p>
+          <p className="text-text-secondary text-sm mt-1">Modelos reutilizáveis para agilizar a criação de novos PEIs.</p>
         </div>
         <Button onClick={() => navigate('/pei-templates/novo')} className="w-full md:w-auto px-6 h-12">
           <Plus className="h-5 w-5 mr-2" />
@@ -44,26 +44,26 @@ export function PeiTemplatesList() {
       </div>
 
       {/* Lista */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-2xl border border-primary-light shadow-sm overflow-hidden">
         {loading ? (
           <div className="flex flex-col items-center justify-center p-16">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-600 mb-4" />
-            <p className="text-gray-500 font-medium">Buscando templates...</p>
+            <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
+            <p className="text-text-secondary font-medium">Buscando templates...</p>
           </div>
         ) : templates.length === 0 ? (
           <div className="text-center p-16">
-            <div className="bg-gray-50 h-20 w-20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <LayoutTemplate className="h-10 w-10 text-gray-300" />
+            <div className="bg-background h-20 w-20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <LayoutTemplate className="h-10 w-10 text-text-secondary" />
             </div>
-            <h3 className="text-xl font-bold text-gray-900">Nenhum template cadastrado</h3>
-            <p className="text-gray-500 mt-2">Crie um template para reutilizar ao criar novos PEIs.</p>
+            <h3 className="text-xl font-bold text-text-primary">Nenhum template cadastrado</h3>
+            <p className="text-text-secondary mt-2">Crie um template para reutilizar ao criar novos PEIs.</p>
           </div>
         ) : (
-          <div className="divide-y divide-gray-50">
+          <div className="divide-y divide-primary-light">
             {templates.map((template) => (
               <div key={template.id} className="p-5">
-                <p className="font-bold text-gray-900">{template.nome}</p>
-                <p className="text-sm text-gray-500 mt-1 line-clamp-2">{template.dificuldades}</p>
+                <p className="font-bold text-text-primary">{template.nome}</p>
+                <p className="text-sm text-text-secondary mt-1 line-clamp-2">{template.dificuldades}</p>
               </div>
             ))}
           </div>

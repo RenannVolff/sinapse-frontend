@@ -138,26 +138,26 @@ export function Relatorios() {
       {/* Cabeçalho */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-text-primary flex items-center gap-2">
             <BarChart3 className="h-6 w-6 text-primary" />
             Relatório Analítico de Evolução
           </h1>
-          <p className="text-gray-500">Geração autônoma de laudos e gráficos do aprendente.</p>
+          <p className="text-text-secondary">Geração autônoma de laudos e gráficos do aprendente.</p>
         </div>
       </div>
 
       {/* Caixa de Filtros (Formulário) */}
-      <form onSubmit={handleGerarRelatorio} className="bg-white p-6 md:p-8 rounded-xl border border-gray-100 shadow-sm space-y-6">
+      <form onSubmit={handleGerarRelatorio} className="bg-white p-6 md:p-8 rounded-xl border border-primary-light shadow-sm space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="flex flex-col gap-1.5 w-full md:col-span-1">
-            <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-              <User className="h-4 w-4 text-gray-400" /> Aprendente
+            <label className="text-sm font-semibold text-text-primary flex items-center gap-2">
+              <User className="h-4 w-4 text-text-secondary" /> Aprendente
             </label>
             <select
               value={aprendenteSelecionado}
               onChange={(e) => setAprendenteSelecionado(e.target.value)}
               disabled={loadingDados}
-              className="w-full bg-white border border-gray-200 rounded-lg py-3 px-4 outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 text-gray-900 cursor-pointer"
+              className="w-full bg-white border border-primary-light rounded-lg py-3 px-4 outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 text-text-primary cursor-pointer"
             >
               <option value="" disabled>
                 {loadingDados ? 'Carregando lista...' : 'Escolha o aprendente...'}
@@ -180,13 +180,13 @@ export function Relatorios() {
           </div>
         )}
 
-        <div className="flex justify-between items-center pt-2 border-t border-gray-100 mt-6">
+        <div className="flex justify-between items-center pt-2 border-t border-primary-light mt-6">
           <div className="flex items-center gap-2">
-            <Settings2 className="h-5 w-5 text-gray-400" />
+            <Settings2 className="h-5 w-5 text-text-secondary" />
             <select
               value={tipoGrafico}
               onChange={(e) => setTipoGrafico(e.target.value as TipoGrafico)}
-              className="text-sm font-medium text-gray-700 bg-gray-50 border border-gray-200 rounded-lg py-2 px-3 outline-none focus:border-primary cursor-pointer"
+              className="text-sm font-medium text-text-primary bg-background border border-primary-light rounded-lg py-2 px-3 outline-none focus:border-primary cursor-pointer"
             >
               <option value="linha">Gráfico de Linha</option>
               <option value="barra">Gráfico de Barras</option>
@@ -205,30 +205,30 @@ export function Relatorios() {
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
           
           {/* Caixa de Laudo da Inteligência Heurística */}
-          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 md:p-8 rounded-xl border border-blue-100 shadow-sm relative overflow-hidden">
+          <div className="bg-primary-light p-6 md:p-8 rounded-xl border border-primary-light shadow-sm relative overflow-hidden">
             <div className="absolute top-0 right-0 p-4 opacity-10">
               <BrainCircuit className="h-32 w-32 text-primary" />
             </div>
             <div className="relative z-10">
-              <h3 className="text-lg font-bold text-indigo-900 mb-4 flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-indigo-600" />
+              <h3 className="text-lg font-bold text-text-primary mb-4 flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-primary" />
                 Laudo Automático Sistêmico
               </h3>
-              <p className="text-gray-700 leading-relaxed font-medium">
+              <p className="text-text-primary leading-relaxed font-medium">
                 {resumoIa}
               </p>
             </div>
           </div>
 
           {/* Gráfico Analítico (Dinâmico) */}
-          <div className="bg-white p-6 md:p-8 rounded-xl border border-gray-100 shadow-sm">
+          <div className="bg-white p-6 md:p-8 rounded-xl border border-primary-light shadow-sm">
             <div className="mb-8">
-              <h3 className="text-xl font-bold text-gray-900">Análise Cognitiva Gráfica</h3>
-              <p className="text-sm text-gray-500">Média de desempenho (Score) no período selecionado.</p>
+              <h3 className="text-xl font-bold text-text-primary">Análise Cognitiva Gráfica</h3>
+              <p className="text-sm text-text-secondary">Média de desempenho (Score) no período selecionado.</p>
             </div>
 
             {dadosEvolucao.length === 0 ? (
-              <div className="flex items-center justify-center h-[300px] text-gray-400 font-medium">
+              <div className="flex items-center justify-center h-[300px] text-text-secondary font-medium">
                 Não há dados matemáticos consolidados para este período.
               </div>
             ) : (

@@ -7,25 +7,26 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Paleta Sinapse Edu (Sutil e Profissional)
+        // Paleta Sinapse Edu (Identidade própria: petróleo clínico + âmbar de destaque)
         primary: {
-          DEFAULT: '#2563EB', // Azul Royal (Ação principal)
-          hover: '#1D4ED8',
-          light: '#DBEAFE',   // Fundo suave
+          DEFAULT: '#1F5A56', // Petróleo profundo (Ação principal)
+          hover: '#164541',
+          light: '#E4EEED',   // Fundo suave em tom petróleo
         },
-        secondary: {
-          DEFAULT: '#10B981', // Verde Esmeralda (Sucesso/Evolução)
-          hover: '#059669',
+        accent: {
+          DEFAULT: '#D97A3F', // Âmbar (destaque de evolução/sucesso, uso moderado)
+          hover: '#C2652D',
         },
-        background: '#F8FAFC', // Cinza muito claro (para não cansar a vista)
+        background: '#FAF9F6', // Cinza-branco levemente quente
         surface: '#FFFFFF',    // Branco puro para cartões
         text: {
-          primary: '#1E293B',   // Cinza escuro (leitura)
-          secondary: '#64748B', // Cinza médio (legendas)
+          primary: '#292420',   // Grafite quente (leitura)
+          secondary: '#6B6560', // Cinza médio quente (legendas)
         }
       },
       fontFamily: {
-        sans: ['Inter', 'sans-serif'], // Fonte moderna e legível
+        sans: ['Inter', 'sans-serif'],   // Corpo/dados
+        display: ['Fraunces', 'serif'],  // Títulos de destaque
       }
     },
   },

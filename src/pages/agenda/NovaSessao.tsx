@@ -70,25 +70,25 @@ export function NovaSessao() {
 
   return (
     <div className="max-w-3xl mx-auto space-y-6 fade-in pb-12">
-      <div className="flex items-center gap-4 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-        <button onClick={() => navigate('/agenda')} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-          <ArrowLeft className="h-5 w-5 text-gray-500" />
+      <div className="flex items-center gap-4 bg-white p-6 rounded-2xl shadow-sm border border-primary-light">
+        <button onClick={() => navigate('/agenda')} className="p-2 hover:bg-primary-light rounded-full transition-colors">
+          <ArrowLeft className="h-5 w-5 text-text-secondary" />
         </button>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Agendar Nova Sessão</h1>
-          <p className="text-sm text-gray-500 mt-1">Defina o aprendente e o horário do atendimento.</p>
+          <h1 className="text-2xl font-bold text-text-primary">Agendar Nova Sessão</h1>
+          <p className="text-sm text-text-secondary mt-1">Defina o aprendente e o horário do atendimento.</p>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-100 space-y-6">
+      <form onSubmit={handleSubmit} className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-primary-light space-y-6">
         <div className="space-y-1.5">
-          <label className="text-sm font-bold text-gray-700 flex items-center gap-2">
-            <User className="h-4 w-4 text-gray-400" /> Aprendente
+          <label className="text-sm font-bold text-text-primary flex items-center gap-2">
+            <User className="h-4 w-4 text-text-secondary" /> Aprendente
           </label>
           <select
             value={aprendenteId}
             onChange={(e) => setAprendenteId(e.target.value)}
-            className="w-full p-3.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none bg-gray-50 focus:bg-white transition-all font-medium"
+            className="w-full p-3.5 rounded-xl border border-primary-light focus:ring-2 focus:ring-primary outline-none bg-background focus:bg-white transition-all font-medium"
             required
             disabled={loading}
           >
@@ -137,7 +137,7 @@ export function NovaSessao() {
           </div>
         )}
 
-        <div className="pt-4 border-t border-gray-100 flex justify-end">
+        <div className="pt-4 border-t border-primary-light flex justify-end">
           <Button type="submit" isLoading={loading} className="w-full md:w-auto px-10 h-12">
             Confirmar Agendamento
           </Button>

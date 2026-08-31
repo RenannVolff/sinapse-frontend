@@ -7,7 +7,7 @@ import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 
 const textareaClassName =
-  'w-full bg-white border border-gray-200 rounded-lg py-3 px-4 outline-none transition-all duration-200 placeholder:text-gray-400 text-gray-900 focus:border-primary focus:ring-4 focus:ring-primary/10 hover:border-gray-300 min-h-[110px] resize-y';
+  'w-full bg-white border border-primary-light rounded-lg py-3 px-4 outline-none transition-all duration-200 placeholder:text-text-secondary text-text-primary focus:border-primary focus:ring-4 focus:ring-primary/10 hover:border-primary/30 min-h-[110px] resize-y';
 
 export function NovoPeiTemplate() {
   const navigate = useNavigate();
@@ -50,25 +50,25 @@ export function NovoPeiTemplate() {
     <div className="max-w-4xl mx-auto space-y-6 fade-in pb-12">
 
       {/* Cabeçalho */}
-      <div className="flex items-center gap-4 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+      <div className="flex items-center gap-4 bg-white p-6 rounded-2xl border border-primary-light shadow-sm">
         <button
           onClick={() => navigate('/pei-templates')}
-          className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+          className="p-2 text-text-secondary hover:text-primary hover:bg-primary-light rounded-lg transition-colors"
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <LayoutTemplate className="h-6 w-6 text-blue-600" />
+          <h1 className="text-2xl font-bold text-text-primary flex items-center gap-2">
+            <LayoutTemplate className="h-6 w-6 text-primary" />
             Novo Template de PEI
           </h1>
-          <p className="text-gray-500 text-sm mt-1">Crie um modelo reutilizável para agilizar a criação de novos PEIs.</p>
+          <p className="text-text-secondary text-sm mt-1">Crie um modelo reutilizável para agilizar a criação de novos PEIs.</p>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-white p-6 md:p-8 rounded-2xl border border-gray-100 shadow-sm space-y-8 relative overflow-hidden">
+      <form onSubmit={handleSubmit} className="bg-white p-6 md:p-8 rounded-2xl border border-primary-light shadow-sm space-y-8 relative overflow-hidden">
 
-        <div className="absolute top-0 right-0 w-64 h-64 bg-blue-50 rounded-full blur-3xl -z-10 transform translate-x-1/2 -translate-y-1/2"></div>
+        <div className="absolute top-0 right-0 w-64 h-64 bg-primary-light rounded-full blur-3xl -z-10 transform translate-x-1/2 -translate-y-1/2"></div>
 
         <div className="relative z-10">
           <Input
@@ -83,7 +83,7 @@ export function NovoPeiTemplate() {
 
         <div className="grid grid-cols-1 gap-6 relative z-10">
           <div className="flex flex-col gap-1.5 w-full">
-            <label className="text-sm font-semibold text-gray-700">Dificuldades</label>
+            <label className="text-sm font-semibold text-text-primary">Dificuldades</label>
             <textarea
               value={dificuldades}
               onChange={(e) => setDificuldades(e.target.value)}
@@ -95,7 +95,7 @@ export function NovoPeiTemplate() {
           </div>
 
           <div className="flex flex-col gap-1.5 w-full">
-            <label className="text-sm font-semibold text-gray-700">Objetivos</label>
+            <label className="text-sm font-semibold text-text-primary">Objetivos</label>
             <textarea
               value={objetivos}
               onChange={(e) => setObjetivos(e.target.value)}
@@ -107,7 +107,7 @@ export function NovoPeiTemplate() {
           </div>
 
           <div className="flex flex-col gap-1.5 w-full">
-            <label className="text-sm font-semibold text-gray-700">Estratégias</label>
+            <label className="text-sm font-semibold text-text-primary">Estratégias</label>
             <textarea
               value={estrategias}
               onChange={(e) => setEstrategias(e.target.value)}
@@ -131,7 +131,7 @@ export function NovoPeiTemplate() {
           </div>
         )}
 
-        <div className="flex justify-end pt-4 border-t border-gray-100">
+        <div className="flex justify-end pt-4 border-t border-primary-light">
           <Button type="submit" isLoading={loading} disabled={!!sucesso} className="w-full md:w-auto px-10 h-12 text-base">
             <LayoutTemplate className="h-5 w-5 mr-2" /> Cadastrar Template
           </Button>
