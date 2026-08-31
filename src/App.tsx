@@ -25,10 +25,16 @@ import { Relatorios } from './pages/relatorios/Relatorios';
 import { Auditoria } from './pages/auditoria/Auditoria';
 import { Configuracoes } from './pages/configuracoes/Configuracoes';
 import { NotFound } from './pages/NotFound'; // <-- Rota 404
+import { VLibrasWidget } from './components/ui/VLibrasWidget';
+import { CookieBanner } from './components/ui/CookieBanner';
+import { AccessibilityWidgetsPositioner } from './components/ui/AccessibilityWidgetsPositioner';
 
 export default function App() {
   return (
     <BrowserRouter>
+      <CookieBanner />
+      <VLibrasWidget />
+      <AccessibilityWidgetsPositioner />
       <ToastProvider>
         <AuthProvider>
           <Routes>
