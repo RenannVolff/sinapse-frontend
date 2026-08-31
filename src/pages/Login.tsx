@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { BrainCircuit, Mail, Lock, Loader2, AlertCircle, ArrowRight } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
+import { SynapseBackground } from '../components/ui/SynapseBackground';
 
 export function Login() {
   const navigate = useNavigate();
@@ -29,12 +30,11 @@ export function Login() {
   };
 
   return (
-    // Fundo Premium com Gradiente Animado (Estilo Deep Blue/Indigo)
-    <div className="min-h-screen relative overflow-hidden flex items-center justify-center bg-gradient-to-br from-slate-900 via-primary-hover to-primary p-4">
+    // Fundo Premium em tons de petróleo (assinatura visual Sinapse Edu)
+    <div className="min-h-screen relative overflow-hidden flex items-center justify-center bg-gradient-to-br from-[#0F2B29] via-[#153F3B] to-[#1F5A56] p-4">
 
-      {/* Elementos Flutuantes de Fundo (Decoração) */}
-      <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-pulse"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] w-[30rem] h-[30rem] bg-primary-hover/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+      {/* Assinatura visual sutil: rede de sinapses atrás do card */}
+      <SynapseBackground className="absolute inset-0 w-full h-full text-white/[0.12]" />
 
       {/* Card de Login (Glassmorphism sutil e Sombras Profundas) */}
       <div className="relative z-10 w-full max-w-[420px] animate-in slide-in-from-bottom-8 duration-700 fade-in zoom-in-95">

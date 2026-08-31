@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { BrainCircuit, Mail, Lock, User, UserPlus, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { api } from '../services/api';
 import { getErrorMessage, getSafeErrorLog } from '../services/apiError';
+import { SynapseBackground } from '../components/ui/SynapseBackground';
 
 export function Cadastro() {
   const navigate = useNavigate();
@@ -55,11 +56,10 @@ export function Cadastro() {
 
   return (
     // Removido o py-12 para centralização absoluta
-    <div className="min-h-screen relative overflow-hidden flex items-center justify-center bg-gradient-to-br from-slate-900 via-primary-hover to-primary p-4">
+    <div className="min-h-screen relative overflow-hidden flex items-center justify-center bg-gradient-to-br from-[#0F2B29] via-[#153F3B] to-[#1F5A56] p-4">
 
-      {/* Elementos Flutuantes de Fundo */}
-      <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-pulse"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] w-[30rem] h-[30rem] bg-primary-hover/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+      {/* Assinatura visual sutil: rede de sinapses atrás do card */}
+      <SynapseBackground className="absolute inset-0 w-full h-full text-white/[0.12]" />
 
       <div className="relative z-10 w-full max-w-[460px] animate-in slide-in-from-bottom-8 duration-700 fade-in zoom-in-95">
         {/* Padding interno do card reduzido (p-6 sm:p-8) */}

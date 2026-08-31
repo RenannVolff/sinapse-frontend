@@ -7,6 +7,7 @@ import {
 import { useAuth } from '../hooks/useAuth';
 import { api } from '../services/api';
 import { getSafeErrorLog } from '../services/apiError';
+import { SynapseBackground } from '../components/ui/SynapseBackground';
 
 interface Tarefa {
   id: string;
@@ -76,6 +77,7 @@ export function Dashboard() {
       
       {/* Cabeçalho de Boas-Vindas */}
       <div className="bg-gradient-to-r from-primary to-primary-hover rounded-2xl p-8 text-white shadow-xl shadow-primary/20 relative overflow-hidden">
+        <SynapseBackground className="absolute inset-0 w-full h-full text-white/[0.12] pointer-events-none" />
         <div className="absolute right-0 top-0 opacity-10 pointer-events-none transform translate-x-8 -translate-y-8">
           <BrainCircuit className="h-64 w-64" />
         </div>
@@ -87,7 +89,7 @@ export function Dashboard() {
 
       {/* Cards de Métricas */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-2xl border border-primary-light shadow-sm flex items-center gap-4 transition-transform hover:-translate-y-1 duration-300">
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-300 bg-white p-6 rounded-2xl border border-primary-light shadow-sm flex items-center gap-4 transition-transform hover:-translate-y-1">
           <div className="h-14 w-14 bg-primary-light text-primary rounded-xl flex items-center justify-center">
             <Users className="h-7 w-7" />
           </div>
@@ -97,7 +99,7 @@ export function Dashboard() {
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl border border-primary-light shadow-sm flex items-center gap-4 transition-transform hover:-translate-y-1 duration-300">
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-300 delay-75 bg-white p-6 rounded-2xl border border-primary-light shadow-sm flex items-center gap-4 transition-transform hover:-translate-y-1">
           <div className="h-14 w-14 bg-primary-light text-primary rounded-xl flex items-center justify-center">
             <CalendarIcon className="h-7 w-7" />
           </div>
@@ -107,7 +109,7 @@ export function Dashboard() {
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl border border-primary-light shadow-sm flex items-center gap-4 transition-transform hover:-translate-y-1 duration-300">
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-300 delay-150 bg-white p-6 rounded-2xl border border-primary-light shadow-sm flex items-center gap-4 transition-transform hover:-translate-y-1">
           <div className="h-14 w-14 bg-green-50 text-green-600 rounded-xl flex items-center justify-center">
             <TrendingUp className="h-7 w-7" />
           </div>
@@ -125,7 +127,7 @@ export function Dashboard() {
             Ações Rápidas
           </h2>
 
-          <button onClick={() => navigate('/aprendentes/novo')} className="w-full flex items-center justify-between p-4 bg-white border border-primary-light rounded-xl shadow-sm hover:border-primary/30 hover:bg-primary-light transition-all group">
+          <button onClick={() => navigate('/aprendentes/novo')} className="w-full flex items-center justify-between p-4 bg-white border border-primary-light rounded-xl shadow-sm hover:shadow-md hover:shadow-primary/10 hover:border-primary/30 hover:bg-primary-light transition-all duration-200 group">
             <div className="flex items-center gap-3">
               <div className="bg-primary-light text-primary p-2 rounded-lg"><Users className="h-5 w-5" /></div>
               <span className="font-semibold text-text-primary group-hover:text-primary-hover">Novo Aprendente</span>
@@ -133,7 +135,7 @@ export function Dashboard() {
             <ArrowRight className="h-5 w-5 text-text-secondary group-hover:text-primary transition-transform group-hover:translate-x-1" />
           </button>
 
-          <button onClick={() => navigate('/agenda/nova')} className="w-full flex items-center justify-between p-4 bg-white border border-primary-light rounded-xl shadow-sm hover:border-primary/30 hover:bg-primary-light transition-all group">
+          <button onClick={() => navigate('/agenda/nova')} className="w-full flex items-center justify-between p-4 bg-white border border-primary-light rounded-xl shadow-sm hover:shadow-md hover:shadow-primary/10 hover:border-primary/30 hover:bg-primary-light transition-all duration-200 group">
             <div className="flex items-center gap-3">
               <div className="bg-primary-light text-primary p-2 rounded-lg"><CalendarIcon className="h-5 w-5" /></div>
               <span className="font-semibold text-text-primary group-hover:text-primary-hover">Agendar Sessão</span>
@@ -141,7 +143,7 @@ export function Dashboard() {
             <ArrowRight className="h-5 w-5 text-text-secondary group-hover:text-primary transition-transform group-hover:translate-x-1" />
           </button>
 
-          <button onClick={() => navigate('/relatorios')} className="w-full flex items-center justify-between p-4 bg-white border border-primary-light rounded-xl shadow-sm hover:border-green-300 hover:bg-green-50 transition-all group">
+          <button onClick={() => navigate('/relatorios')} className="w-full flex items-center justify-between p-4 bg-white border border-primary-light rounded-xl shadow-sm hover:shadow-md hover:shadow-green-500/10 hover:border-green-300 hover:bg-green-50 transition-all duration-200 group">
             <div className="flex items-center gap-3">
               <div className="bg-green-100 text-green-600 p-2 rounded-lg"><TrendingUp className="h-5 w-5" /></div>
               <span className="font-semibold text-text-primary group-hover:text-green-700">Emitir Relatório</span>
