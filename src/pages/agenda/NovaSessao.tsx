@@ -11,9 +11,18 @@ interface AprendenteOpcao {
   nomeCompleto: string;
 }
 
+function getHojeISODate(): string {
+  const hoje = new Date();
+  const ano = hoje.getFullYear();
+  const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+  const dia = String(hoje.getDate()).padStart(2, '0');
+  return `${ano}-${mes}-${dia}`;
+}
+
 export function NovaSessao() {
   const navigate = useNavigate();
   const [aprendentes, setAprendentes] = useState<AprendenteOpcao[]>([]);
+  const dataMinima = getHojeISODate();
 
   const [aprendenteId, setAprendenteId] = useState('');
   const [data, setData] = useState('');
@@ -102,13 +111,14 @@ export function NovaSessao() {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Input 
-            label="Data da Sessão" 
-            type="date" 
-            icon={<Calendar className="h-5 w-5"/>} 
-            value={data} 
-            onChange={(e) => setData(e.target.value)} 
-            required 
-            disabled={loading} 
+            label="Data da Sessão"
+            type="date"
+            icon={<Calendar className="h-5 w-5"/>}
+            value={data}
+            onChange={(e) => setData(e.target.value)}
+            min={dataMinima}
+            required
+            disabled={loading}
           />
           <Input 
             label="Horário" 
