@@ -5,6 +5,7 @@ import { api } from '../../services/api';
 import { getErrorMessage, getSafeErrorLog } from '../../services/apiError';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
+import { dispararAtualizacaoNotificacoes } from '../../utils/notificacoesBus';
 
 interface AprendenteOpcao {
   id: string;
@@ -19,8 +20,8 @@ interface AtendimentoCalendario {
 }
 
 const DURACOES = [30, 45, 60, 90] as const;
-const HORA_INICIO = 8;
-const HORA_FIM = 18;
+const HORA_INICIO = 0;
+const HORA_FIM = 24;
 const PASSO_MINUTOS = 30;
 
 function getHojeISODate(): string {
@@ -138,6 +139,7 @@ export function NovaSessao() {
       tituloSessao: titulo,
     })
       .then(() => {
+        dispararAtualizacaoNotificacoes();
         navigate('/agenda');
       })
       .catch((err: unknown) => {
@@ -238,7 +240,7 @@ export function NovaSessao() {
               Carregando disponibilidade...
             </p>
           ) : (
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2 max-h-72 overflow-y-auto pr-1">
               {horariosDisponibilidade.map(({ horario, ocupado }) => (
                 <button
                   key={horario}

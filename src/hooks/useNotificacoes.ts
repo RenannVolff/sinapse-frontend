@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '../services/api';
 import { getSafeErrorLog } from '../services/apiError';
+import { ouvirAtualizacaoNotificacoes } from '../utils/notificacoesBus';
 
 const CHAVE_LIDAS = '@SinapseEdu:notificacoesLidas';
 const INTERVALO_MS = 60_000;
@@ -140,10 +141,12 @@ export function useNotificacoes() {
 
     buscar();
     const intervalo = setInterval(buscar, INTERVALO_MS);
+    const pararDeOuvir = ouvirAtualizacaoNotificacoes(buscar);
 
     return () => {
       cancelado = true;
       clearInterval(intervalo);
+      pararDeOuvir();
     };
   }, []);
 

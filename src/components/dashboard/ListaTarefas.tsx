@@ -3,6 +3,7 @@ import { CheckCircle2, ChevronDown, Circle, Loader2, Plus, Trash2 } from 'lucide
 import { api } from '../../services/api';
 import { getSafeErrorLog } from '../../services/apiError';
 import { useToast } from '../../hooks/useToast';
+import { dispararAtualizacaoNotificacoes } from '../../utils/notificacoesBus';
 
 interface Tarefa {
   id: string;
@@ -40,6 +41,7 @@ export function ListaTarefas() {
       .then((res) => {
         setTarefas((prev) => [res.data, ...prev]);
         setNovaTarefa('');
+        dispararAtualizacaoNotificacoes();
       })
       .catch((err) => console.error('[ListaTarefas] Erro ao adicionar tarefa:', getSafeErrorLog(err)))
       .finally(() => setAdicionando(false));
@@ -50,6 +52,7 @@ export function ListaTarefas() {
     setTarefas((prev) => prev.map((t) => (t.id === tarefa.id ? { ...t, concluida } : t)));
 
     api.patch(`/tarefas/${tarefa.id}`, { concluida })
+      .then(() => dispararAtualizacaoNotificacoes())
       .catch((err) => {
         console.error('[ListaTarefas] Erro ao atualizar tarefa:', getSafeErrorLog(err));
         setTarefas((prev) => prev.map((t) => (t.id === tarefa.id ? { ...t, concluida: tarefa.concluida } : t)));
@@ -62,6 +65,7 @@ export function ListaTarefas() {
     if (tarefaExpandidaId === id) setTarefaExpandidaId(null);
 
     api.delete(`/tarefas/${id}`)
+      .then(() => dispararAtualizacaoNotificacoes())
       .catch((err) => {
         console.error('[ListaTarefas] Erro ao excluir tarefa:', getSafeErrorLog(err));
         setTarefas(anterior);
@@ -89,6 +93,7 @@ export function ListaTarefas() {
       .then(() => {
         setTarefas((prev) => prev.map((t) => (t.id === tarefa.id ? { ...t, notas: nota } : t)));
         showSuccess('Nota salva.');
+        dispararAtualizacaoNotificacoes();
       })
       .catch((err) => console.error('[ListaTarefas] Erro ao salvar nota:', getSafeErrorLog(err)))
       .finally(() => {

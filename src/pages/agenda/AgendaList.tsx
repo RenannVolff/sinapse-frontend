@@ -6,6 +6,7 @@ import { getErrorMessage, getSafeErrorLog } from '../../services/apiError';
 import { useToast } from '../../hooks/useToast';
 import { Button } from '../../components/ui/Button';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { dispararAtualizacaoNotificacoes } from '../../utils/notificacoesBus';
 
 type StatusAtendimento =
   | 'AGENDADO'
@@ -74,6 +75,7 @@ export function AgendaList() {
         setSessoes((prev) => prev.filter((s) => s.id !== sessaoParaExcluir.id));
         showSuccess('Sessão excluída com sucesso.');
         setSessaoParaExcluir(null);
+        dispararAtualizacaoNotificacoes();
       })
       .catch((err) => console.error('[Agenda] Erro ao excluir sessão:', getSafeErrorLog(err)))
       .finally(() => setExcluindo(false));
@@ -85,6 +87,7 @@ export function AgendaList() {
       .then(() => {
         setSessoes((prev) => prev.map((s) => (s.id === sessao.id ? { ...s, status: novoStatus } : s)));
         showSuccess(novoStatus === 'CONFIRMADO' ? 'Sessão confirmada.' : 'Sessão cancelada.');
+        dispararAtualizacaoNotificacoes();
       })
       .catch((err) => {
         console.error('[Agenda] Erro ao atualizar status:', getSafeErrorLog(err));
