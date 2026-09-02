@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Users, Calendar as CalendarIcon, BrainCircuit, TrendingUp, ArrowRight
+  Users, Calendar as CalendarIcon, BrainCircuit, TrendingUp, ArrowRight, Clock
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { api } from '../services/api';
@@ -16,6 +16,7 @@ export function Dashboard() {
   // Estados para Estatísticas
   const [totalAprendentes, setTotalAprendentes] = useState(0);
   const [sessoesMes, setSessoesMes] = useState(0);
+  const [sessoesAguardandoConfirmacao, setSessoesAguardandoConfirmacao] = useState(0);
 
   // Busca as métricas reais do banco de dados (Sem async/await)
   useEffect(() => {
@@ -24,10 +25,15 @@ export function Dashboard() {
       .then((res) => setTotalAprendentes(res.data.length))
       .catch((err) => console.error('[Dashboard] Erro ao buscar aprendentes:', getSafeErrorLog(err)));
 
-    // Busca sessões do mês atual
+    // Busca sessões do mês atual (reaproveitada para os cards de total e de aguardando confirmação)
     const dataAtual = new Date();
     api.get(`/atendimentos/calendario?mes=${dataAtual.getMonth() + 1}&ano=${dataAtual.getFullYear()}`)
-      .then((res) => setSessoesMes(res.data.length))
+      .then((res) => {
+        setSessoesMes(res.data.length);
+        setSessoesAguardandoConfirmacao(
+          res.data.filter((s: { status: string }) => s.status === 'AGUARDANDO_CONFIRMACAO').length
+        );
+      })
       .catch((err) => console.error('[Dashboard] Erro ao buscar sessões:', getSafeErrorLog(err)));
   }, []);
 
@@ -68,15 +74,18 @@ export function Dashboard() {
           </div>
         </div>
 
-        <div className="animate-in fade-in slide-in-from-bottom-4 duration-300 delay-150 bg-white p-6 rounded-2xl border border-primary-light shadow-sm flex items-center gap-4 transition-transform hover:-translate-y-1">
-          <div className="h-14 w-14 bg-green-50 text-green-600 rounded-xl flex items-center justify-center">
-            <TrendingUp className="h-7 w-7" />
+        <button
+          onClick={() => navigate('/agenda')}
+          className="animate-in fade-in slide-in-from-bottom-4 duration-300 delay-150 bg-white p-6 rounded-2xl border border-primary-light shadow-sm flex items-center gap-4 transition-transform hover:-translate-y-1 text-left"
+        >
+          <div className={`h-14 w-14 rounded-xl flex items-center justify-center ${sessoesAguardandoConfirmacao > 0 ? 'bg-accent/10 text-accent' : 'bg-primary-light text-text-secondary'}`}>
+            <Clock className="h-7 w-7" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-text-secondary uppercase">Status do Sistema</p>
-            <h3 className="text-xl font-black text-text-primary mt-1">Operacional</h3>
+            <p className="text-sm font-semibold text-text-secondary uppercase">Aguardando Confirmação</p>
+            <h3 className="text-2xl font-black text-text-primary">{sessoesAguardandoConfirmacao}</h3>
           </div>
-        </div>
+        </button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

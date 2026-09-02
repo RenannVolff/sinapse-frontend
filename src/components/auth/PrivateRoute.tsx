@@ -1,6 +1,6 @@
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import { isTokenExpired } from '../../contexts/AuthProvider';
+import { isTokenExpired } from '../../utils/jwt';
 
 // Guarda de rota: bloqueia o acesso às rotas privadas antes mesmo de renderizá-las,
 // sem depender de uma chamada de API falhar primeiro.
