@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
@@ -9,5 +9,17 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <!--
+      Posicao inicial (canto inferior direito, 24px/24px) antes do JS de
+      AccessibilityWidgetsPositioner assumir. Esse script tambem sobrescreve
+      dinamicamente o bottom quando a barra de cookies esta visivel (ela pode
+      passar de 24px de altura) — ver src/components/ui/AccessibilityWidgetsPositioner.tsx.
+    -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/sienna-accessibility@latest/dist/sienna-accessibility.umd.js"
+      data-position="bottom-right"
+      data-offset="24,24"
+      defer
+    ></script>
   </body>
 </html>

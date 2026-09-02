@@ -250,15 +250,15 @@ export function SessaoAtiva() {
 
   if (loading) return (
     <div className="flex flex-col h-[60vh] items-center justify-center gap-3">
-      <Loader2 className="h-10 w-10 animate-spin text-blue-600" />
-      <p className="text-gray-500 font-medium">Carregando prontuário do aprendente...</p>
+      <Loader2 className="h-10 w-10 animate-spin text-primary" />
+      <p className="text-text-secondary font-medium">Carregando prontuário do aprendente...</p>
     </div>
   );
 
   if (!atendimento) return (
-    <div className="text-center p-12 bg-white rounded-2xl border border-dashed border-gray-200">
+    <div className="text-center p-12 bg-white rounded-2xl border border-dashed border-primary-light">
       <AlertTriangle className="h-12 w-12 text-orange-400 mx-auto mb-4" />
-      <p className="text-gray-500 font-bold">Sessão não encontrada.</p>
+      <p className="text-text-secondary font-bold">Sessão não encontrada.</p>
     </div>
   );
 
@@ -269,21 +269,21 @@ export function SessaoAtiva() {
     <div className="max-w-5xl mx-auto space-y-6 fade-in pb-12 relative">
       
       {/* Cabeçalho de Ações */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 rounded-2xl shadow-sm border border-gray-100 sticky top-4 z-30">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 rounded-2xl shadow-sm border border-primary-light sticky top-4 z-30">
         <div className="flex items-center gap-4">
-          <button onClick={() => navigate('/agenda')} className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all">
+          <button onClick={() => navigate('/agenda')} className="p-2 text-text-secondary hover:text-primary hover:bg-primary-light rounded-xl transition-all">
             <ArrowLeft className="h-6 w-6" />
           </button>
           <div>
-            <h1 className="text-xl font-black text-gray-900 leading-tight">{atendimento.tituloSessao}</h1>
-            <p className="text-sm text-gray-500 font-medium">Aprendente: <span className="text-blue-600">{atendimento.aprendente.nomeCompleto}</span></p>
+            <h1 className="text-xl font-black text-text-primary leading-tight">{atendimento.tituloSessao}</h1>
+            <p className="text-sm text-text-secondary font-medium">Aprendente: <span className="text-primary">{atendimento.aprendente.nomeCompleto}</span></p>
           </div>
         </div>
-        
+
         <div className="flex gap-3">
           <button
             onClick={() => setModalExcluirOpen(true)}
-            className="p-2.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
+            className="p-2.5 text-text-secondary hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
             title="Excluir sessão"
             aria-label="Excluir sessão"
           >
@@ -291,7 +291,7 @@ export function SessaoAtiva() {
           </button>
           {!isFinalizada ? (
             <>
-              <Button variant="outline" onClick={handlePausar} isLoading={loadingAcao} className="border-blue-200 text-blue-600 hover:bg-blue-50">
+              <Button variant="outline" onClick={handlePausar} isLoading={loadingAcao} className="border-primary/30 text-primary hover:bg-primary-light">
                 <Save className="h-4 w-4 mr-2" /> Salvar e Pausar
               </Button>
               <Button
@@ -331,33 +331,33 @@ export function SessaoAtiva() {
 
       {/* Formulário de Nova Atividade */}
       {!isFinalizada && (
-        <form onSubmit={handleAddAtividade} className="bg-gradient-to-br from-blue-600 to-indigo-700 p-5 md:p-6 rounded-3xl shadow-xl shadow-blue-900/10 flex flex-col md:flex-row gap-4 items-end">
+        <form onSubmit={handleAddAtividade} className="bg-gradient-to-br from-primary to-primary-hover p-5 md:p-6 rounded-3xl shadow-xl shadow-primary/10 flex flex-col md:flex-row gap-4 items-end">
           <div className="flex-1 w-full">
-            <label className="text-xs font-black text-blue-100 uppercase tracking-widest ml-1 mb-2 block">Nova Atividade para esta Sessão</label>
-            <input 
-              type="text" 
-              value={novoTitulo} 
+            <label className="text-xs font-black text-primary-light uppercase tracking-widest ml-1 mb-2 block">Nova Atividade para esta Sessão</label>
+            <input
+              type="text"
+              value={novoTitulo}
               onChange={(e) => setNovoTitulo(e.target.value)}
-              className="w-full bg-white/10 border border-white/20 rounded-xl py-3 px-4 outline-none focus:bg-white focus:text-gray-900 transition-all text-white placeholder-white/50 font-medium"
+              className="w-full bg-white/10 border border-white/20 rounded-xl py-3 px-4 outline-none focus:bg-white focus:text-text-primary transition-all text-white placeholder-white/50 font-medium"
               placeholder="Ex: Identificação de Fonemas, Puzzle Lógico..."
               required
             />
           </div>
           <div className="w-full md:w-40">
-            <label className="text-xs font-black text-blue-100 uppercase tracking-widest ml-1 mb-2 block">Dificuldade</label>
-            <select 
-              value={novaDificuldade} 
+            <label className="text-xs font-black text-primary-light uppercase tracking-widest ml-1 mb-2 block">Dificuldade</label>
+            <select
+              value={novaDificuldade}
               onChange={(e) => setNovaDificuldade(Number(e.target.value))}
-              className="w-full bg-white/10 border border-white/20 rounded-xl py-3 px-4 outline-none focus:bg-white focus:text-gray-900 transition-all text-white font-bold cursor-pointer"
+              className="w-full bg-white/10 border border-white/20 rounded-xl py-3 px-4 outline-none focus:bg-white focus:text-text-primary transition-all text-white font-bold cursor-pointer"
             >
-              <option value={1} className="text-gray-900">1 - Iniciante</option>
-              <option value={2} className="text-gray-900">2 - Fácil</option>
-              <option value={3} className="text-gray-900">3 - Médio</option>
-              <option value={4} className="text-gray-900">4 - Desafiador</option>
-              <option value={5} className="text-gray-900">5 - Avançado</option>
+              <option value={1} className="text-text-primary">1 - Iniciante</option>
+              <option value={2} className="text-text-primary">2 - Fácil</option>
+              <option value={3} className="text-text-primary">3 - Médio</option>
+              <option value={4} className="text-text-primary">4 - Desafiador</option>
+              <option value={5} className="text-text-primary">5 - Avançado</option>
             </select>
           </div>
-          <Button type="submit" isLoading={loadingAdd} className="w-full md:w-auto bg-white text-blue-600 hover:bg-blue-50 h-[50px] px-6 shadow-lg shadow-black/10">
+          <Button type="submit" isLoading={loadingAdd} className="w-full md:w-auto bg-white text-primary hover:bg-primary-light h-[50px] px-6 shadow-lg shadow-black/10">
             <Plus className="h-5 w-5 mr-2" /> Adicionar
           </Button>
         </form>
@@ -366,25 +366,25 @@ export function SessaoAtiva() {
       {/* Listagem de Atividades */}
       <div className="space-y-6">
         {atendimento.atividades.length === 0 ? (
-          <div className="bg-white rounded-3xl border-2 border-dashed border-gray-100 p-16 text-center">
-            <BrainCircuit className="h-16 w-16 text-gray-200 mx-auto mb-4" />
-            <h3 className="text-gray-400 font-bold text-lg">Nenhuma atividade registrada ainda.</h3>
-            <p className="text-gray-300 text-sm">Adicione uma atividade acima para começar o registro.</p>
+          <div className="bg-white rounded-3xl border-2 border-dashed border-primary-light p-16 text-center">
+            <BrainCircuit className="h-16 w-16 text-text-secondary mx-auto mb-4" />
+            <h3 className="text-text-secondary font-bold text-lg">Nenhuma atividade registrada ainda.</h3>
+            <p className="text-text-secondary text-sm">Adicione uma atividade acima para começar o registro.</p>
           </div>
         ) : (
           atendimento.atividades.map((atividade, idx) => (
-            <div key={atividade.id} className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden animate-in slide-in-from-bottom-4 duration-300" style={{ animationDelay: `${idx * 100}ms` }}>
-              <div className="p-6 border-b border-gray-50 flex justify-between items-center bg-gray-50/30">
+            <div key={atividade.id} className="bg-white rounded-3xl border border-primary-light shadow-sm overflow-hidden animate-in slide-in-from-bottom-4 duration-300" style={{ animationDelay: `${idx * 100}ms` }}>
+              <div className="p-6 border-b border-primary-light flex justify-between items-center bg-primary-light/30">
                 <div className="flex items-center gap-4">
-                  <span className="h-8 w-8 bg-blue-600 text-white rounded-xl flex items-center justify-center font-black text-sm shadow-md shadow-blue-600/20">{idx + 1}</span>
-                  <h3 className="text-lg font-bold text-gray-900">{atividade.titulo}</h3>
+                  <span className="h-8 w-8 bg-primary text-white rounded-xl flex items-center justify-center font-black text-sm shadow-md shadow-primary/20">{idx + 1}</span>
+                  <h3 className="text-lg font-bold text-text-primary">{atividade.titulo}</h3>
                 </div>
-                <div className="flex items-center gap-1 px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-full border border-indigo-100">
-                  <Star className="h-4 w-4 fill-indigo-600" />
+                <div className="flex items-center gap-1 px-3 py-1.5 bg-primary-light text-primary-hover rounded-full border border-primary-light">
+                  <Star className="h-4 w-4 fill-primary" />
                   <span className="text-xs font-black uppercase tracking-tight">Nível {atividade.nivelDificuldade}</span>
                 </div>
               </div>
-              
+
               <div className="p-6 grid grid-cols-2 sm:grid-cols-5 gap-4">
                 {atividade.itensChecklist.map((item) => (
                   <button
@@ -393,17 +393,17 @@ export function SessaoAtiva() {
                     disabled={isFinalizada}
                     onClick={() => handleToggleChecklist(atividade.id, item.id, item.realizado)}
                     className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all group relative ${
-                      item.realizado 
-                      ? 'border-green-500 bg-green-50 text-green-700 shadow-inner' 
-                      : 'border-gray-100 bg-white text-gray-400 hover:border-blue-200 hover:bg-blue-50/50'
+                      item.realizado
+                      ? 'border-green-500 bg-green-50 text-green-700 shadow-inner'
+                      : 'border-primary-light bg-white text-text-secondary hover:border-primary/30 hover:bg-primary-light/50'
                     }`}
                   >
                     {item.realizado ? (
                       <CheckCircle2 className="h-8 w-8 mb-2 text-green-600" />
                     ) : (
-                      <Circle className="h-8 w-8 mb-2 text-gray-200 group-hover:text-blue-300 transition-colors" />
+                      <Circle className="h-8 w-8 mb-2 text-text-secondary group-hover:text-primary/60 transition-colors" />
                     )}
-                    <span className={`text-[10px] font-black uppercase tracking-widest text-center leading-tight ${item.realizado ? 'text-green-700' : 'text-gray-400 group-hover:text-blue-600'}`}>
+                    <span className={`text-[10px] font-black uppercase tracking-widest text-center leading-tight ${item.realizado ? 'text-green-700' : 'text-text-secondary group-hover:text-primary'}`}>
                       {item.nome}
                     </span>
                   </button>
@@ -415,16 +415,16 @@ export function SessaoAtiva() {
       </div>
 
       {/* Observações Finais */}
-      <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
-        <label className="text-sm font-black text-gray-700 uppercase tracking-widest flex items-center gap-2 mb-4">
-          <FileText className="h-5 w-5 text-blue-600" /> Parecer Técnico / Observações
+      <div className="bg-white p-6 rounded-3xl border border-primary-light shadow-sm">
+        <label className="text-sm font-black text-text-primary uppercase tracking-widest flex items-center gap-2 mb-4">
+          <FileText className="h-5 w-5 text-primary" /> Parecer Técnico / Observações
         </label>
-        <textarea 
+        <textarea
           value={observacoes}
           onChange={(e) => setObservacoes(e.target.value)}
           disabled={isFinalizada}
           placeholder={isFinalizada ? "Nenhuma observação registrada." : "Descreva aqui os detalhes do desempenho, comportamento e evolução observados nesta sessão..."}
-          className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-5 outline-none focus:bg-white focus:border-blue-500 transition-all text-gray-700 leading-relaxed h-40 resize-none font-medium placeholder-gray-300 disabled:opacity-70 disabled:bg-gray-100 disabled:cursor-not-allowed"
+          className="w-full bg-background border border-primary-light rounded-2xl p-5 outline-none focus:bg-white focus:border-primary transition-all text-text-primary leading-relaxed h-40 resize-none font-medium placeholder-text-secondary disabled:opacity-70 disabled:bg-primary-light disabled:cursor-not-allowed"
         />
       </div>
 
@@ -433,18 +433,18 @@ export function SessaoAtiva() {
 
       {/* Modal: Encerrar Sessão */}
       {modalEncerrarOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-text-primary/40 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden">
             <div className="p-6 text-center">
               <div className="mx-auto w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-4">
                 <CheckCheck className="h-8 w-8" />
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Encerrar Sessão?</h2>
-              <p className="text-gray-500 mb-6">
+              <h2 className="text-2xl font-bold text-text-primary mb-2">Encerrar Sessão?</h2>
+              <p className="text-text-secondary mb-6">
                 Ao encerrar, esta sessão será marcada como concluída, travada para edições e movida para o histórico do aprendente.
               </p>
               <div className="flex gap-3">
-                <Button variant="outline" onClick={() => setModalEncerrarOpen(false)} className="flex-1 bg-gray-50">
+                <Button variant="outline" onClick={() => setModalEncerrarOpen(false)} className="flex-1 bg-background">
                   Cancelar
                 </Button>
                 <Button onClick={confirmarEncerramento} isLoading={loadingAcao} className="flex-1 bg-green-600 hover:bg-green-700 text-white">
@@ -458,17 +458,17 @@ export function SessaoAtiva() {
 
       {/* Modal: Reabrir Sessão */}
       {modalReabrirOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-text-primary/40 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden">
             <div className="p-6 text-center relative">
-              <button onClick={() => setModalReabrirOpen(false)} className="absolute top-4 right-4 p-2 text-gray-400 hover:bg-gray-100 rounded-full transition-colors">
+              <button onClick={() => setModalReabrirOpen(false)} className="absolute top-4 right-4 p-2 text-text-secondary hover:bg-primary-light rounded-full transition-colors">
                 <X className="h-5 w-5" />
               </button>
               <div className="mx-auto w-16 h-16 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center mb-4">
                 <Unlock className="h-8 w-8" />
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Reabrir Sessão?</h2>
-              <p className="text-gray-500 mb-6">
+              <h2 className="text-2xl font-bold text-text-primary mb-2">Reabrir Sessão?</h2>
+              <p className="text-text-secondary mb-6">
                 Esta ação destravará a edição do checklist e das observações. A sessão voltará para a lista de pendências da sua agenda.
               </p>
               <div className="flex gap-3">
@@ -483,21 +483,21 @@ export function SessaoAtiva() {
 
       {/* Modal: Marcar Falta */}
       {modalFaltaOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-text-primary/40 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden">
             <div className="p-6 text-center relative">
-              <button onClick={() => setModalFaltaOpen(false)} className="absolute top-4 right-4 p-2 text-gray-400 hover:bg-gray-100 rounded-full transition-colors">
+              <button onClick={() => setModalFaltaOpen(false)} className="absolute top-4 right-4 p-2 text-text-secondary hover:bg-primary-light rounded-full transition-colors">
                 <X className="h-5 w-5" />
               </button>
               <div className="mx-auto w-16 h-16 bg-amber-100 text-amber-700 rounded-full flex items-center justify-center mb-4">
                 <UserX className="h-8 w-8" />
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Marcar Falta?</h2>
-              <p className="text-gray-500 mb-6">
+              <h2 className="text-2xl font-bold text-text-primary mb-2">Marcar Falta?</h2>
+              <p className="text-text-secondary mb-6">
                 A sessão será marcada como <strong>Falta</strong> — o aprendente não compareceu. Isso é diferente de um cancelamento e ficará registrado separadamente no histórico.
               </p>
               <div className="flex gap-3">
-                <Button variant="outline" onClick={() => setModalFaltaOpen(false)} className="flex-1 bg-gray-50">
+                <Button variant="outline" onClick={() => setModalFaltaOpen(false)} className="flex-1 bg-background">
                   Voltar
                 </Button>
                 <Button onClick={confirmarFalta} isLoading={loadingAcao} className="flex-1 bg-amber-600 hover:bg-amber-700 text-white">
@@ -511,21 +511,21 @@ export function SessaoAtiva() {
 
       {/* Modal: Cancelar Sessão */}
       {modalCancelarOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-text-primary/40 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden">
             <div className="p-6 text-center relative">
-              <button onClick={() => setModalCancelarOpen(false)} className="absolute top-4 right-4 p-2 text-gray-400 hover:bg-gray-100 rounded-full transition-colors">
+              <button onClick={() => setModalCancelarOpen(false)} className="absolute top-4 right-4 p-2 text-text-secondary hover:bg-primary-light rounded-full transition-colors">
                 <X className="h-5 w-5" />
               </button>
               <div className="mx-auto w-16 h-16 bg-slate-100 text-slate-600 rounded-full flex items-center justify-center mb-4">
                 <Ban className="h-8 w-8" />
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Cancelar Sessão?</h2>
-              <p className="text-gray-500 mb-6">
+              <h2 className="text-2xl font-bold text-text-primary mb-2">Cancelar Sessão?</h2>
+              <p className="text-text-secondary mb-6">
                 A sessão será marcada como <strong>Cancelada</strong> e removida da agenda de pendências. Use esta opção quando a sessão não ocorrer por decisão do terapeuta ou outro impedimento — não para faltas do aprendente.
               </p>
               <div className="flex gap-3">
-                <Button variant="outline" onClick={() => setModalCancelarOpen(false)} className="flex-1 bg-gray-50">
+                <Button variant="outline" onClick={() => setModalCancelarOpen(false)} className="flex-1 bg-background">
                   Voltar
                 </Button>
                 <Button onClick={confirmarCancelamento} isLoading={loadingAcao} className="flex-1 bg-slate-600 hover:bg-slate-700 text-white">

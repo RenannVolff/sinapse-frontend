@@ -60,26 +60,26 @@ export function NovoAprendente() {
     <div className="max-w-4xl mx-auto space-y-6 fade-in pb-12">
       
       {/* Cabeçalho */}
-      <div className="flex items-center gap-4 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+      <div className="flex items-center gap-4 bg-white p-6 rounded-2xl border border-primary-light shadow-sm">
         <button
           onClick={() => navigate('/aprendentes')}
-          className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+          className="p-2 text-text-secondary hover:text-primary hover:bg-primary-light rounded-lg transition-colors"
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <UserPlus className="h-6 w-6 text-blue-600" />
+          <h1 className="text-2xl font-bold text-text-primary flex items-center gap-2">
+            <UserPlus className="h-6 w-6 text-primary" />
             Cadastrar Aprendente
           </h1>
-          <p className="text-gray-500 text-sm mt-1">Preencha os dados para iniciar o prontuário.</p>
+          <p className="text-text-secondary text-sm mt-1">Preencha os dados para iniciar o prontuário.</p>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-white p-6 md:p-8 rounded-2xl border border-gray-100 shadow-sm space-y-8 relative overflow-hidden">
-        
+      <form onSubmit={handleSubmit} className="bg-white p-6 md:p-8 rounded-2xl border border-primary-light shadow-sm space-y-8 relative overflow-hidden">
+
         {/* Decoração de Fundo */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-blue-50 rounded-full blur-3xl -z-10 transform translate-x-1/2 -translate-y-1/2"></div>
+        <div className="absolute top-0 right-0 w-64 h-64 bg-primary-light rounded-full blur-3xl -z-10 transform translate-x-1/2 -translate-y-1/2"></div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
           <Input 
@@ -137,7 +137,7 @@ export function NovoAprendente() {
           </div>
         )}
 
-        <div className="flex justify-end pt-4 border-t border-gray-100">
+        <div className="flex justify-end pt-4 border-t border-primary-light">
           <Button type="submit" isLoading={loading} disabled={!!sucesso} className="w-full md:w-auto px-10 h-12 text-base">
             <UserPlus className="h-5 w-5 mr-2" /> Cadastrar
           </Button>

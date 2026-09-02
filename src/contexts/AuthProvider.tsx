@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import { AuthContext, type User } from './AuthContext';
 import { api } from '../services/api';
+import { isTokenExpired } from '../utils/jwt';
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -11,19 +12,30 @@ interface LoginResponse {
   usuario: User;
 }
 
+function clearAuthStorage() {
+  localStorage.removeItem('@SinapseEdu:user');
+  localStorage.removeItem('@SinapseEdu:token');
+  delete api.defaults.headers.common['Authorization'];
+}
+
 export function AuthProvider({ children }: AuthProviderProps) {
-  
+
     // Estado do usuário, inicialmente tenta puxar do localStorage para manter a sessão
   const [user, setUser] = useState<User | null>(() => {
     const storageUser = localStorage.getItem('@SinapseEdu:user');
     const storageToken = localStorage.getItem('@SinapseEdu:token');
 
     if (storageUser && storageToken) {
+      if (isTokenExpired(storageToken)) {
+        clearAuthStorage();
+        return null;
+      }
+
       // Injeta o token no Axios instantaneamente antes mesmo da tela piscar
       api.defaults.headers.common['Authorization'] = `Bearer ${storageToken}`;
       return JSON.parse(storageUser);
     }
-    
+
     return null;
   });
 
@@ -48,9 +60,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // Função de Logout segura
   const signOut = () => {
-    localStorage.removeItem('@SinapseEdu:user');
-    localStorage.removeItem('@SinapseEdu:token');
-    delete api.defaults.headers.common['Authorization'];
+    clearAuthStorage();
     setUser(null);
   };
 
