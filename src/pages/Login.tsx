@@ -47,7 +47,7 @@ export function Login() {
             </div>
             <h1 className="text-3xl font-black text-text-primary tracking-tight">Sinapse Edu</h1>
             <p className="text-sm font-medium text-text-secondary mt-2 text-center">
-              Gestão Neuropsicopedagógica
+              Aplicação Neuropsicopedagógica
             </p>
           </div>
 
