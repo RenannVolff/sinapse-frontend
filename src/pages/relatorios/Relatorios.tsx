@@ -1,9 +1,9 @@
 import { useState, useEffect, type FormEvent } from 'react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  BarChart, Bar, AreaChart, Area, ReferenceLine, Cell
+  BarChart, Bar, AreaChart, Area, ReferenceLine, Cell, ComposedChart, Scatter
 } from 'recharts';
-import { BarChart3, User, BrainCircuit, Calendar as CalendarIcon, Sparkles, Settings2, Activity, Info } from 'lucide-react';
+import { BarChart3, User, BrainCircuit, Calendar as CalendarIcon, Sparkles, Settings2, Activity, Info, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { api } from '../../services/api';
 import { getErrorMessage, getSafeErrorLog } from '../../services/apiError';
 import { Button } from '../../components/ui/Button';
@@ -27,7 +27,7 @@ interface RelatorioResponse {
 
 type TipoGrafico = 'linha' | 'barra' | 'area';
 
-type ModoRelatorio = 'ia' | 'acompanhamento' | 'media-periodo';
+type ModoRelatorio = 'ia' | 'acompanhamento' | 'media-periodo' | 'regressao';
 
 type Fase = 'LINHA_BASE' | 'INTERVENCAO';
 
@@ -87,6 +87,45 @@ function agruparEmCiclos(pontos: PontoAcompanhamento[]): CicloAcompanhamento[] {
   }));
 }
 
+interface RegressaoLinear {
+  slope: number;
+  intercept: number;
+  previstos: number[];
+}
+
+interface PontoRegressao {
+  data: string;
+  score: number;
+  fase: Fase;
+  previsto?: number;
+}
+
+// Regressão linear simples (mínimos quadrados) sobre o índice sequencial das sessões (x) e o score (y).
+function calcularRegressaoLinear(pontos: PontoAcompanhamento[]): RegressaoLinear {
+  const n = pontos.length;
+  const xs = pontos.map((_, indice) => indice);
+  const ys = pontos.map((ponto) => ponto.score);
+
+  const somaX = xs.reduce((soma, x) => soma + x, 0);
+  const somaY = ys.reduce((soma, y) => soma + y, 0);
+  const somaXY = xs.reduce((soma, x, i) => soma + x * ys[i], 0);
+  const somaX2 = xs.reduce((soma, x) => soma + x * x, 0);
+
+  const slope = (n * somaXY - somaX * somaY) / (n * somaX2 - somaX * somaX);
+  const intercept = (somaY - slope * somaX) / n;
+
+  const previstos = xs.map((x) => slope * x + intercept);
+
+  return { slope, intercept, previstos };
+}
+
+// Shape customizado do Scatter: pinta cada ponto real pela fase, igual ao DotFase do AB-ABAB.
+function ShapePontoRegressao(props: { cx?: number; cy?: number; payload?: PontoRegressao }) {
+  const { cx, cy, payload } = props;
+  if (cx === undefined || cy === undefined || !payload) return null;
+  return <circle cx={cx} cy={cy} r={5} fill={CORES_FASE[payload.fase]} stroke="#fff" strokeWidth={1.5} />;
+}
+
 export function Relatorios() {
   const [aprendentes, setAprendentes] = useState<AprendenteOpcao[]>([]);
 
@@ -131,7 +170,8 @@ export function Relatorios() {
 
   // Busca do histórico de acompanhamento (sem IA) ao trocar de modo ou de aprendente
   useEffect(() => {
-    if ((modo !== 'acompanhamento' && modo !== 'media-periodo') || !aprendenteSelecionado) {
+    const modosComHistorico: ModoRelatorio[] = ['acompanhamento', 'media-periodo', 'regressao'];
+    if (!modosComHistorico.includes(modo) || !aprendenteSelecionado) {
       return;
     }
 
@@ -240,6 +280,22 @@ export function Relatorios() {
   const possuiIntervencao = dadosAcompanhamento.some((ponto) => ponto.fase === 'INTERVENCAO');
   const ciclosAcompanhamento = agruparEmCiclos(dadosAcompanhamento);
 
+  // Regressão linear exige pelo menos 3 sessões para ter sentido estatístico
+  const regressao = dadosAcompanhamento.length >= 3 ? calcularRegressaoLinear(dadosAcompanhamento) : null;
+  const dadosRegressao: PontoRegressao[] = dadosAcompanhamento.map((ponto, i) => ({
+    data: ponto.data,
+    score: ponto.score,
+    fase: ponto.fase,
+    previsto: regressao ? regressao.previstos[i] : undefined,
+  }));
+  const tendencia = regressao === null
+    ? null
+    : Math.abs(regressao.slope) < 0.5
+      ? 'estavel'
+      : regressao.slope > 0
+        ? 'melhora'
+        : 'piora';
+
   return (
     <div className="space-y-6 fade-in max-w-5xl mx-auto pb-12">
       {/* Cabeçalho */}
@@ -282,6 +338,15 @@ export function Relatorios() {
         >
           <BarChart3 className="h-4 w-4" /> Média por Período
         </button>
+        <button
+          type="button"
+          onClick={() => setModo('regressao')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-semibold transition-colors ${
+            modo === 'regressao' ? 'bg-primary text-white shadow' : 'text-text-secondary hover:text-primary hover:bg-primary-light'
+          }`}
+        >
+          <TrendingUp className="h-4 w-4" /> Regressão Linear
+        </button>
       </div>
 
       {/* Caixa de Filtros (Formulário) */}
@@ -320,7 +385,7 @@ export function Relatorios() {
           </div>
         )}
 
-        {(modo === 'acompanhamento' || modo === 'media-periodo') && errorAcompanhamento && (
+        {(modo === 'acompanhamento' || modo === 'media-periodo' || modo === 'regressao') && errorAcompanhamento && (
           <div className="p-3 bg-red-50 text-red-600 text-sm font-medium rounded-lg border border-red-100">
             {errorAcompanhamento}
           </div>
@@ -517,6 +582,90 @@ export function Relatorios() {
                   <div className="flex items-center gap-2 mt-4 text-sm text-text-secondary">
                     <Info className="h-4 w-4 shrink-0" />
                     Ainda não há dados de intervenção registrados para comparação — todas as sessões estão em Linha de Base.
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Área de Resultado (Regressão Linear) */}
+      {modo === 'regressao' && !!aprendenteSelecionado && (
+        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="bg-white p-6 md:p-8 rounded-xl border border-primary-light shadow-sm">
+            <div className="mb-8">
+              <h3 className="text-xl font-bold text-text-primary">Regressão Linear</h3>
+              <p className="text-sm text-text-secondary">Tendência de evolução do score ao longo das sessões, sem uso de IA.</p>
+            </div>
+
+            {loadingAcompanhamento ? (
+              <div className="flex items-center justify-center h-[300px] text-text-secondary font-medium">
+                Carregando histórico...
+              </div>
+            ) : dadosAcompanhamento.length === 0 ? (
+              <div className="flex items-center justify-center h-[300px] text-text-secondary font-medium">
+                Não há atendimentos registrados para este aprendente.
+              </div>
+            ) : dadosAcompanhamento.length < 3 ? (
+              <div className="flex items-center gap-2 justify-center h-[300px] text-text-secondary font-medium text-center px-6">
+                <Info className="h-4 w-4 shrink-0" />
+                São necessárias pelo menos 3 sessões registradas para gerar a análise de regressão linear.
+              </div>
+            ) : (
+              <>
+                <div className="h-[400px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <ComposedChart data={dadosRegressao} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                      <XAxis dataKey="data" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 13, fontWeight: 500 }} dy={10} />
+                      <YAxis domain={[0, 100]} axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 13 }} />
+                      <Tooltip
+                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                        labelStyle={{ fontWeight: 'bold', color: '#1E293B', marginBottom: '4px' }}
+                        formatter={(value: number | undefined, name, item) => {
+                          if (value === undefined) return ['-', name];
+                          if (name === 'previsto') {
+                            return [`${Math.round(value)}%`, 'Tendência (regressão)'];
+                          }
+                          const fase = (item?.payload as PontoRegressao | undefined)?.fase;
+                          const rotuloFase = fase === 'INTERVENCAO' ? 'Intervenção' : 'Linha de Base';
+                          return [`${value}% (${rotuloFase})`, 'Score Real'];
+                        }}
+                      />
+                      <Scatter dataKey="score" fill="#1F5A56" shape={<ShapePontoRegressao />} />
+                      <Line type="linear" dataKey="previsto" stroke="#6B6560" strokeWidth={2} strokeDasharray="6 4" dot={false} activeDot={false} animationDuration={1500} />
+                    </ComposedChart>
+                  </ResponsiveContainer>
+                </div>
+
+                {/* Legenda das fases */}
+                <div className="flex items-center gap-6 mt-4 pt-4 border-t border-primary-light">
+                  <div className="flex items-center gap-2 text-sm font-medium text-text-secondary">
+                    <span className="h-3 w-3 rounded-full inline-block" style={{ backgroundColor: CORES_FASE.LINHA_BASE }} />
+                    Linha de Base
+                  </div>
+                  <div className="flex items-center gap-2 text-sm font-medium text-text-secondary">
+                    <span className="h-3 w-3 rounded-full inline-block" style={{ backgroundColor: CORES_FASE.INTERVENCAO }} />
+                    Intervenção
+                  </div>
+                  <div className="flex items-center gap-2 text-sm font-medium text-text-secondary">
+                    <span className="h-3 w-3 rounded-full inline-block border border-dashed border-[#6B6560]" />
+                    Tendência (regressão)
+                  </div>
+                </div>
+
+                {/* Resumo textual da tendência */}
+                {tendencia && (
+                  <div className={`flex items-center gap-2 mt-4 pt-4 border-t border-primary-light text-sm font-semibold ${
+                    tendencia === 'melhora' ? 'text-primary' : tendencia === 'piora' ? 'text-red-600' : 'text-text-secondary'
+                  }`}>
+                    {tendencia === 'melhora' && <TrendingUp className="h-4 w-4 shrink-0" />}
+                    {tendencia === 'piora' && <TrendingDown className="h-4 w-4 shrink-0" />}
+                    {tendencia === 'estavel' && <Minus className="h-4 w-4 shrink-0" />}
+                    {tendencia === 'melhora' && 'Tendência de melhora ao longo do tempo.'}
+                    {tendencia === 'piora' && 'Tendência de piora ao longo do tempo.'}
+                    {tendencia === 'estavel' && 'Desempenho estável, sem tendência clara.'}
                   </div>
                 )}
               </>
