@@ -1,7 +1,7 @@
 import { useState, useEffect, type FormEvent } from 'react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  BarChart, Bar, AreaChart, Area, ReferenceLine
+  BarChart, Bar, AreaChart, Area, ReferenceLine, Cell
 } from 'recharts';
 import { BarChart3, User, BrainCircuit, Calendar as CalendarIcon, Sparkles, Settings2, Activity, Info } from 'lucide-react';
 import { api } from '../../services/api';
@@ -27,7 +27,7 @@ interface RelatorioResponse {
 
 type TipoGrafico = 'linha' | 'barra' | 'area';
 
-type ModoRelatorio = 'ia' | 'acompanhamento';
+type ModoRelatorio = 'ia' | 'acompanhamento' | 'media-periodo';
 
 type Fase = 'LINHA_BASE' | 'INTERVENCAO';
 
@@ -45,6 +45,13 @@ interface PontoAcompanhamento {
   fase: Fase;
 }
 
+interface CicloAcompanhamento {
+  ciclo: string;
+  fase: Fase;
+  mediaScore: number;
+  quantidade: number;
+}
+
 const CORES_FASE: Record<Fase, string> = {
   LINHA_BASE: '#1F5A56',
   INTERVENCAO: '#D97A3F',
@@ -56,6 +63,28 @@ function DotFase(props: { cx?: number; cy?: number; payload?: PontoAcompanhament
   const { cx, cy, payload } = props;
   if (cx === undefined || cy === undefined || !payload) return null;
   return <circle cx={cx} cy={cy} r={6} fill={CORES_FASE[payload.fase]} stroke="#fff" strokeWidth={2} />;
+}
+
+// Agrupa os pontos (já ordenados por data) em ciclos: sequências consecutivas com a mesma fase.
+// Cada troca de fase em relação ao ponto anterior inicia um novo ciclo.
+function agruparEmCiclos(pontos: PontoAcompanhamento[]): CicloAcompanhamento[] {
+  const grupos: { fase: Fase; scores: number[] }[] = [];
+
+  pontos.forEach((ponto) => {
+    const ultimo = grupos[grupos.length - 1];
+    if (ultimo && ultimo.fase === ponto.fase) {
+      ultimo.scores.push(ponto.score);
+    } else {
+      grupos.push({ fase: ponto.fase, scores: [ponto.score] });
+    }
+  });
+
+  return grupos.map((grupo, index) => ({
+    ciclo: `Ciclo ${index + 1}`,
+    fase: grupo.fase,
+    mediaScore: Math.round(grupo.scores.reduce((soma, score) => soma + score, 0) / grupo.scores.length),
+    quantidade: grupo.scores.length,
+  }));
 }
 
 export function Relatorios() {
@@ -102,7 +131,7 @@ export function Relatorios() {
 
   // Busca do histórico de acompanhamento (sem IA) ao trocar de modo ou de aprendente
   useEffect(() => {
-    if (modo !== 'acompanhamento' || !aprendenteSelecionado) {
+    if ((modo !== 'acompanhamento' && modo !== 'media-periodo') || !aprendenteSelecionado) {
       return;
     }
 
@@ -209,6 +238,7 @@ export function Relatorios() {
     (ponto, index) => index > 0 && ponto.fase !== dadosAcompanhamento[index - 1].fase
   );
   const possuiIntervencao = dadosAcompanhamento.some((ponto) => ponto.fase === 'INTERVENCAO');
+  const ciclosAcompanhamento = agruparEmCiclos(dadosAcompanhamento);
 
   return (
     <div className="space-y-6 fade-in max-w-5xl mx-auto pb-12">
@@ -242,6 +272,15 @@ export function Relatorios() {
           }`}
         >
           <Activity className="h-4 w-4" /> Acompanhamento (AB-ABAB)
+        </button>
+        <button
+          type="button"
+          onClick={() => setModo('media-periodo')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-semibold transition-colors ${
+            modo === 'media-periodo' ? 'bg-primary text-white shadow' : 'text-text-secondary hover:text-primary hover:bg-primary-light'
+          }`}
+        >
+          <BarChart3 className="h-4 w-4" /> Média por Período
         </button>
       </div>
 
@@ -281,7 +320,7 @@ export function Relatorios() {
           </div>
         )}
 
-        {modo === 'acompanhamento' && errorAcompanhamento && (
+        {(modo === 'acompanhamento' || modo === 'media-periodo') && errorAcompanhamento && (
           <div className="p-3 bg-red-50 text-red-600 text-sm font-medium rounded-lg border border-red-100">
             {errorAcompanhamento}
           </div>
@@ -390,6 +429,75 @@ export function Relatorios() {
                       ))}
                       <Line type="monotone" dataKey="score" stroke="#1F5A56" strokeWidth={3} dot={<DotFase />} activeDot={{ r: 8, strokeWidth: 0, fill: '#1F5A56' }} animationDuration={1500} />
                     </LineChart>
+                  </ResponsiveContainer>
+                </div>
+
+                {/* Legenda das fases */}
+                <div className="flex items-center gap-6 mt-4 pt-4 border-t border-primary-light">
+                  <div className="flex items-center gap-2 text-sm font-medium text-text-secondary">
+                    <span className="h-3 w-3 rounded-full inline-block" style={{ backgroundColor: CORES_FASE.LINHA_BASE }} />
+                    Linha de Base
+                  </div>
+                  <div className="flex items-center gap-2 text-sm font-medium text-text-secondary">
+                    <span className="h-3 w-3 rounded-full inline-block" style={{ backgroundColor: CORES_FASE.INTERVENCAO }} />
+                    Intervenção
+                  </div>
+                </div>
+
+                {!possuiIntervencao && (
+                  <div className="flex items-center gap-2 mt-4 text-sm text-text-secondary">
+                    <Info className="h-4 w-4 shrink-0" />
+                    Ainda não há dados de intervenção registrados para comparação — todas as sessões estão em Linha de Base.
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Área de Resultado (Média por Período) */}
+      {modo === 'media-periodo' && !!aprendenteSelecionado && (
+        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="bg-white p-6 md:p-8 rounded-xl border border-primary-light shadow-sm">
+            <div className="mb-8">
+              <h3 className="text-xl font-bold text-text-primary">Média por Período</h3>
+              <p className="text-sm text-text-secondary">Score médio por ciclo de fase (Linha de Base / Intervenção), sem uso de IA.</p>
+            </div>
+
+            {loadingAcompanhamento ? (
+              <div className="flex items-center justify-center h-[300px] text-text-secondary font-medium">
+                Carregando histórico...
+              </div>
+            ) : ciclosAcompanhamento.length === 0 ? (
+              <div className="flex items-center justify-center h-[300px] text-text-secondary font-medium">
+                Não há atendimentos registrados para este aprendente.
+              </div>
+            ) : (
+              <>
+                <div className="h-[400px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={ciclosAcompanhamento} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                      <XAxis dataKey="ciclo" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 13, fontWeight: 500 }} dy={10} />
+                      <YAxis domain={[0, 100]} axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 13 }} />
+                      <Tooltip
+                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                        labelStyle={{ fontWeight: 'bold', color: '#1E293B', marginBottom: '4px' }}
+                        formatter={(value: number | undefined, _name, item) => {
+                          const dados = item?.payload as CicloAcompanhamento | undefined;
+                          if (!dados || value === undefined) return ['-', 'Score Médio'];
+                          const rotuloFase = dados.fase === 'INTERVENCAO' ? 'Intervenção' : 'Linha de Base';
+                          const sessoesLabel = dados.quantidade === 1 ? '1 sessão' : `${dados.quantidade} sessões`;
+                          return [`${value}% (${rotuloFase}, ${sessoesLabel})`, 'Score Médio'];
+                        }}
+                      />
+                      <Bar dataKey="mediaScore" radius={[4, 4, 0, 0]} barSize={60} animationDuration={1500}>
+                        {ciclosAcompanhamento.map((ciclo) => (
+                          <Cell key={ciclo.ciclo} fill={CORES_FASE[ciclo.fase]} />
+                        ))}
+                      </Bar>
+                    </BarChart>
                   </ResponsiveContainer>
                 </div>
 
