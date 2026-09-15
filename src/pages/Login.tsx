@@ -1,17 +1,25 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { BrainCircuit, Mail, Lock, Loader2, AlertCircle, ArrowRight } from 'lucide-react';
+import { isAxiosError } from 'axios';
+import { BrainCircuit, Mail, Lock, Loader2, AlertCircle, ArrowRight, RefreshCw } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
+import { useToast } from '../hooks/useToast';
+import { api } from '../services/api';
+import { getSafeErrorLog } from '../services/apiError';
 import { SynapseBackground } from '../components/ui/SynapseBackground';
 
 export function Login() {
   const navigate = useNavigate();
   const { signIn } = useAuth();
-  
+  const { showSuccess } = useToast();
+
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  // 403 (email não verificado) precisa de uma ação diferente de 401 (senha errada)
+  const [emailNaoVerificado, setEmailNaoVerificado] = useState(false);
+  const [reenviando, setReenviando] = useState(false);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -22,11 +30,30 @@ export function Login() {
 
     setLoading(true);
     setError('');
+    setEmailNaoVerificado(false);
 
     signIn(email, senha)
       .then(() => navigate('/dashboard'))
-      .catch(() => setError('Acesso negado. E-mail ou senha incorretos.'))
+      .catch((err: unknown) => {
+        if (isAxiosError(err) && err.response?.status === 403) {
+          setEmailNaoVerificado(true);
+          setError('Confirme seu email antes de fazer login.');
+        } else {
+          setError('Acesso negado. E-mail ou senha incorretos.');
+        }
+      })
       .finally(() => setLoading(false));
+  };
+
+  const handleReenviarVerificacao = () => {
+    setReenviando(true);
+
+    api.post('/auth/reenviar-verificacao', { email })
+      .then(() => showSuccess('Email de verificação reenviado. Verifique sua caixa de entrada.'))
+      .catch((err: unknown) => {
+        console.error('[Login] Erro ao reenviar verificação:', getSafeErrorLog(err));
+      })
+      .finally(() => setReenviando(false));
   };
 
   return (
@@ -90,11 +117,31 @@ export function Login() {
               </div>
             </div>
 
+            {/* Link "Esqueci minha senha" */}
+            <div className="flex justify-end -mt-2">
+              <Link to="/esqueci-senha" className="text-xs font-bold text-primary hover:text-primary-hover transition-colors">
+                Esqueci minha senha
+              </Link>
+            </div>
+
             {/* Mensagem de Erro */}
             {error && (
-              <div className="p-3.5 bg-red-50 text-red-700 text-sm font-bold rounded-xl border border-red-100 flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
-                <AlertCircle className="h-5 w-5 flex-shrink-0" />
-                {error}
+              <div className="p-3.5 bg-red-50 text-red-700 text-sm font-bold rounded-xl border border-red-100 flex flex-col gap-2 animate-in fade-in slide-in-from-top-2">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="h-5 w-5 flex-shrink-0" />
+                  {error}
+                </div>
+                {emailNaoVerificado && (
+                  <button
+                    type="button"
+                    onClick={handleReenviarVerificacao}
+                    disabled={reenviando}
+                    className="self-start inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:text-primary-hover transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    {reenviando ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
+                    Reenviar email de verificação
+                  </button>
+                )}
               </div>
             )}
 

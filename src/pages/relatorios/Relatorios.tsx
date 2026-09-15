@@ -1,11 +1,14 @@
-import { useState, useEffect, type FormEvent } from 'react';
+import { useState, useEffect, useRef, type FormEvent } from 'react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   BarChart, Bar, AreaChart, Area, ReferenceLine, Cell, ComposedChart, Scatter
 } from 'recharts';
-import { BarChart3, User, BrainCircuit, Calendar as CalendarIcon, Sparkles, Settings2, Activity, Info, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { BarChart3, User, BrainCircuit, Calendar as CalendarIcon, Sparkles, Settings2, Activity, Info, TrendingUp, TrendingDown, Minus, Download } from 'lucide-react';
+import { isAxiosError } from 'axios';
+import { toPng } from 'html-to-image';
 import { api } from '../../services/api';
 import { getErrorMessage, getSafeErrorLog } from '../../services/apiError';
+import { useToast } from '../../hooks/useToast';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 
@@ -126,7 +129,97 @@ function ShapePontoRegressao(props: { cx?: number; cy?: number; payload?: PontoR
   return <circle cx={cx} cy={cy} r={5} fill={CORES_FASE[payload.fase]} stroke="#fff" strokeWidth={1.5} />;
 }
 
+// Componentes de gráfico extraídos para serem reaproveitados tanto na área
+// visível (por modo) quanto no container oculto usado na exportação para Word.
+function GraficoAbAbab({ dados, transicoes }: { dados: PontoAcompanhamento[]; transicoes: PontoAcompanhamento[] }) {
+  return (
+    <ResponsiveContainer width="100%" height="100%">
+      <LineChart data={dados} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+        <XAxis dataKey="data" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 13, fontWeight: 500 }} dy={10} />
+        <YAxis domain={[0, 100]} axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 13 }} />
+        <Tooltip
+          contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+          labelStyle={{ fontWeight: 'bold', color: '#1E293B', marginBottom: '4px' }}
+          formatter={(value: number | undefined, _name, item) => {
+            const fase = (item?.payload as PontoAcompanhamento | undefined)?.fase;
+            const rotuloFase = fase === 'INTERVENCAO' ? 'Intervenção' : 'Linha de Base';
+            return value !== undefined ? [`${value}% (${rotuloFase})`, 'Score'] : ['-', 'Score'];
+          }}
+        />
+        {transicoes.map((ponto, i) => (
+          <ReferenceLine key={`${ponto.data}-${i}`} x={ponto.data} stroke="#6B6560" strokeDasharray="4 4" />
+        ))}
+        <Line type="monotone" dataKey="score" stroke="#1F5A56" strokeWidth={3} dot={<DotFase />} activeDot={{ r: 8, strokeWidth: 0, fill: '#1F5A56' }} animationDuration={1500} />
+      </LineChart>
+    </ResponsiveContainer>
+  );
+}
+
+function GraficoCiclos({ ciclos }: { ciclos: CicloAcompanhamento[] }) {
+  return (
+    <ResponsiveContainer width="100%" height="100%">
+      <BarChart data={ciclos} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+        <XAxis dataKey="ciclo" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 13, fontWeight: 500 }} dy={10} />
+        <YAxis domain={[0, 100]} axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 13 }} />
+        <Tooltip
+          contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+          labelStyle={{ fontWeight: 'bold', color: '#1E293B', marginBottom: '4px' }}
+          formatter={(value: number | undefined, _name, item) => {
+            const dados = item?.payload as CicloAcompanhamento | undefined;
+            if (!dados || value === undefined) return ['-', 'Score Médio'];
+            const rotuloFase = dados.fase === 'INTERVENCAO' ? 'Intervenção' : 'Linha de Base';
+            const sessoesLabel = dados.quantidade === 1 ? '1 sessão' : `${dados.quantidade} sessões`;
+            return [`${value}% (${rotuloFase}, ${sessoesLabel})`, 'Score Médio'];
+          }}
+        />
+        <Bar dataKey="mediaScore" radius={[4, 4, 0, 0]} barSize={60} animationDuration={1500}>
+          {ciclos.map((ciclo) => (
+            <Cell key={ciclo.ciclo} fill={CORES_FASE[ciclo.fase]} />
+          ))}
+        </Bar>
+      </BarChart>
+    </ResponsiveContainer>
+  );
+}
+
+function GraficoRegressao({ dados }: { dados: PontoRegressao[] }) {
+  return (
+    <ResponsiveContainer width="100%" height="100%">
+      <ComposedChart data={dados} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+        <XAxis dataKey="data" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 13, fontWeight: 500 }} dy={10} />
+        <YAxis domain={[0, 100]} axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 13 }} />
+        <Tooltip
+          contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+          labelStyle={{ fontWeight: 'bold', color: '#1E293B', marginBottom: '4px' }}
+          formatter={(value: number | undefined, name, item) => {
+            if (value === undefined) return ['-', name];
+            if (name === 'previsto') {
+              return [`${Math.round(value)}%`, 'Tendência (regressão)'];
+            }
+            const fase = (item?.payload as PontoRegressao | undefined)?.fase;
+            const rotuloFase = fase === 'INTERVENCAO' ? 'Intervenção' : 'Linha de Base';
+            return [`${value}% (${rotuloFase})`, 'Score Real'];
+          }}
+        />
+        <Scatter dataKey="score" fill="#1F5A56" shape={<ShapePontoRegressao />} />
+        <Line type="linear" dataKey="previsto" stroke="#6B6560" strokeWidth={2} strokeDasharray="6 4" dot={false} activeDot={false} animationDuration={1500} />
+      </ComposedChart>
+    </ResponsiveContainer>
+  );
+}
+
+function extrairNomeArquivo(contentDisposition: unknown): string | null {
+  if (typeof contentDisposition !== 'string') return null;
+  const match = /filename="?([^"]+)"?/.exec(contentDisposition);
+  return match ? match[1] : null;
+}
+
 export function Relatorios() {
+  const { showError, showSuccess } = useToast();
+
   const [aprendentes, setAprendentes] = useState<AprendenteOpcao[]>([]);
 
   // Modo do relatório: IA (comportamento atual) ou Acompanhamento AB-ABAB
@@ -141,16 +234,29 @@ export function Relatorios() {
   // Estados de Resultado
   const [dadosEvolucao, setDadosEvolucao] = useState<EvolucaoData[]>([]);
   const [resumoIa, setResumoIa] = useState<string>('');
+  // Aprendente para o qual o resumoIa acima foi gerado — evita reaproveitar
+  // (cache) um resumo de outro aprendente ao exportar para Word.
+  const [resumoIaAprendenteId, setResumoIaAprendenteId] = useState<string>('');
 
   // Estados do modo Acompanhamento (AB-ABAB)
   const [dadosAcompanhamento, setDadosAcompanhamento] = useState<PontoAcompanhamento[]>([]);
   const [loadingAcompanhamento, setLoadingAcompanhamento] = useState<boolean>(false);
   const [errorAcompanhamento, setErrorAcompanhamento] = useState<string>('');
+  // Intervalo (primeira/última sessão) do histórico de acompanhamento carregado —
+  // usado como período padrão do relatório de IA na exportação para Word,
+  // quando o usuário ainda não gerou um relatório de IA com datas escolhidas.
+  const [intervaloAcompanhamento, setIntervaloAcompanhamento] = useState<{ inicio: string; fim: string } | null>(null);
 
   // Estados de Controle (Sem async/await)
   const [loadingDados, setLoadingDados] = useState<boolean>(true);
   const [loadingRelatorio, setLoadingRelatorio] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
+
+  // Estado da exportação para Word (.docx)
+  const [exportandoDocx, setExportandoDocx] = useState<boolean>(false);
+  const refGraficoAbAbab = useRef<HTMLDivElement>(null);
+  const refGraficoCiclos = useRef<HTMLDivElement>(null);
+  const refGraficoRegressao = useRef<HTMLDivElement>(null);
 
   // Busca inicial dos aprendentes
   useEffect(() => {
@@ -168,10 +274,14 @@ export function Relatorios() {
       });
   }, []);
 
-  // Busca do histórico de acompanhamento (sem IA) ao trocar de modo ou de aprendente
+  // Busca do histórico de acompanhamento (sem IA) ao trocar de aprendente.
+  // Carregado independente do modo ativo, pois também alimenta o container
+  // oculto de exportação para Word (os três gráficos precisam estar
+  // disponíveis mesmo se o usuário nunca visitou as abas de acompanhamento).
   useEffect(() => {
-    const modosComHistorico: ModoRelatorio[] = ['acompanhamento', 'media-periodo', 'regressao'];
-    if (!modosComHistorico.includes(modo) || !aprendenteSelecionado) {
+    if (!aprendenteSelecionado) {
+      setDadosAcompanhamento([]);
+      setIntervaloAcompanhamento(null);
       return;
     }
 
@@ -187,11 +297,19 @@ export function Relatorios() {
             fase: sessao.fase,
           }));
           setDadosAcompanhamento(pontos);
+
+          if (res.data.length > 0) {
+            const datasIso = res.data.map((sessao) => sessao.dataAtendimento.slice(0, 10)).sort();
+            setIntervaloAcompanhamento({ inicio: datasIso[0], fim: datasIso[datasIso.length - 1] });
+          } else {
+            setIntervaloAcompanhamento(null);
+          }
         })
         .catch((err) => {
           console.error('[Relatorios] Erro ao buscar gráfico de acompanhamento:', getSafeErrorLog(err));
           setErrorAcompanhamento(getErrorMessage(err, 'Falha ao buscar o histórico de acompanhamento.'));
           setDadosAcompanhamento([]);
+          setIntervaloAcompanhamento(null);
         })
         .finally(() => {
           setLoadingAcompanhamento(false);
@@ -199,7 +317,7 @@ export function Relatorios() {
     }
 
     buscarAcompanhamento();
-  }, [modo, aprendenteSelecionado]);
+  }, [aprendenteSelecionado]);
 
   // Submissão do Formulário
   const handleGerarRelatorio = (e: FormEvent) => {
@@ -217,6 +335,7 @@ export function Relatorios() {
       .then((res) => {
         setDadosEvolucao(res.data.dadosGrafico);
         setResumoIa(res.data.resumoIa);
+        setResumoIaAprendenteId(aprendenteSelecionado);
       })
       .catch((err) => {
         console.error('[Relatorios] Erro ao gerar relatório:', getSafeErrorLog(err));
@@ -225,6 +344,99 @@ export function Relatorios() {
       .finally(() => {
         setLoadingRelatorio(false);
       });
+  };
+
+  // Captura um dos três containers ocultos de gráfico como PNG base64 (sem o prefixo data:...).
+  async function capturarGraficoBase64(elemento: HTMLDivElement | null): Promise<string> {
+    if (!elemento) {
+      throw new Error('Gráfico indisponível para captura.');
+    }
+    const dataUrl = await toPng(elemento, { backgroundColor: '#FFFFFF', pixelRatio: 2 });
+    return dataUrl.replace(/^data:image\/png;base64,/, '');
+  }
+
+  // Exportação do relatório para Word (.docx): texto do relatório de IA +
+  // os três gráficos de acompanhamento, capturados fielmente da tela.
+  const handleExportarDocx = async () => {
+    if (!aprendenteSelecionado || dadosAcompanhamento.length === 0) {
+      return;
+    }
+
+    setExportandoDocx(true);
+
+    try {
+      let textoResumo = resumoIaAprendenteId === aprendenteSelecionado ? resumoIa : '';
+
+      if (!textoResumo) {
+        const inicio = dataInicio || intervaloAcompanhamento?.inicio;
+        const fim = dataFim || intervaloAcompanhamento?.fim;
+
+        if (!inicio || !fim) {
+          throw new Error('SEM_INTERVALO');
+        }
+
+        const res = await api.get<RelatorioResponse>(
+          `/aprendentes/${aprendenteSelecionado}/relatorio-ia?inicio=${inicio}&fim=${fim}`
+        );
+        textoResumo = res.data.resumoIa;
+        setResumoIa(textoResumo);
+        setResumoIaAprendenteId(aprendenteSelecionado);
+      }
+
+      // Garante que os três gráficos ocultos já pintaram antes da captura.
+      await new Promise<void>((resolve) => {
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+      });
+
+      const [imagemAbAbab, imagemCiclos, imagemRegressao] = await Promise.all([
+        capturarGraficoBase64(refGraficoAbAbab.current),
+        capturarGraficoBase64(refGraficoCiclos.current),
+        capturarGraficoBase64(refGraficoRegressao.current),
+      ]);
+
+      const nomeAprendente = aprendentes.find((a) => a.id === aprendenteSelecionado)?.nomeCompleto ?? '';
+
+      const payload = {
+        nomeAprendente,
+        resumoIa: textoResumo,
+        graficos: [
+          { titulo: 'Acompanhamento AB-ABAB', imagemBase64: imagemAbAbab },
+          { titulo: 'Média por Período', imagemBase64: imagemCiclos },
+          { titulo: 'Regressão Linear', imagemBase64: imagemRegressao },
+        ],
+      };
+
+      const response = await api.post(`/aprendentes/${aprendenteSelecionado}/exportar-docx`, payload, {
+        responseType: 'blob',
+      });
+
+      const blobUrl = URL.createObjectURL(response.data as Blob);
+      const nomeArquivo = extrairNomeArquivo(response.headers?.['content-disposition'])
+        ?? `relatorio-${nomeAprendente.trim().toLowerCase().replace(/\s+/g, '-')}.docx`;
+
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = nomeArquivo;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(blobUrl);
+
+      showSuccess('Relatório exportado para Word com sucesso.');
+    } catch (err) {
+      console.error('[Relatorios] Erro ao exportar para Word:', getSafeErrorLog(err));
+      // Erros do axios (rede/servidor) já disparam toast automaticamente no
+      // interceptor global; aqui só cobrimos os casos que não passam por ele.
+      if (!isAxiosError(err)) {
+        showError(
+          err instanceof Error && err.message === 'SEM_INTERVALO'
+            ? 'Não foi possível determinar o período do relatório. Gere o relatório com IA ou registre atendimentos para este aprendente.'
+            : 'Não foi possível gerar o documento Word. Tente novamente.'
+        );
+      }
+    } finally {
+      setExportandoDocx(false);
+    }
   };
 
   // Função auxiliar para renderizar o gráfico escolhido
@@ -307,7 +519,43 @@ export function Relatorios() {
           </h1>
           <p className="text-text-secondary">Geração autônoma de relatórios e gráficos do aprendente.</p>
         </div>
+
+        <Button
+          type="button"
+          variant="outline"
+          onClick={handleExportarDocx}
+          isLoading={exportandoDocx}
+          disabled={!aprendenteSelecionado || dadosAcompanhamento.length === 0}
+          title={
+            !aprendenteSelecionado
+              ? 'Selecione um aprendente para exportar.'
+              : dadosAcompanhamento.length === 0
+                ? 'Este aprendente ainda não possui atendimentos registrados para gerar os gráficos do relatório.'
+                : undefined
+          }
+          className="w-full md:w-auto px-6"
+        >
+          <Download className="h-4 w-4 mr-2" /> Exportar para Word (.docx)
+        </Button>
       </div>
+
+      {/* Container oculto: monta os três gráficos fora da tela para captura fiel via html-to-image */}
+      {dadosAcompanhamento.length > 0 && (
+        <div
+          aria-hidden="true"
+          style={{ position: 'fixed', top: 0, left: '-9999px', zIndex: -1 }}
+        >
+          <div ref={refGraficoAbAbab} style={{ width: 800, height: 420, padding: 24, background: '#FFFFFF' }}>
+            <GraficoAbAbab dados={dadosAcompanhamento} transicoes={transicoesFase} />
+          </div>
+          <div ref={refGraficoCiclos} style={{ width: 800, height: 420, padding: 24, background: '#FFFFFF' }}>
+            <GraficoCiclos ciclos={ciclosAcompanhamento} />
+          </div>
+          <div ref={refGraficoRegressao} style={{ width: 800, height: 420, padding: 24, background: '#FFFFFF' }}>
+            <GraficoRegressao dados={dadosRegressao} />
+          </div>
+        </div>
+      )}
 
       {/* Alternador de Modo */}
       <div className="inline-flex items-center gap-1 p-1 bg-white border border-primary-light rounded-lg shadow-sm">
@@ -475,26 +723,7 @@ export function Relatorios() {
             ) : (
               <>
                 <div className="h-[400px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={dadosAcompanhamento} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                      <XAxis dataKey="data" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 13, fontWeight: 500 }} dy={10} />
-                      <YAxis domain={[0, 100]} axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 13 }} />
-                      <Tooltip
-                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-                        labelStyle={{ fontWeight: 'bold', color: '#1E293B', marginBottom: '4px' }}
-                        formatter={(value: number | undefined, _name, item) => {
-                          const fase = (item?.payload as PontoAcompanhamento | undefined)?.fase;
-                          const rotuloFase = fase === 'INTERVENCAO' ? 'Intervenção' : 'Linha de Base';
-                          return value !== undefined ? [`${value}% (${rotuloFase})`, 'Score'] : ['-', 'Score'];
-                        }}
-                      />
-                      {transicoesFase.map((ponto, i) => (
-                        <ReferenceLine key={`${ponto.data}-${i}`} x={ponto.data} stroke="#6B6560" strokeDasharray="4 4" />
-                      ))}
-                      <Line type="monotone" dataKey="score" stroke="#1F5A56" strokeWidth={3} dot={<DotFase />} activeDot={{ r: 8, strokeWidth: 0, fill: '#1F5A56' }} animationDuration={1500} />
-                    </LineChart>
-                  </ResponsiveContainer>
+                  <GraficoAbAbab dados={dadosAcompanhamento} transicoes={transicoesFase} />
                 </div>
 
                 {/* Legenda das fases */}
@@ -541,29 +770,7 @@ export function Relatorios() {
             ) : (
               <>
                 <div className="h-[400px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={ciclosAcompanhamento} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                      <XAxis dataKey="ciclo" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 13, fontWeight: 500 }} dy={10} />
-                      <YAxis domain={[0, 100]} axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 13 }} />
-                      <Tooltip
-                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-                        labelStyle={{ fontWeight: 'bold', color: '#1E293B', marginBottom: '4px' }}
-                        formatter={(value: number | undefined, _name, item) => {
-                          const dados = item?.payload as CicloAcompanhamento | undefined;
-                          if (!dados || value === undefined) return ['-', 'Score Médio'];
-                          const rotuloFase = dados.fase === 'INTERVENCAO' ? 'Intervenção' : 'Linha de Base';
-                          const sessoesLabel = dados.quantidade === 1 ? '1 sessão' : `${dados.quantidade} sessões`;
-                          return [`${value}% (${rotuloFase}, ${sessoesLabel})`, 'Score Médio'];
-                        }}
-                      />
-                      <Bar dataKey="mediaScore" radius={[4, 4, 0, 0]} barSize={60} animationDuration={1500}>
-                        {ciclosAcompanhamento.map((ciclo) => (
-                          <Cell key={ciclo.ciclo} fill={CORES_FASE[ciclo.fase]} />
-                        ))}
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
+                  <GraficoCiclos ciclos={ciclosAcompanhamento} />
                 </div>
 
                 {/* Legenda das fases */}
@@ -615,28 +822,7 @@ export function Relatorios() {
             ) : (
               <>
                 <div className="h-[400px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <ComposedChart data={dadosRegressao} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                      <XAxis dataKey="data" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 13, fontWeight: 500 }} dy={10} />
-                      <YAxis domain={[0, 100]} axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 13 }} />
-                      <Tooltip
-                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-                        labelStyle={{ fontWeight: 'bold', color: '#1E293B', marginBottom: '4px' }}
-                        formatter={(value: number | undefined, name, item) => {
-                          if (value === undefined) return ['-', name];
-                          if (name === 'previsto') {
-                            return [`${Math.round(value)}%`, 'Tendência (regressão)'];
-                          }
-                          const fase = (item?.payload as PontoRegressao | undefined)?.fase;
-                          const rotuloFase = fase === 'INTERVENCAO' ? 'Intervenção' : 'Linha de Base';
-                          return [`${value}% (${rotuloFase})`, 'Score Real'];
-                        }}
-                      />
-                      <Scatter dataKey="score" fill="#1F5A56" shape={<ShapePontoRegressao />} />
-                      <Line type="linear" dataKey="previsto" stroke="#6B6560" strokeWidth={2} strokeDasharray="6 4" dot={false} activeDot={false} animationDuration={1500} />
-                    </ComposedChart>
-                  </ResponsiveContainer>
+                  <GraficoRegressao dados={dadosRegressao} />
                 </div>
 
                 {/* Legenda das fases */}

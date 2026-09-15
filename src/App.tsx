@@ -3,6 +3,9 @@ import { AuthProvider } from './contexts/AuthProvider';
 import { ToastProvider } from './contexts/ToastProvider';
 import { Cadastro } from './pages/Cadastro';
 import { Login } from './pages/Login';
+import { VerificarEmail } from './pages/VerificarEmail';
+import { EsqueciSenha } from './pages/EsqueciSenha';
+import { RedefinirSenha } from './pages/RedefinirSenha';
 import { Dashboard } from './pages/Dashboard';
 import { DefaultLayout } from './components/layout/DefaultLayout';
 import { PrivateRoute } from './components/auth/PrivateRoute';
@@ -42,6 +45,9 @@ export default function App() {
             {/* Rota Pública */}
             <Route path="/" element={<Login />} />
             <Route path="/cadastro" element={<Cadastro />} />
+            <Route path="/verificar-email" element={<VerificarEmail />} />
+            <Route path="/esqueci-senha" element={<EsqueciSenha />} />
+            <Route path="/redefinir-senha" element={<RedefinirSenha />} />
 
             {/* Rotas Privadas */}
             <Route element={<PrivateRoute />}>
