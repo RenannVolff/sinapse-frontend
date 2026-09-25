@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, type FormEvent } from 'react';
+import { useState, useEffect, useRef, type FormEvent, type CSSProperties } from 'react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   BarChart, Bar, AreaChart, Area, ReferenceLine, Cell, ComposedChart, Scatter
@@ -129,11 +129,42 @@ function ShapePontoRegressao(props: { cx?: number; cy?: number; payload?: PontoR
   return <circle cx={cx} cy={cy} r={5} fill={CORES_FASE[payload.fase]} stroke="#fff" strokeWidth={1.5} />;
 }
 
+type DimensaoGrafico = { width: number; height: number };
+
+// Dimensões fixas dos gráficos no container oculto de exportação. Fora da área
+// visível o ResponsiveContainer não mede o pai de forma confiável (e sempre
+// começa em -1x-1), então usamos tamanho em pixel explícito.
+const EXPORT_PADDING = 24;
+const EXPORT_WRAPPER = { width: 800, height: 420 };
+const EXPORT_GRAFICO: DimensaoGrafico = {
+  width: EXPORT_WRAPPER.width - EXPORT_PADDING * 2,
+  height: EXPORT_WRAPPER.height - EXPORT_PADDING * 2,
+};
+
+// Abaixo disso o PNG em base64 é considerado vazio/degenerado (um PNG 800x420
+// real com gráfico tem dezenas de KB; um PNG em branco fica bem menor).
+const TAMANHO_MINIMO_BASE64 = 5000;
+
+// Sem dimensão: responsivo (área visível). Com dimensão: tamanho fixo em pixel.
+function propsContainer(dimensao?: DimensaoGrafico) {
+  return dimensao
+    ? { width: dimensao.width, height: dimensao.height, initialDimension: dimensao }
+    : { width: '100%' as const, height: '100%' as const };
+}
+
+const estiloWrapperExport: CSSProperties = {
+  width: EXPORT_WRAPPER.width,
+  height: EXPORT_WRAPPER.height,
+  padding: EXPORT_PADDING,
+  boxSizing: 'border-box',
+  background: '#FFFFFF',
+};
+
 // Componentes de gráfico extraídos para serem reaproveitados tanto na área
 // visível (por modo) quanto no container oculto usado na exportação para Word.
-function GraficoAbAbab({ dados, transicoes }: { dados: PontoAcompanhamento[]; transicoes: PontoAcompanhamento[] }) {
+function GraficoAbAbab({ dados, transicoes, dimensao }: { dados: PontoAcompanhamento[]; transicoes: PontoAcompanhamento[]; dimensao?: DimensaoGrafico }) {
   return (
-    <ResponsiveContainer width="100%" height="100%">
+    <ResponsiveContainer {...propsContainer(dimensao)}>
       <LineChart data={dados} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
         <XAxis dataKey="data" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 13, fontWeight: 500 }} dy={10} />
@@ -156,9 +187,9 @@ function GraficoAbAbab({ dados, transicoes }: { dados: PontoAcompanhamento[]; tr
   );
 }
 
-function GraficoCiclos({ ciclos }: { ciclos: CicloAcompanhamento[] }) {
+function GraficoCiclos({ ciclos, dimensao }: { ciclos: CicloAcompanhamento[]; dimensao?: DimensaoGrafico }) {
   return (
-    <ResponsiveContainer width="100%" height="100%">
+    <ResponsiveContainer {...propsContainer(dimensao)}>
       <BarChart data={ciclos} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
         <XAxis dataKey="ciclo" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 13, fontWeight: 500 }} dy={10} />
@@ -184,9 +215,9 @@ function GraficoCiclos({ ciclos }: { ciclos: CicloAcompanhamento[] }) {
   );
 }
 
-function GraficoRegressao({ dados }: { dados: PontoRegressao[] }) {
+function GraficoRegressao({ dados, dimensao }: { dados: PontoRegressao[]; dimensao?: DimensaoGrafico }) {
   return (
-    <ResponsiveContainer width="100%" height="100%">
+    <ResponsiveContainer {...propsContainer(dimensao)}>
       <ComposedChart data={dados} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
         <XAxis dataKey="data" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 13, fontWeight: 500 }} dy={10} />
@@ -351,8 +382,17 @@ export function Relatorios() {
     if (!elemento) {
       throw new Error('Gráfico indisponível para captura.');
     }
-    const dataUrl = await toPng(elemento, { backgroundColor: '#FFFFFF', pixelRatio: 2 });
-    return dataUrl.replace(/^data:image\/png;base64,/, '');
+    const dataUrl = await toPng(elemento, {
+      backgroundColor: '#FFFFFF',
+      pixelRatio: 2,
+      width: EXPORT_WRAPPER.width,
+      height: EXPORT_WRAPPER.height,
+    });
+    const base64 = dataUrl.replace(/^data:image\/png;base64,/, '');
+    if (base64.length < TAMANHO_MINIMO_BASE64) {
+      throw new Error('CAPTURA_VAZIA');
+    }
+    return base64;
   }
 
   // Exportação do relatório para Word (.docx): texto do relatório de IA +
@@ -431,7 +471,9 @@ export function Relatorios() {
         showError(
           err instanceof Error && err.message === 'SEM_INTERVALO'
             ? 'Não foi possível determinar o período do relatório. Gere o relatório com IA ou registre atendimentos para este aprendente.'
-            : 'Não foi possível gerar o documento Word. Tente novamente.'
+            : err instanceof Error && err.message === 'CAPTURA_VAZIA'
+              ? 'Não foi possível capturar os gráficos para o documento (imagem vazia). Aguarde os gráficos carregarem e tente novamente.'
+              : 'Não foi possível gerar o documento Word. Tente novamente.'
         );
       }
     } finally {
@@ -543,16 +585,23 @@ export function Relatorios() {
       {dadosAcompanhamento.length > 0 && (
         <div
           aria-hidden="true"
-          style={{ position: 'fixed', top: 0, left: '-9999px', zIndex: -1 }}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: '-9999px',
+            zIndex: -1,
+            width: EXPORT_WRAPPER.width,
+            height: EXPORT_WRAPPER.height * 3,
+          }}
         >
-          <div ref={refGraficoAbAbab} style={{ width: 800, height: 420, padding: 24, background: '#FFFFFF' }}>
-            <GraficoAbAbab dados={dadosAcompanhamento} transicoes={transicoesFase} />
+          <div ref={refGraficoAbAbab} style={estiloWrapperExport}>
+            <GraficoAbAbab dados={dadosAcompanhamento} transicoes={transicoesFase} dimensao={EXPORT_GRAFICO} />
           </div>
-          <div ref={refGraficoCiclos} style={{ width: 800, height: 420, padding: 24, background: '#FFFFFF' }}>
-            <GraficoCiclos ciclos={ciclosAcompanhamento} />
+          <div ref={refGraficoCiclos} style={estiloWrapperExport}>
+            <GraficoCiclos ciclos={ciclosAcompanhamento} dimensao={EXPORT_GRAFICO} />
           </div>
-          <div ref={refGraficoRegressao} style={{ width: 800, height: 420, padding: 24, background: '#FFFFFF' }}>
-            <GraficoRegressao dados={dadosRegressao} />
+          <div ref={refGraficoRegressao} style={estiloWrapperExport}>
+            <GraficoRegressao dados={dadosRegressao} dimensao={EXPORT_GRAFICO} />
           </div>
         </div>
       )}
