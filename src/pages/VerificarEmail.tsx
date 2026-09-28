@@ -1,4 +1,4 @@
-import { useState, useEffect, type FormEvent } from 'react';
+import { useState, useEffect, useRef, type FormEvent } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { BrainCircuit, Mail, Loader2, AlertCircle, CheckCircle2, ArrowRight } from 'lucide-react';
 import { api } from '../services/api';
@@ -21,10 +21,14 @@ export function VerificarEmail() {
   const [emailReenvio, setEmailReenvio] = useState('');
   const [reenviando, setReenviando] = useState(false);
 
+  // Token é de uso único: evita a segunda chamada do StrictMode em dev
+  const jaChamouRef = useRef(false);
+
   useEffect(() => {
-    if (!token) {
+    if (!token || jaChamouRef.current) {
       return;
     }
+    jaChamouRef.current = true;
 
     api.get(`/auth/verificar-email?token=${encodeURIComponent(token)}`)
       .then(() => setStatus('sucesso'))

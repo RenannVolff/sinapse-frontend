@@ -3,6 +3,7 @@ import { CheckCircle2, ChevronDown, Circle, Loader2, Plus, Trash2 } from 'lucide
 import { api } from '../../services/api';
 import { getSafeErrorLog } from '../../services/apiError';
 import { useToast } from '../../hooks/useToast';
+import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { dispararAtualizacaoNotificacoes } from '../../utils/notificacoesBus';
 
 interface Tarefa {
@@ -23,6 +24,7 @@ export function ListaTarefas() {
   const [notaRascunho, setNotaRascunho] = useState('');
   const [salvandoNotaId, setSalvandoNotaId] = useState<string | null>(null);
   const salvandoNotaRef = useRef<string | null>(null);
+  const [tarefaParaExcluir, setTarefaParaExcluir] = useState<Tarefa | null>(null);
 
   useEffect(() => {
     api.get<Tarefa[]>('/tarefas')
@@ -59,7 +61,11 @@ export function ListaTarefas() {
       });
   };
 
-  const deletarTarefa = (id: string) => {
+  const deletarTarefa = () => {
+    if (!tarefaParaExcluir) return;
+    const { id } = tarefaParaExcluir;
+    setTarefaParaExcluir(null);
+
     const anterior = tarefas;
     setTarefas((prev) => prev.filter((t) => t.id !== id));
     if (tarefaExpandidaId === id) setTarefaExpandidaId(null);
@@ -141,7 +147,7 @@ export function ListaTarefas() {
                     <ChevronDown className={`h-4 w-4 text-text-secondary flex-shrink-0 transition-transform ${expandida ? 'rotate-180' : ''}`} />
                   </button>
 
-                  <button onClick={() => deletarTarefa(tarefa.id)} className="p-2 text-text-secondary hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0" aria-label="Excluir tarefa">
+                  <button onClick={() => setTarefaParaExcluir(tarefa)} className="p-2 text-text-secondary hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0" aria-label="Excluir tarefa">
                     <Trash2 className="h-4 w-4" />
                   </button>
                 </div>
@@ -187,6 +193,19 @@ export function ListaTarefas() {
           {adicionando ? <Loader2 className="h-5 w-5 animate-spin" /> : <Plus className="h-5 w-5" />}
         </button>
       </form>
+
+      <ConfirmDialog
+        open={!!tarefaParaExcluir}
+        title="Excluir tarefa?"
+        description={
+          tarefaParaExcluir?.notas?.trim()
+            ? `A tarefa "${tarefaParaExcluir.texto}" e sua anotação serão removidas. Esta ação não pode ser desfeita.`
+            : `A tarefa "${tarefaParaExcluir?.texto}" será removida. Esta ação não pode ser desfeita.`
+        }
+        confirmLabel="Sim, Excluir"
+        onConfirm={deletarTarefa}
+        onCancel={() => setTarefaParaExcluir(null)}
+      />
     </div>
   );
 }

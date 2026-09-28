@@ -43,6 +43,7 @@ export function AgendaList() {
   const [loading, setLoading] = useState(true);
   const [sessaoParaExcluir, setSessaoParaExcluir] = useState<Sessao | null>(null);
   const [excluindo, setExcluindo] = useState(false);
+  const [sessaoParaCancelar, setSessaoParaCancelar] = useState<Sessao | null>(null);
   const [mostrarCancelados, setMostrarCancelados] = useState(false);
   const [atualizandoStatusId, setAtualizandoStatusId] = useState<string | null>(null);
 
@@ -87,6 +88,7 @@ export function AgendaList() {
       .then(() => {
         setSessoes((prev) => prev.map((s) => (s.id === sessao.id ? { ...s, status: novoStatus } : s)));
         showSuccess(novoStatus === 'CONFIRMADO' ? 'Sessão confirmada.' : 'Sessão cancelada.');
+        if (novoStatus === 'CANCELADO') setSessaoParaCancelar(null);
         dispararAtualizacaoNotificacoes();
       })
       .catch((err) => {
@@ -175,7 +177,7 @@ export function AgendaList() {
                           <Check className="h-4 w-4" /> Confirmar
                         </button>
                         <button
-                          onClick={() => handleAtualizarStatus(sessao, 'CANCELADO')}
+                          onClick={() => setSessaoParaCancelar(sessao)}
                           disabled={processando}
                           className="flex items-center gap-1 px-3 py-2.5 text-sm font-semibold text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors disabled:opacity-50"
                         >
@@ -212,6 +214,17 @@ export function AgendaList() {
         loading={excluindo}
         onConfirm={handleExcluirSessao}
         onCancel={() => setSessaoParaExcluir(null)}
+      />
+
+      <ConfirmDialog
+        open={!!sessaoParaCancelar}
+        title="Cancelar sessão?"
+        description={`A sessão "${sessaoParaCancelar?.tituloSessao}" será marcada como cancelada e o horário ficará liberado na agenda.`}
+        confirmLabel="Sim, Cancelar"
+        cancelLabel="Voltar"
+        loading={!!sessaoParaCancelar && atualizandoStatusId === sessaoParaCancelar.id}
+        onConfirm={() => sessaoParaCancelar && handleAtualizarStatus(sessaoParaCancelar, 'CANCELADO')}
+        onCancel={() => setSessaoParaCancelar(null)}
       />
     </div>
   );
