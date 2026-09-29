@@ -5,6 +5,7 @@ import { Lock, Loader2, AlertCircle, CheckCircle2, KeyRound, ArrowRight } from '
 import { api } from '../services/api';
 import { getErrorMessage, getSafeErrorLog } from '../services/apiError';
 import { SynapseBackground } from '../components/ui/SynapseBackground';
+import { DICA_SENHA_FORTE, MENSAGEM_SENHA_FRACA, senhaEhForte } from '../utils/senha';
 
 type Status = 'formulario' | 'sucesso' | 'tokenInvalido';
 
@@ -24,6 +25,11 @@ export function RedefinirSenha() {
 
     if (!token) {
       setStatus('tokenInvalido');
+      return;
+    }
+
+    if (!senhaEhForte(novaSenha)) {
+      setErro(MENSAGEM_SENHA_FRACA);
       return;
     }
 
@@ -153,7 +159,7 @@ export function RedefinirSenha() {
               </div>
 
               <p className="text-xs text-text-secondary ml-1">
-                Mínimo 8 caracteres, com 1 letra maiúscula, 1 minúscula e 1 número ou símbolo.
+                {DICA_SENHA_FORTE}
               </p>
 
               {erro && (

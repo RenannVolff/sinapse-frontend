@@ -36,7 +36,9 @@ api.interceptors.response.use(
     // Log seguro: nunca o objeto de erro cru (pode conter payload de Aprendente/responsável).
     console.error('[API Error]', getSafeErrorLog(error));
 
-    const isLoginAttempt = error.config?.url?.includes('/auth/login');
+    // Código 2FA errado também volta 401, mas não pode derrubar a sessão.
+    const url: string | undefined = error.config?.url;
+    const isLoginAttempt = !!url && (url.includes('/auth/login') || url.includes('/auth/2fa/verificar-login'));
     const hasResponse = !!error.response;
 
     if (hasResponse && error.response.status === 401 && !isLoginAttempt) {

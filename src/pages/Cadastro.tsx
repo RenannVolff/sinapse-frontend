@@ -6,15 +6,7 @@ import { getErrorMessage, getSafeErrorLog } from '../services/apiError';
 import { useToast } from '../hooks/useToast';
 import { SynapseBackground } from '../components/ui/SynapseBackground';
 import { HoneypotField } from '../components/ui/HoneypotField';
-
-// Mesma regra do backend (SenhaForte(), aplicada em cadastro e redefinição
-// de senha): mínimo 8 caracteres, 1 maiúscula, 1 minúscula e (1 número ou
-// 1 caractere especial).
-const SENHA_FORTE_REGEX = /((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/;
-
-function senhaEhForte(senha: string): boolean {
-  return senha.length >= 8 && SENHA_FORTE_REGEX.test(senha);
-}
+import { DICA_SENHA_FORTE, MENSAGEM_SENHA_FRACA, senhaEhForte } from '../utils/senha';
 
 export function Cadastro() {
   const { showSuccess } = useToast();
@@ -38,7 +30,7 @@ export function Cadastro() {
     setErro('');
 
     if (!senhaEhForte(senha)) {
-      setErro('A senha deve ter no mínimo 8 caracteres, com 1 letra maiúscula, 1 minúscula e 1 número ou símbolo.');
+      setErro(MENSAGEM_SENHA_FRACA);
       return;
     }
 
@@ -215,7 +207,7 @@ export function Cadastro() {
                 </div>
 
                 <p className="text-xs text-text-secondary ml-1">
-                  Mínimo 8 caracteres, com 1 letra maiúscula, 1 minúscula e 1 número ou símbolo.
+                  {DICA_SENHA_FORTE}
                 </p>
 
                 {/* Avisos */}

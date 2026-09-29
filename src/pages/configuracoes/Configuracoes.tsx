@@ -6,6 +6,8 @@ import { api } from '../../services/api';
 import { getErrorMessage, getSafeErrorLog } from '../../services/apiError';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
+import { DICA_SENHA_FORTE, MENSAGEM_SENHA_FRACA, senhaEhForte } from '../../utils/senha';
+import { DoisFatoresSection } from './DoisFatoresSection';
 
 interface UpdatePayload {
   nome?: string;
@@ -47,8 +49,8 @@ export function Configuracoes() {
 
     // Validação estrita de senha
     if (novaSenha.length > 0 || confirmarSenha.length > 0) {
-      if (novaSenha.length < 6) {
-        setErro('A nova senha deve ter no mínimo 8 caracteres.');
+      if (!senhaEhForte(novaSenha)) {
+        setErro(MENSAGEM_SENHA_FRACA);
         return;
       }
       if (novaSenha !== confirmarSenha) {
@@ -88,7 +90,7 @@ export function Configuracoes() {
         setConfirmarSenha('');
         
         updateUser({
-          id: user.id,
+          ...user,
           nome: response.data.nome,
           email: response.data.email
         });
@@ -134,7 +136,7 @@ export function Configuracoes() {
           </div>
         </div>
 
-        <div className="md:col-span-2">
+        <div className="md:col-span-2 space-y-6">
           <form onSubmit={handleSalvar} className="bg-white p-6 md:p-8 rounded-xl border border-primary-light shadow-sm space-y-6">
             <h3 className="text-lg font-bold text-text-primary border-b border-primary-light pb-2">
               Dados Cadastrais
@@ -183,6 +185,8 @@ export function Configuracoes() {
             </div>
             
             <p className="text-xs text-text-secondary mt-1">
+              {DICA_SENHA_FORTE}
+              <br />
               * Deixe os campos de senha em branco caso não deseje alterá-la.
             </p>
 
@@ -209,6 +213,8 @@ export function Configuracoes() {
               </Button>
             </div>
           </form>
+
+          <DoisFatoresSection />
         </div>
       </div>
     </div>

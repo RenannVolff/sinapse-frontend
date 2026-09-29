@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { AlertTriangle, X } from 'lucide-react';
 import { Button } from './Button';
 
@@ -8,6 +9,9 @@ interface ConfirmDialogProps {
   confirmLabel?: string;
   cancelLabel?: string;
   loading?: boolean;
+  confirmDisabled?: boolean;
+  // Conteúdo extra entre a descrição e os botões (ex: campo de senha).
+  children?: ReactNode;
   onConfirm: () => void;
   onCancel: () => void;
 }
@@ -19,6 +23,8 @@ export function ConfirmDialog({
   confirmLabel = 'Confirmar',
   cancelLabel = 'Cancelar',
   loading = false,
+  confirmDisabled = false,
+  children,
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
@@ -41,11 +47,12 @@ export function ConfirmDialog({
           </div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">{title}</h2>
           <p className="text-gray-500 mb-6">{description}</p>
+          {children && <div className="mb-6 text-left">{children}</div>}
           <div className="flex gap-3">
             <Button variant="outline" onClick={onCancel} disabled={loading} className="flex-1 bg-gray-50">
               {cancelLabel}
             </Button>
-            <Button onClick={onConfirm} isLoading={loading} className="flex-1 bg-red-600 hover:bg-red-700 text-white">
+            <Button onClick={onConfirm} isLoading={loading} disabled={confirmDisabled} className="flex-1 bg-red-600 hover:bg-red-700 text-white">
               {confirmLabel}
             </Button>
           </div>

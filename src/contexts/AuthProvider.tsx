@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react';
-import { AuthContext, type User } from './AuthContext';
+import { AuthContext, type SignInResult, type User } from './AuthContext';
 import { api } from '../services/api';
 import { isTokenExpired } from '../utils/jwt';
 
@@ -10,6 +10,11 @@ interface AuthProviderProps {
 interface LoginResponse {
   token: string;
   usuario: User;
+}
+
+interface PendenteDoisFatoresResponse {
+  pendente2fa: true;
+  tokenTemporario: string;
 }
 
 function clearAuthStorage() {
@@ -39,23 +44,36 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return null;
   });
 
-  const signIn = (email: string, senha: string, website?: string): Promise<void> => {
-    return new Promise((resolve, reject) => {
-      api.post<LoginResponse>('/auth/login', { email, senha, website })
-        .then((response) => {
-          const { token, usuario } = response.data;
+  const iniciarSessao = (token: string, usuario: User) => {
+    localStorage.setItem('@SinapseEdu:user', JSON.stringify(usuario));
+    localStorage.setItem('@SinapseEdu:token', token);
 
-          localStorage.setItem('@SinapseEdu:user', JSON.stringify(usuario));
-          localStorage.setItem('@SinapseEdu:token', token);
+    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    setUser(usuario);
+  };
 
-          api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-          setUser(usuario);
-          resolve();
-        })
-        .catch((error) => {
-          reject(error);
-        });
-    });
+  const signIn = (email: string, senha: string, website?: string): Promise<SignInResult> => {
+    return api.post<LoginResponse | PendenteDoisFatoresResponse>('/auth/login', { email, senha, website })
+      .then((response) => {
+        const data = response.data;
+
+        // 2FA ativo: ainda não autentica — a tela de login pede o código.
+        if ('pendente2fa' in data && data.pendente2fa) {
+          return { pendente2fa: true, tokenTemporario: data.tokenTemporario };
+        }
+
+        const { token, usuario } = data as LoginResponse;
+        iniciarSessao(token, usuario);
+        return { pendente2fa: false };
+      });
+  };
+
+  const confirmarDoisFatores = (tokenTemporario: string, codigo: string): Promise<void> => {
+    return api.post<LoginResponse>('/auth/2fa/verificar-login', { tokenTemporario, codigo })
+      .then((response) => {
+        const { token, usuario } = response.data;
+        iniciarSessao(token, usuario);
+      });
   };
 
   // Função de Logout segura
@@ -71,7 +89,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   return (
-    <AuthContext.Provider value={{ signed: !!user, user, signIn, signOut, updateUser }}>
+    <AuthContext.Provider value={{ signed: !!user, user, signIn, confirmarDoisFatores, signOut, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

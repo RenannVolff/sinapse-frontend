@@ -1,17 +1,17 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { isAxiosError } from 'axios';
-import { BrainCircuit, Mail, Lock, Loader2, AlertCircle, ArrowRight, RefreshCw } from 'lucide-react';
+import { BrainCircuit, Mail, Lock, Loader2, AlertCircle, ArrowRight, RefreshCw, ShieldCheck, KeyRound, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
 import { api } from '../services/api';
-import { getSafeErrorLog } from '../services/apiError';
+import { getErrorMessage, getSafeErrorLog } from '../services/apiError';
 import { SynapseBackground } from '../components/ui/SynapseBackground';
 import { HoneypotField } from '../components/ui/HoneypotField';
 
 export function Login() {
   const navigate = useNavigate();
-  const { signIn } = useAuth();
+  const { signIn, confirmarDoisFatores } = useAuth();
   const { showSuccess } = useToast();
 
   const [email, setEmail] = useState('');
@@ -22,6 +22,11 @@ export function Login() {
   // 403 (email não verificado) precisa de uma ação diferente de 401 (senha errada)
   const [emailNaoVerificado, setEmailNaoVerificado] = useState(false);
   const [reenviando, setReenviando] = useState(false);
+
+  // Segunda etapa (2FA): preenchido quando o login por senha volta pendente2fa
+  const [tokenTemporario, setTokenTemporario] = useState<string | null>(null);
+  const [codigo, setCodigo] = useState('');
+  const [usandoBackup, setUsandoBackup] = useState(false);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -35,7 +40,13 @@ export function Login() {
     setEmailNaoVerificado(false);
 
     signIn(email, senha, website)
-      .then(() => navigate('/dashboard'))
+      .then((resultado) => {
+        if (resultado.pendente2fa) {
+          setTokenTemporario(resultado.tokenTemporario);
+          return;
+        }
+        navigate('/dashboard');
+      })
       .catch((err: unknown) => {
         if (isAxiosError(err) && err.response?.status === 403) {
           setEmailNaoVerificado(true);
@@ -45,6 +56,36 @@ export function Login() {
         }
       })
       .finally(() => setLoading(false));
+  };
+
+  const handleVerificarCodigo = (e: FormEvent) => {
+    e.preventDefault();
+    if (!tokenTemporario) return;
+
+    if (!codigo.trim()) {
+      setError('Por favor, informe o código de verificação.');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
+    confirmarDoisFatores(tokenTemporario, codigo.trim())
+      .then(() => navigate('/dashboard'))
+      .catch((err: unknown) => {
+        // O backend diferencia "código inválido" de "sessão de verificação
+        // expirada" (token temporário vale 5 min) — as duas mensagens são seguras.
+        setError(getErrorMessage(err, 'Código de verificação inválido.'));
+      })
+      .finally(() => setLoading(false));
+  };
+
+  const handleVoltarParaSenha = () => {
+    setTokenTemporario(null);
+    setCodigo('');
+    setUsandoBackup(false);
+    setSenha('');
+    setError('');
   };
 
   const handleReenviarVerificacao = () => {
@@ -80,6 +121,91 @@ export function Login() {
             </p>
           </div>
 
+          {tokenTemporario ? (
+            /* Segunda etapa: senha já conferida, falta o código do app autenticador */
+            <form onSubmit={handleVerificarCodigo} className="space-y-5 animate-in fade-in">
+              <div className="flex items-start gap-3 p-4 bg-primary-light/60 rounded-xl border border-primary-light">
+                <ShieldCheck className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-text-secondary font-medium">
+                  {usandoBackup
+                    ? 'Digite um dos seus códigos de backup. Cada código só pode ser usado uma vez.'
+                    : 'Digite o código de 6 dígitos exibido no seu app autenticador.'}
+                </p>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-sm font-bold text-text-primary ml-1">
+                  {usandoBackup ? 'Código de Backup' : 'Código de Verificação'}
+                </label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-text-secondary group-focus-within:text-primary transition-colors">
+                    <KeyRound className="h-5 w-5" />
+                  </div>
+                  <input
+                    type="text"
+                    value={codigo}
+                    onChange={(e) => setCodigo(e.target.value)}
+                    disabled={loading}
+                    required
+                    autoFocus
+                    autoComplete="one-time-code"
+                    inputMode={usandoBackup ? 'text' : 'numeric'}
+                    maxLength={20}
+                    placeholder={usandoBackup ? 'XXXXXXXX' : '000000'}
+                    className="w-full bg-background border-2 border-primary-light rounded-xl py-3.5 pl-11 pr-4 outline-none text-text-primary font-bold tracking-[0.3em] transition-all duration-300 focus:border-primary focus:bg-white focus:ring-4 focus:ring-primary/10"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-between -mt-2">
+                <button
+                  type="button"
+                  onClick={handleVoltarParaSenha}
+                  disabled={loading}
+                  className="inline-flex items-center gap-1 text-xs font-bold text-text-secondary hover:text-primary transition-colors disabled:opacity-60"
+                >
+                  <ArrowLeft className="h-3.5 w-3.5" />
+                  Voltar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setUsandoBackup((v) => !v); setCodigo(''); setError(''); }}
+                  disabled={loading}
+                  className="text-xs font-bold text-primary hover:text-primary-hover transition-colors disabled:opacity-60"
+                >
+                  {usandoBackup ? 'Usar o app autenticador' : 'Usar um código de backup'}
+                </button>
+              </div>
+
+              {error && (
+                <div className="p-3.5 bg-red-50 text-red-700 text-sm font-bold rounded-xl border border-red-100 flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
+                  <AlertCircle className="h-5 w-5 flex-shrink-0" />
+                  {error}
+                </div>
+              )}
+
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full relative group overflow-hidden rounded-xl bg-primary text-white font-bold h-14 transition-all duration-300 hover:bg-primary-hover hover:shadow-lg hover:shadow-primary/30 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
+                >
+                  <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"></div>
+                  <span className="relative flex items-center justify-center gap-2">
+                    {loading ? (
+                      <Loader2 className="h-6 w-6 animate-spin" />
+                    ) : (
+                      <>
+                        Verificar
+                        <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+                      </>
+                    )}
+                  </span>
+                </button>
+              </div>
+            </form>
+          ) : (
+          <>
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Input E-mail Customizado para esta tela */}
             <div className="space-y-1.5">
@@ -185,6 +311,8 @@ export function Login() {
               Acesso exclusivo e monitorado
             </p>
           </div>
+          </>
+          )}
 
         </div>
       </div>
