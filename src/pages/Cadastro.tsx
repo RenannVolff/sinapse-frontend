@@ -5,6 +5,7 @@ import { api } from '../services/api';
 import { getErrorMessage, getSafeErrorLog } from '../services/apiError';
 import { useToast } from '../hooks/useToast';
 import { SynapseBackground } from '../components/ui/SynapseBackground';
+import { HoneypotField } from '../components/ui/HoneypotField';
 
 // Mesma regra do backend (SenhaForte(), aplicada em cadastro e redefinição
 // de senha): mínimo 8 caracteres, 1 maiúscula, 1 minúscula e (1 número ou
@@ -22,6 +23,7 @@ export function Cadastro() {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [confirmarSenha, setConfirmarSenha] = useState('');
+  const [website, setWebsite] = useState(''); // honeypot anti-bot
 
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState('');
@@ -50,7 +52,8 @@ export function Cadastro() {
     api.post('/usuarios', {
       nome,
       email,
-      senha
+      senha,
+      website
     })
       .then(() => {
         setEmailCadastrado(email);
@@ -243,6 +246,8 @@ export function Cadastro() {
                     </span>
                   </button>
                 </div>
+
+                <HoneypotField value={website} onChange={setWebsite} />
               </form>
 
               {/* Margens do rodapé reduzidas */}

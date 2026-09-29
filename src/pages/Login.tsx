@@ -7,6 +7,7 @@ import { useToast } from '../hooks/useToast';
 import { api } from '../services/api';
 import { getSafeErrorLog } from '../services/apiError';
 import { SynapseBackground } from '../components/ui/SynapseBackground';
+import { HoneypotField } from '../components/ui/HoneypotField';
 
 export function Login() {
   const navigate = useNavigate();
@@ -15,6 +16,7 @@ export function Login() {
 
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
+  const [website, setWebsite] = useState(''); // honeypot anti-bot
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   // 403 (email não verificado) precisa de uma ação diferente de 401 (senha errada)
@@ -32,7 +34,7 @@ export function Login() {
     setError('');
     setEmailNaoVerificado(false);
 
-    signIn(email, senha)
+    signIn(email, senha, website)
       .then(() => navigate('/dashboard'))
       .catch((err: unknown) => {
         if (isAxiosError(err) && err.response?.status === 403) {
@@ -167,6 +169,8 @@ export function Login() {
                 </span>
               </button>
             </div>
+
+            <HoneypotField value={website} onChange={setWebsite} />
           </form>
 
           {/* Rodapé Elegante com o link para cadastro */}

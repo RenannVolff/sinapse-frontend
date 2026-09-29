@@ -39,9 +39,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return null;
   });
 
-  const signIn = (email: string, senha: string): Promise<void> => {
+  const signIn = (email: string, senha: string, website?: string): Promise<void> => {
     return new Promise((resolve, reject) => {
-      api.post<LoginResponse>('/auth/login', { email, senha })
+      api.post<LoginResponse>('/auth/login', { email, senha, website })
         .then((response) => {
           const { token, usuario } = response.data;
 

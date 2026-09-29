@@ -9,7 +9,7 @@ export interface User {
 export interface AuthContextData {
   signed: boolean;
   user: User | null;
-  signIn: (email: string, senha: string) => Promise<void>;
+  signIn: (email: string, senha: string, website?: string) => Promise<void>;
   signOut: () => void;
   updateUser: (user: User) => void;
 }
