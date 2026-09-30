@@ -19,11 +19,11 @@ export function Login() {
   const [website, setWebsite] = useState(''); // honeypot anti-bot
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  // 403 (email não verificado) precisa de uma ação diferente de 401 (senha errada)
+  // 403 = email não verificado (oferece reenvio); 401 = senha errada.
   const [emailNaoVerificado, setEmailNaoVerificado] = useState(false);
   const [reenviando, setReenviando] = useState(false);
 
-  // Segunda etapa (2FA): preenchido quando o login por senha volta pendente2fa
+  // Preenchido quando o login volta pendente2fa; troca o form pelo do código.
   const [tokenTemporario, setTokenTemporario] = useState<string | null>(null);
   const [codigo, setCodigo] = useState('');
   const [usandoBackup, setUsandoBackup] = useState(false);
@@ -73,8 +73,8 @@ export function Login() {
     confirmarDoisFatores(tokenTemporario, codigo.trim())
       .then(() => navigate('/dashboard'))
       .catch((err: unknown) => {
-        // O backend diferencia "código inválido" de "sessão de verificação
-        // expirada" (token temporário vale 5 min) — as duas mensagens são seguras.
+        // A mensagem do backend distingue código errado de token temporário
+        // expirado (5 min). Pode mostrar direto, nenhuma das duas vaza nada.
         setError(getErrorMessage(err, 'Código de verificação inválido.'));
       })
       .finally(() => setLoading(false));
@@ -100,17 +100,13 @@ export function Login() {
   };
 
   return (
-    // Fundo Premium em tons de petróleo (assinatura visual Sinapse Edu)
     <div className="min-h-screen relative overflow-hidden flex items-center justify-center bg-gradient-to-br from-[#0F2B29] via-[#153F3B] to-[#1F5A56] p-4">
 
-      {/* Assinatura visual sutil: rede de sinapses atrás do card */}
       <SynapseBackground className="absolute inset-0 w-full h-full text-white/[0.12]" />
 
-      {/* Card de Login (Glassmorphism sutil e Sombras Profundas) */}
       <div className="relative z-10 w-full max-w-[420px] animate-in slide-in-from-bottom-8 duration-700 fade-in zoom-in-95">
         <div className="bg-white/95 backdrop-blur-xl rounded-[2rem] shadow-2xl shadow-black/50 border border-white/20 p-8 sm:p-10">
 
-          {/* Logo Animada */}
           <div className="flex flex-col items-center mb-10">
             <div className="h-20 w-20 bg-gradient-to-tr from-primary to-primary-hover rounded-3xl flex items-center justify-center mb-5 shadow-lg shadow-primary/30 transform transition-transform hover:scale-105 duration-300">
               <BrainCircuit className="h-10 w-10 text-white" />
@@ -122,7 +118,7 @@ export function Login() {
           </div>
 
           {tokenTemporario ? (
-            /* Segunda etapa: senha já conferida, falta o código do app autenticador */
+            /* Senha já conferida; falta o código do app autenticador */
             <form onSubmit={handleVerificarCodigo} className="space-y-5 animate-in fade-in">
               <div className="flex items-start gap-3 p-4 bg-primary-light/60 rounded-xl border border-primary-light">
                 <ShieldCheck className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
@@ -207,7 +203,6 @@ export function Login() {
           ) : (
           <>
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Input E-mail Customizado para esta tela */}
             <div className="space-y-1.5">
               <label className="text-sm font-bold text-text-primary ml-1">E-mail Profissional</label>
               <div className="relative group">
@@ -226,7 +221,6 @@ export function Login() {
               </div>
             </div>
 
-            {/* Input Senha Customizado */}
             <div className="space-y-1.5">
               <label className="text-sm font-bold text-text-primary ml-1">Senha de Acesso</label>
               <div className="relative group">
@@ -245,14 +239,12 @@ export function Login() {
               </div>
             </div>
 
-            {/* Link "Esqueci minha senha" */}
             <div className="flex justify-end -mt-2">
               <Link to="/esqueci-senha" className="text-xs font-bold text-primary hover:text-primary-hover transition-colors">
                 Esqueci minha senha
               </Link>
             </div>
 
-            {/* Mensagem de Erro */}
             {error && (
               <div className="p-3.5 bg-red-50 text-red-700 text-sm font-bold rounded-xl border border-red-100 flex flex-col gap-2 animate-in fade-in slide-in-from-top-2">
                 <div className="flex items-center gap-2">
@@ -273,14 +265,12 @@ export function Login() {
               </div>
             )}
 
-            {/* Botão Premium */}
             <div className="pt-2">
               <button
                 type="submit"
                 disabled={loading}
                 className="w-full relative group overflow-hidden rounded-xl bg-primary text-white font-bold h-14 transition-all duration-300 hover:bg-primary-hover hover:shadow-lg hover:shadow-primary/30 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
               >
-                {/* Efeito de brilho passando pelo botão */}
                 <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"></div>
                 
                 <span className="relative flex items-center justify-center gap-2">
@@ -299,7 +289,6 @@ export function Login() {
             <HoneypotField value={website} onChange={setWebsite} />
           </form>
 
-          {/* Rodapé Elegante com o link para cadastro */}
           <div className="mt-8 pt-6 border-t border-primary-light/60 text-center space-y-4">
             <p className="text-sm text-text-secondary font-medium">
               Não possui uma conta?{' '}

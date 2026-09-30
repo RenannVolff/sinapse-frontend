@@ -34,9 +34,8 @@ interface AtendimentoDetalhe {
   atividades: Atividade[];
 }
 
-// Cancelado (sessão não ocorreu por decisão/impedimento) e Falta (aprendente
-// não compareceu) são status distintos — precisam de identidade visual própria
-// para o terapeuta diferenciar rapidamente ao marcar ou revisar o histórico.
+// CANCELADO (sessão desmarcada antes) e FALTA (aprendente não veio) têm visual
+// próprio para o terapeuta não confundir os dois no histórico.
 const STATUS_FINALIZADO_INFO = {
   CONCLUIDO: { label: 'SESSÃO CONCLUÍDA', badgeClass: 'bg-gray-100 text-gray-500', Icon: CheckCircle2 },
   CANCELADO: { label: 'SESSÃO CANCELADA', badgeClass: 'bg-slate-200 text-slate-600', Icon: Ban },
@@ -48,18 +47,15 @@ export function SessaoAtiva() {
   const navigate = useNavigate();
   const { showError, showSuccess } = useToast();
 
-  // Estados de Dados
   const [atendimento, setAtendimento] = useState<AtendimentoDetalhe | null>(null);
   const [observacoes, setObservacoes] = useState('');
   
-  // Estados de Controle de Interface e Requisições
   const [loading, setLoading] = useState(true);
   const [loadingAcao, setLoadingAcao] = useState(false);
   const [novoTitulo, setNovoTitulo] = useState('');
   const [novaDificuldade, setNovaDificuldade] = useState<number>(1);
   const [loadingAdd, setLoadingAdd] = useState(false);
 
-  // Estados para os Modais (Pop-ups)
   const [modalEncerrarOpen, setModalEncerrarOpen] = useState(false);
   const [modalReabrirOpen, setModalReabrirOpen] = useState(false);
   const [modalExcluirOpen, setModalExcluirOpen] = useState(false);
@@ -87,7 +83,6 @@ export function SessaoAtiva() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  // Ação: Adicionar Nova Atividade
   const handleAddAtividade = (e: FormEvent) => {
     e.preventDefault();
     if (!novoTitulo.trim() || !id) return;
@@ -101,7 +96,7 @@ export function SessaoAtiva() {
       .then(() => {
         setNovoTitulo('');
         setNovaDificuldade(1);
-        carregarSessao(); // Recarrega para mostrar a nova atividade
+        carregarSessao();
       })
       .catch((err) => {
         console.error('[SessaoAtiva] Erro ao criar atividade:', getSafeErrorLog(err));
@@ -110,7 +105,6 @@ export function SessaoAtiva() {
       .finally(() => setLoadingAdd(false));
   };
 
-  // Ação: Marcar/Desmarcar tentativa no checklist
   const handleToggleChecklist = (atividadeId: string, itemId: string, statusAtual: boolean) => {
     if (atendimento?.status === 'CONCLUIDO') return;
 
@@ -134,11 +128,11 @@ export function SessaoAtiva() {
       .catch((err) => {
         console.error('[SessaoAtiva] Erro ao atualizar checklist:', getSafeErrorLog(err));
         showError(getErrorMessage(err, 'Erro ao salvar item do checklist.'));
-        carregarSessao(); // Se falhar no banco, volta ao estado anterior
+        carregarSessao(); // desfaz a marcação otimista
       });
   };
 
-  // Ação: Salvar e Pausar (Mantém na agenda)
+  // Volta para EM_ANDAMENTO: salva sem encerrar, a sessão continua na agenda.
   const handlePausar = () => {
     if (!id) return;
     setLoadingAcao(true);
@@ -151,7 +145,6 @@ export function SessaoAtiva() {
       .finally(() => setLoadingAcao(false));
   };
 
-  // Ação: Confirmação do Modal de Encerrar
   const confirmarEncerramento = () => {
     if (!id) return;
     setLoadingAcao(true);
@@ -172,7 +165,6 @@ export function SessaoAtiva() {
       .finally(() => setLoadingAcao(false));
   };
 
-  // Ação: Confirmação do Modal de Cancelar Sessão
   const confirmarCancelamento = () => {
     if (!id) return;
     setLoadingAcao(true);
@@ -192,7 +184,6 @@ export function SessaoAtiva() {
       .finally(() => setLoadingAcao(false));
   };
 
-  // Ação: Confirmação do Modal de Marcar Falta
   const confirmarFalta = () => {
     if (!id) return;
     setLoadingAcao(true);
@@ -212,7 +203,6 @@ export function SessaoAtiva() {
       .finally(() => setLoadingAcao(false));
   };
 
-  // Ação: Confirmação do Modal de Excluir
   const confirmarExclusao = () => {
     if (!id) return;
     setExcluindo(true);
@@ -228,7 +218,6 @@ export function SessaoAtiva() {
       .finally(() => setExcluindo(false));
   };
 
-  // Ação: Confirmação do Modal de Reabrir
   const confirmarReabertura = () => {
     if (!id) return;
     setLoadingAcao(true);
@@ -239,7 +228,7 @@ export function SessaoAtiva() {
     })
       .then(() => {
         setModalReabrirOpen(false);
-        carregarSessao(); // Recarrega a tela para destravar os botões
+        carregarSessao(); // fica na tela, agora editável
       })
       .catch((err) => {
         console.error('[SessaoAtiva] Erro ao reabrir sessão:', getSafeErrorLog(err));
@@ -268,7 +257,6 @@ export function SessaoAtiva() {
   return (
     <div className="max-w-5xl mx-auto space-y-6 fade-in pb-12 relative">
       
-      {/* Cabeçalho de Ações */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 rounded-2xl shadow-sm border border-primary-light sticky top-4 z-30">
         <div className="flex items-center gap-4">
           <button onClick={() => navigate('/agenda')} className="p-2 text-text-secondary hover:text-primary hover:bg-primary-light rounded-xl transition-all">
@@ -329,7 +317,6 @@ export function SessaoAtiva() {
         </div>
       </div>
 
-      {/* Formulário de Nova Atividade */}
       {!isFinalizada && (
         <form onSubmit={handleAddAtividade} className="bg-gradient-to-br from-primary to-primary-hover p-5 md:p-6 rounded-3xl shadow-xl shadow-primary/10 flex flex-col md:flex-row gap-4 items-end">
           <div className="flex-1 w-full">
@@ -363,7 +350,6 @@ export function SessaoAtiva() {
         </form>
       )}
 
-      {/* Listagem de Atividades */}
       <div className="space-y-6">
         {atendimento.atividades.length === 0 ? (
           <div className="bg-white rounded-3xl border-2 border-dashed border-primary-light p-16 text-center">
@@ -414,7 +400,6 @@ export function SessaoAtiva() {
         )}
       </div>
 
-      {/* Observações Finais */}
       <div className="bg-white p-6 rounded-3xl border border-primary-light shadow-sm">
         <label className="text-sm font-black text-text-primary uppercase tracking-widest flex items-center gap-2 mb-4">
           <FileText className="h-5 w-5 text-primary" /> Parecer Técnico / Observações
@@ -429,9 +414,8 @@ export function SessaoAtiva() {
       </div>
 
 
-      {/* ================= MODAIS (POP-UPS) ================= */}
+      {/* Modais */}
 
-      {/* Modal: Encerrar Sessão */}
       {modalEncerrarOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-text-primary/40 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden">
@@ -456,7 +440,6 @@ export function SessaoAtiva() {
         </div>
       )}
 
-      {/* Modal: Reabrir Sessão */}
       {modalReabrirOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-text-primary/40 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden">
@@ -481,7 +464,6 @@ export function SessaoAtiva() {
         </div>
       )}
 
-      {/* Modal: Marcar Falta */}
       {modalFaltaOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-text-primary/40 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden">
@@ -509,7 +491,6 @@ export function SessaoAtiva() {
         </div>
       )}
 
-      {/* Modal: Cancelar Sessão */}
       {modalCancelarOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-text-primary/40 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden">
@@ -537,7 +518,6 @@ export function SessaoAtiva() {
         </div>
       )}
 
-      {/* Modal: Excluir Sessão */}
       <ConfirmDialog
         open={modalExcluirOpen}
         title="Excluir sessão?"

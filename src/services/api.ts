@@ -22,8 +22,8 @@ api.interceptors.request.use(
   }
 );
 
-// Falhas de rede/timeout (sem resposta do servidor) não indicam token inválido,
-// então só forçam logout depois de algumas falhas seguidas — não numa falha isolada.
+// Sem resposta do servidor (rede/timeout) não quer dizer token inválido, então
+// só desloga depois de algumas falhas seguidas.
 const MAX_CONSECUTIVE_NETWORK_FAILURES = 3;
 let consecutiveNetworkFailures = 0;
 
@@ -33,7 +33,7 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
-    // Log seguro: nunca o objeto de erro cru (pode conter payload de Aprendente/responsável).
+    // Nunca logar o erro cru: pode carregar dados de aprendente/responsável.
     console.error('[API Error]', getSafeErrorLog(error));
 
     // Código 2FA errado também volta 401, mas não pode derrubar a sessão.
@@ -42,7 +42,6 @@ api.interceptors.response.use(
     const hasResponse = !!error.response;
 
     if (hasResponse && error.response.status === 401 && !isLoginAttempt) {
-      // Token realmente rejeitado pelo servidor.
       consecutiveNetworkFailures = 0;
       emitToast('Sua sessão expirou. Faça login novamente.', 'error');
 
@@ -51,7 +50,6 @@ api.interceptors.response.use(
 
       window.location.href = '/';
     } else if (!hasResponse && !isLoginAttempt) {
-      // Sem resposta nenhuma (rede/timeout) — não é necessariamente sessão inválida.
       consecutiveNetworkFailures += 1;
 
       if (consecutiveNetworkFailures >= MAX_CONSECUTIVE_NETWORK_FAILURES) {
@@ -66,7 +64,7 @@ api.interceptors.response.use(
         emitToast(getErrorMessage(error), 'error');
       }
     } else if (!isLoginAttempt) {
-      // Login tem tratamento de erro próprio (mensagem genérica por segurança).
+      // Login fica de fora: a tela mostra mensagem genérica própria, por segurança.
       emitToast(getErrorMessage(error), 'error');
     }
 

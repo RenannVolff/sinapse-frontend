@@ -25,7 +25,7 @@ function clearAuthStorage() {
 
 export function AuthProvider({ children }: AuthProviderProps) {
 
-    // Estado do usuário, inicialmente tenta puxar do localStorage para manter a sessão
+  // Restaura a sessão do localStorage, descartando token já expirado.
   const [user, setUser] = useState<User | null>(() => {
     const storageUser = localStorage.getItem('@SinapseEdu:user');
     const storageToken = localStorage.getItem('@SinapseEdu:token');
@@ -36,7 +36,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
         return null;
       }
 
-      // Injeta o token no Axios instantaneamente antes mesmo da tela piscar
       api.defaults.headers.common['Authorization'] = `Bearer ${storageToken}`;
       return JSON.parse(storageUser);
     }
@@ -57,7 +56,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
       .then((response) => {
         const data = response.data;
 
-        // 2FA ativo: ainda não autentica — a tela de login pede o código.
         if ('pendente2fa' in data && data.pendente2fa) {
           return { pendente2fa: true, tokenTemporario: data.tokenTemporario };
         }
@@ -76,13 +74,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
       });
   };
 
-  // Função de Logout segura
   const signOut = () => {
     clearAuthStorage();
     setUser(null);
   };
 
-  // Atualização em tempo real (Usado na tela de configurações)
   const updateUser = (updatedUser: User) => {
     localStorage.setItem('@SinapseEdu:user', JSON.stringify(updatedUser));
     setUser(updatedUser);
