@@ -1,4 +1,4 @@
-import { forwardRef, type InputHTMLAttributes, type ReactNode } from 'react';
+import { forwardRef, useId, type InputHTMLAttributes, type ReactNode } from 'react';
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string;
@@ -6,10 +6,15 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   icon?: ReactNode;
 }
 
-export const Input = forwardRef<HTMLInputElement, InputProps>(({ label, error, icon, className, ...props }, ref) => {
+export const Input = forwardRef<HTMLInputElement, InputProps>(({ label, error, icon, className, id, ...props }, ref) => {
+  // O rótulo visível é o nome acessível do campo (htmlFor/id), não o placeholder.
+  const idGerado = useId();
+  const inputId = id ?? idGerado;
+  const erroId = `${inputId}-erro`;
+
   return (
     <div className="flex flex-col gap-1.5 w-full">
-      <label className="text-sm font-semibold text-text-primary">
+      <label htmlFor={inputId} className="text-sm font-semibold text-text-primary">
         {label}
       </label>
 
@@ -22,6 +27,9 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(({ label, error, i
 
         <input
           ref={ref}
+          id={inputId}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? erroId : undefined}
           className={`
             w-full bg-white border rounded-lg py-3 px-4 outline-none transition-all duration-200
             placeholder:text-text-secondary/70
@@ -37,7 +45,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(({ label, error, i
       </div>
 
       {error && (
-        <span className="text-xs text-red-500 font-medium animate-pulse">
+        <span id={erroId} className="text-xs text-red-500 font-medium animate-pulse">
           {error}
         </span>
       )}

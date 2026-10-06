@@ -95,6 +95,7 @@ export function NovoPei() {
         <button
           onClick={() => navigate(`/aprendentes/${aprendenteId}/pei`)}
           className="p-2 text-text-secondary hover:text-primary hover:bg-primary-light rounded-lg transition-colors"
+          aria-label="Voltar para os PEIs do aprendente"
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
@@ -122,10 +123,11 @@ export function NovoPei() {
         <div className="absolute top-0 right-0 w-64 h-64 bg-primary-light rounded-full blur-3xl -z-10 transform translate-x-1/2 -translate-y-1/2"></div>
 
         <div className="relative z-10 space-y-1.5">
-          <label className="text-sm font-semibold text-text-primary flex items-center gap-2">
+          <label htmlFor="novopei-molde" className="text-sm font-semibold text-text-primary flex items-center gap-2">
             <LayoutTemplate className="h-4 w-4 text-text-secondary" /> Partir de um template (opcional)
           </label>
           <select
+            id="novopei-molde"
             value={templateSelecionadoId}
             onChange={(e) => handleSelecionarTemplate(e.target.value)}
             className="w-full p-3.5 rounded-xl border border-primary-light focus:ring-2 focus:ring-primary outline-none bg-background focus:bg-white transition-all font-medium"
@@ -141,8 +143,9 @@ export function NovoPei() {
 
         <div className="grid grid-cols-1 gap-6 relative z-10">
           <div className="flex flex-col gap-1.5 w-full">
-            <label className="text-sm font-semibold text-text-primary">Dificuldades</label>
+            <label htmlFor="novopei-dificuldades" className="text-sm font-semibold text-text-primary">Dificuldades</label>
             <textarea
+              id="novopei-dificuldades"
               value={dificuldades}
               onChange={(e) => setDificuldades(e.target.value)}
               placeholder="Descreva as dificuldades específicas do aprendente..."
@@ -153,8 +156,9 @@ export function NovoPei() {
           </div>
 
           <div className="flex flex-col gap-1.5 w-full">
-            <label className="text-sm font-semibold text-text-primary">Objetivos</label>
+            <label htmlFor="novopei-objetivos" className="text-sm font-semibold text-text-primary">Objetivos</label>
             <textarea
+              id="novopei-objetivos"
               value={objetivos}
               onChange={(e) => setObjetivos(e.target.value)}
               placeholder="Descreva os objetivos do plano..."
@@ -165,8 +169,9 @@ export function NovoPei() {
           </div>
 
           <div className="flex flex-col gap-1.5 w-full">
-            <label className="text-sm font-semibold text-text-primary">Estratégias</label>
+            <label htmlFor="novopei-estrategias" className="text-sm font-semibold text-text-primary">Estratégias</label>
             <textarea
+              id="novopei-estrategias"
               value={estrategias}
               onChange={(e) => setEstrategias(e.target.value)}
               placeholder="Descreva as estratégias de suporte que serão adotadas..."

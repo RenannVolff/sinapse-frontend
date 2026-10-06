@@ -179,7 +179,7 @@ export function AgendaList() {
                         <button
                           onClick={() => setSessaoParaCancelar(sessao)}
                           disabled={processando}
-                          className="flex items-center gap-1 px-3 py-2.5 text-sm font-semibold text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors disabled:opacity-50"
+                          className="flex items-center gap-1 px-3 py-2.5 text-sm font-semibold text-red-700 bg-red-50 hover:bg-red-100 rounded-lg transition-colors disabled:opacity-50"
                         >
                           <X className="h-4 w-4" /> Cancelar
                         </button>

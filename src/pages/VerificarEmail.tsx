@@ -107,12 +107,13 @@ export function VerificarEmail() {
 
               <form onSubmit={handleReenviar} className="w-full space-y-4 text-left">
                 <div className="space-y-1.5">
-                  <label className="text-sm font-bold text-text-primary ml-1">Reenviar verificação para</label>
+                  <label htmlFor="verificaremail-email" className="text-sm font-bold text-text-primary ml-1">Reenviar verificação para</label>
                   <div className="relative group">
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-text-secondary group-focus-within:text-primary transition-colors">
                       <Mail className="h-5 w-5" />
                     </div>
                     <input
+                      id="verificaremail-email"
                       type="email"
                       value={emailReenvio}
                       onChange={(e) => setEmailReenvio(e.target.value)}

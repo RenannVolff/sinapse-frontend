@@ -6,7 +6,8 @@ import {
   BarChart3,
   BrainCircuit,
   Settings,
-  History
+  History,
+  LayoutTemplate
 } from 'lucide-react';
 
 export function Sidebar() {
@@ -14,6 +15,7 @@ export function Sidebar() {
     { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { path: '/aprendentes', label: 'Meus Aprendentes', icon: Users },
     { path: '/agenda', label: 'Agenda', icon: Calendar },
+    { path: '/pei-templates', label: 'Modelos de PEI', icon: LayoutTemplate },
     { path: '/relatorios', label: 'Relatórios', icon: BarChart3 },
     { path: '/auditoria', label: 'Auditoria', icon: History },
     { path: '/configuracoes', label: 'Configurações', icon: Settings },

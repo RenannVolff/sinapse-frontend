@@ -259,7 +259,7 @@ export function SessaoAtiva() {
       
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 rounded-2xl shadow-sm border border-primary-light sticky top-4 z-30">
         <div className="flex items-center gap-4">
-          <button onClick={() => navigate('/agenda')} className="p-2 text-text-secondary hover:text-primary hover:bg-primary-light rounded-xl transition-all">
+          <button onClick={() => navigate('/agenda')} className="p-2 text-text-secondary hover:text-primary hover:bg-primary-light rounded-xl transition-all" aria-label="Voltar para a agenda">
             <ArrowLeft className="h-6 w-6" />
           </button>
           <div>
@@ -320,8 +320,9 @@ export function SessaoAtiva() {
       {!isFinalizada && (
         <form onSubmit={handleAddAtividade} className="bg-gradient-to-br from-primary to-primary-hover p-5 md:p-6 rounded-3xl shadow-xl shadow-primary/10 flex flex-col md:flex-row gap-4 items-end">
           <div className="flex-1 w-full">
-            <label className="text-xs font-black text-primary-light uppercase tracking-widest ml-1 mb-2 block">Nova Atividade para esta Sessão</label>
+            <label htmlFor="sessaoativa-nova-atividade" className="text-xs font-black text-primary-light uppercase tracking-widest ml-1 mb-2 block">Nova Atividade para esta Sessão</label>
             <input
+              id="sessaoativa-nova-atividade"
               type="text"
               value={novoTitulo}
               onChange={(e) => setNovoTitulo(e.target.value)}
@@ -331,8 +332,9 @@ export function SessaoAtiva() {
             />
           </div>
           <div className="w-full md:w-40">
-            <label className="text-xs font-black text-primary-light uppercase tracking-widest ml-1 mb-2 block">Dificuldade</label>
+            <label htmlFor="sessaoativa-dificuldade" className="text-xs font-black text-primary-light uppercase tracking-widest ml-1 mb-2 block">Dificuldade</label>
             <select
+              id="sessaoativa-dificuldade"
               value={novaDificuldade}
               onChange={(e) => setNovaDificuldade(Number(e.target.value))}
               className="w-full bg-white/10 border border-white/20 rounded-xl py-3 px-4 outline-none focus:bg-white focus:text-text-primary transition-all text-white font-bold cursor-pointer"
@@ -401,10 +403,11 @@ export function SessaoAtiva() {
       </div>
 
       <div className="bg-white p-6 rounded-3xl border border-primary-light shadow-sm">
-        <label className="text-sm font-black text-text-primary uppercase tracking-widest flex items-center gap-2 mb-4">
+        <label htmlFor="sessaoativa-parecer" className="text-sm font-black text-text-primary uppercase tracking-widest flex items-center gap-2 mb-4">
           <FileText className="h-5 w-5 text-primary" /> Parecer Técnico / Observações
         </label>
         <textarea
+          id="sessaoativa-parecer"
           value={observacoes}
           onChange={(e) => setObservacoes(e.target.value)}
           disabled={isFinalizada}
@@ -444,7 +447,7 @@ export function SessaoAtiva() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-text-primary/40 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden">
             <div className="p-6 text-center relative">
-              <button onClick={() => setModalReabrirOpen(false)} className="absolute top-4 right-4 p-2 text-text-secondary hover:bg-primary-light rounded-full transition-colors">
+              <button onClick={() => setModalReabrirOpen(false)} className="absolute top-4 right-4 p-2 text-text-secondary hover:bg-primary-light rounded-full transition-colors" aria-label="Fechar">
                 <X className="h-5 w-5" />
               </button>
               <div className="mx-auto w-16 h-16 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center mb-4">
@@ -468,7 +471,7 @@ export function SessaoAtiva() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-text-primary/40 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden">
             <div className="p-6 text-center relative">
-              <button onClick={() => setModalFaltaOpen(false)} className="absolute top-4 right-4 p-2 text-text-secondary hover:bg-primary-light rounded-full transition-colors">
+              <button onClick={() => setModalFaltaOpen(false)} className="absolute top-4 right-4 p-2 text-text-secondary hover:bg-primary-light rounded-full transition-colors" aria-label="Fechar">
                 <X className="h-5 w-5" />
               </button>
               <div className="mx-auto w-16 h-16 bg-amber-100 text-amber-700 rounded-full flex items-center justify-center mb-4">
@@ -495,7 +498,7 @@ export function SessaoAtiva() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-text-primary/40 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden">
             <div className="p-6 text-center relative">
-              <button onClick={() => setModalCancelarOpen(false)} className="absolute top-4 right-4 p-2 text-text-secondary hover:bg-primary-light rounded-full transition-colors">
+              <button onClick={() => setModalCancelarOpen(false)} className="absolute top-4 right-4 p-2 text-text-secondary hover:bg-primary-light rounded-full transition-colors" aria-label="Fechar">
                 <X className="h-5 w-5" />
               </button>
               <div className="mx-auto w-16 h-16 bg-slate-100 text-slate-600 rounded-full flex items-center justify-center mb-4">

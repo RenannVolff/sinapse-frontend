@@ -54,6 +54,7 @@ export function PeiList() {
             onClick={() => navigate(`/aprendentes/${aprendenteId}`)}
             className="p-2 text-text-secondary hover:text-primary hover:bg-primary-light rounded-lg transition-colors"
             title="Voltar"
+            aria-label="Voltar para o prontuário do aprendente"
           >
             <ArrowLeft className="h-5 w-5" />
           </button>

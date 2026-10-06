@@ -2,6 +2,9 @@ import axios from 'axios';
 import { getErrorMessage, getSafeErrorLog } from './apiError';
 import { emitToast } from './toastBridge';
 
+export const TOKEN_STORAGE_KEY = '@SinapseEdu:token';
+export const USER_STORAGE_KEY = '@SinapseEdu:user';
+
 export const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '/backend-api',
 });
@@ -9,10 +12,14 @@ export const api = axios.create({
 api.interceptors.request.use(
   (config) => {
 
-    const token = localStorage.getItem('@SinapseEdu:token');
+    // O localStorage é a única fonte do token: sem ele, a requisição sai
+    // sem Authorization, mesmo que algum valor antigo tenha ficado no config.
+    const token = localStorage.getItem(TOKEN_STORAGE_KEY);
 
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`;
+    if (token) {
+      config.headers.set('Authorization', `Bearer ${token}`);
+    } else {
+      config.headers.delete('Authorization');
     }
 
     return config;
@@ -45,8 +52,8 @@ api.interceptors.response.use(
       consecutiveNetworkFailures = 0;
       emitToast('Sua sessão expirou. Faça login novamente.', 'error');
 
-      localStorage.removeItem('@SinapseEdu:user');
-      localStorage.removeItem('@SinapseEdu:token');
+      localStorage.removeItem(USER_STORAGE_KEY);
+      localStorage.removeItem(TOKEN_STORAGE_KEY);
 
       window.location.href = '/';
     } else if (!hasResponse && !isLoginAttempt) {
@@ -56,8 +63,8 @@ api.interceptors.response.use(
         consecutiveNetworkFailures = 0;
         emitToast('Não foi possível confirmar sua sessão. Faça login novamente.', 'error');
 
-        localStorage.removeItem('@SinapseEdu:user');
-        localStorage.removeItem('@SinapseEdu:token');
+        localStorage.removeItem(USER_STORAGE_KEY);
+        localStorage.removeItem(TOKEN_STORAGE_KEY);
 
         window.location.href = '/';
       } else {

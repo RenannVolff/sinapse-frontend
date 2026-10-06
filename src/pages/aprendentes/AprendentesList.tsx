@@ -72,6 +72,7 @@ export function AprendentesList() {
         <input
           type="text"
           placeholder="Buscar aprendente pelo nome..."
+          aria-label="Buscar aprendente pelo nome"
           value={busca}
           onChange={(e) => setBusca(e.target.value)}
           className="flex-1 bg-transparent border-none py-3 px-4 outline-none text-text-primary placeholder-text-secondary"

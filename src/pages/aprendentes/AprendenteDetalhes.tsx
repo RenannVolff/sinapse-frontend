@@ -124,6 +124,7 @@ export function AprendenteDetalhes() {
           onClick={() => navigate('/aprendentes')}
           className="p-2 text-text-secondary hover:text-primary hover:bg-primary-light rounded-lg transition-colors"
           title="Voltar"
+          aria-label="Voltar para a lista de aprendentes"
         >
           <ArrowLeft className="h-5 w-5" />
         </button>

@@ -561,10 +561,13 @@ export function Relatorios() {
         </Button>
       </div>
 
-      {/* Gráficos fora da tela, em tamanho fixo, só para o html-to-image capturar na exportação */}
+      {/* Gráficos fora da tela, em tamanho fixo, só para o html-to-image capturar na exportação.
+          `inert` tira os gráficos (o Recharts deixa o SVG focável) da ordem de Tab e da árvore
+          de acessibilidade; o html-to-image clona o DOM, então a captura não muda. */}
       {dadosAcompanhamento.length > 0 && (
         <div
           aria-hidden="true"
+          inert
           style={{
             position: 'fixed',
             top: 0,
@@ -628,10 +631,11 @@ export function Relatorios() {
       <form onSubmit={handleGerarRelatorio} className="bg-white p-6 md:p-8 rounded-xl border border-primary-light shadow-sm space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="flex flex-col gap-1.5 w-full md:col-span-1">
-            <label className="text-sm font-semibold text-text-primary flex items-center gap-2">
+            <label htmlFor="relatorios-aprendente" className="text-sm font-semibold text-text-primary flex items-center gap-2">
               <User className="h-4 w-4 text-text-secondary" /> Aprendente
             </label>
             <select
+              id="relatorios-aprendente"
               value={aprendenteSelecionado}
               onChange={(e) => setAprendenteSelecionado(e.target.value)}
               disabled={loadingDados}
@@ -670,7 +674,9 @@ export function Relatorios() {
           <div className="flex justify-between items-center pt-2 border-t border-primary-light mt-6">
             <div className="flex items-center gap-2">
               <Settings2 className="h-5 w-5 text-text-secondary" />
+              <label htmlFor="relatorios-tipo-grafico" className="sr-only">Tipo de gráfico</label>
               <select
+                id="relatorios-tipo-grafico"
                 value={tipoGrafico}
                 onChange={(e) => setTipoGrafico(e.target.value as TipoGrafico)}
                 className="text-sm font-medium text-text-primary bg-background border border-primary-light rounded-lg py-2 px-3 outline-none focus:border-primary cursor-pointer"

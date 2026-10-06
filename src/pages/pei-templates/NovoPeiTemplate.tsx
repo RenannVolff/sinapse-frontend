@@ -54,6 +54,7 @@ export function NovoPeiTemplate() {
         <button
           onClick={() => navigate('/pei-templates')}
           className="p-2 text-text-secondary hover:text-primary hover:bg-primary-light rounded-lg transition-colors"
+          aria-label="Voltar para os modelos de PEI"
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
@@ -83,8 +84,9 @@ export function NovoPeiTemplate() {
 
         <div className="grid grid-cols-1 gap-6 relative z-10">
           <div className="flex flex-col gap-1.5 w-full">
-            <label className="text-sm font-semibold text-text-primary">Dificuldades</label>
+            <label htmlFor="novopeitemplate-dificuldades" className="text-sm font-semibold text-text-primary">Dificuldades</label>
             <textarea
+              id="novopeitemplate-dificuldades"
               value={dificuldades}
               onChange={(e) => setDificuldades(e.target.value)}
               placeholder="Descreva as dificuldades típicas cobertas por este template..."
@@ -95,8 +97,9 @@ export function NovoPeiTemplate() {
           </div>
 
           <div className="flex flex-col gap-1.5 w-full">
-            <label className="text-sm font-semibold text-text-primary">Objetivos</label>
+            <label htmlFor="novopeitemplate-objetivos" className="text-sm font-semibold text-text-primary">Objetivos</label>
             <textarea
+              id="novopeitemplate-objetivos"
               value={objetivos}
               onChange={(e) => setObjetivos(e.target.value)}
               placeholder="Descreva os objetivos padrão deste template..."
@@ -107,8 +110,9 @@ export function NovoPeiTemplate() {
           </div>
 
           <div className="flex flex-col gap-1.5 w-full">
-            <label className="text-sm font-semibold text-text-primary">Estratégias</label>
+            <label htmlFor="novopeitemplate-estrategias" className="text-sm font-semibold text-text-primary">Estratégias</label>
             <textarea
+              id="novopeitemplate-estrategias"
               value={estrategias}
               onChange={(e) => setEstrategias(e.target.value)}
               placeholder="Descreva as estratégias de suporte padrão deste template..."

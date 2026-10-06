@@ -148,6 +148,7 @@ export function PeiDetalhes() {
           onClick={() => navigate(`/aprendentes/${pei.aprendenteId}/pei`)}
           className="p-2 text-text-secondary hover:text-primary hover:bg-primary-light rounded-lg transition-colors"
           title="Voltar"
+          aria-label="Voltar para os PEIs do aprendente"
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
@@ -170,8 +171,9 @@ export function PeiDetalhes() {
       <form onSubmit={handleSalvar} className="bg-white p-6 md:p-8 rounded-2xl border border-primary-light shadow-sm space-y-8">
         <div className="grid grid-cols-1 gap-6">
           <div className="flex flex-col gap-1.5 w-full">
-            <label className="text-sm font-semibold text-text-primary">Dificuldades</label>
+            <label htmlFor="peidetalhes-dificuldades" className="text-sm font-semibold text-text-primary">Dificuldades</label>
             <textarea
+              id="peidetalhes-dificuldades"
               value={dificuldades}
               onChange={(e) => setDificuldades(e.target.value)}
               className={textareaClassName}
@@ -181,8 +183,9 @@ export function PeiDetalhes() {
           </div>
 
           <div className="flex flex-col gap-1.5 w-full">
-            <label className="text-sm font-semibold text-text-primary">Objetivos</label>
+            <label htmlFor="peidetalhes-objetivos" className="text-sm font-semibold text-text-primary">Objetivos</label>
             <textarea
+              id="peidetalhes-objetivos"
               value={objetivos}
               onChange={(e) => setObjetivos(e.target.value)}
               className={textareaClassName}
@@ -192,8 +195,9 @@ export function PeiDetalhes() {
           </div>
 
           <div className="flex flex-col gap-1.5 w-full">
-            <label className="text-sm font-semibold text-text-primary">Estratégias</label>
+            <label htmlFor="peidetalhes-estrategias" className="text-sm font-semibold text-text-primary">Estratégias</label>
             <textarea
+              id="peidetalhes-estrategias"
               value={estrategias}
               onChange={(e) => setEstrategias(e.target.value)}
               className={textareaClassName}

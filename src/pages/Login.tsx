@@ -130,7 +130,7 @@ export function Login() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-sm font-bold text-text-primary ml-1">
+                <label htmlFor="login-codigo" className="text-sm font-bold text-text-primary ml-1">
                   {usandoBackup ? 'Código de Backup' : 'Código de Verificação'}
                 </label>
                 <div className="relative group">
@@ -138,6 +138,7 @@ export function Login() {
                     <KeyRound className="h-5 w-5" />
                   </div>
                   <input
+                    id="login-codigo"
                     type="text"
                     value={codigo}
                     onChange={(e) => setCodigo(e.target.value)}
@@ -204,12 +205,13 @@ export function Login() {
           <>
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-1.5">
-              <label className="text-sm font-bold text-text-primary ml-1">E-mail Profissional</label>
+              <label htmlFor="login-email" className="text-sm font-bold text-text-primary ml-1">E-mail Profissional</label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-text-secondary group-focus-within:text-primary transition-colors">
                   <Mail className="h-5 w-5" />
                 </div>
                 <input
+                  id="login-email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -222,12 +224,13 @@ export function Login() {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-sm font-bold text-text-primary ml-1">Senha de Acesso</label>
+              <label htmlFor="login-senha-de-acesso" className="text-sm font-bold text-text-primary ml-1">Senha de Acesso</label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-text-secondary group-focus-within:text-primary transition-colors">
                   <Lock className="h-5 w-5" />
                 </div>
                 <input
+                  id="login-senha-de-acesso"
                   type="password"
                   value={senha}
                   onChange={(e) => setSenha(e.target.value)}

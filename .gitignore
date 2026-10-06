@@ -24,3 +24,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Suíte de navegador (Playwright): saídas locais, sessões e tokens de teste
+/test-results/
+/playwright-report/
+/blob-report/
+/test-browser/.estado/

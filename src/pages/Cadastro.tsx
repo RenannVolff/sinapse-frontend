@@ -131,13 +131,14 @@ export function Cadastro() {
               <form onSubmit={handleCadastro} className="space-y-3">
 
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-text-primary ml-1">Nome Completo</label>
+                  <label htmlFor="cadastro-nome-completo" className="text-xs font-bold text-text-primary ml-1">Nome Completo</label>
                   <div className="relative group">
                     <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-text-secondary group-focus-within:text-primary transition-colors">
                       <User className="h-4 w-4" />
                     </div>
                     {/* Altura dos inputs reduzida (py-2.5) */}
                     <input
+                      id="cadastro-nome-completo"
                       type="text"
                       value={nome}
                       onChange={(e) => setNome(e.target.value)}
@@ -150,12 +151,13 @@ export function Cadastro() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-text-primary ml-1">E-mail Profissional</label>
+                  <label htmlFor="cadastro-email" className="text-xs font-bold text-text-primary ml-1">E-mail Profissional</label>
                   <div className="relative group">
                     <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-text-secondary group-focus-within:text-primary transition-colors">
                       <Mail className="h-4 w-4" />
                     </div>
                     <input
+                      id="cadastro-email"
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
@@ -170,12 +172,13 @@ export function Cadastro() {
                 {/* Gap reduzido (gap-3) */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                   <div className="space-y-1">
-                    <label className="text-xs font-bold text-text-primary ml-1">Criar Senha</label>
+                    <label htmlFor="cadastro-criar-senha" className="text-xs font-bold text-text-primary ml-1">Criar Senha</label>
                     <div className="relative group">
                       <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-text-secondary group-focus-within:text-primary transition-colors">
                         <Lock className="h-4 w-4" />
                       </div>
                       <input
+                        id="cadastro-criar-senha"
                         type="password"
                         value={senha}
                         onChange={(e) => setSenha(e.target.value)}
@@ -188,12 +191,13 @@ export function Cadastro() {
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-xs font-bold text-text-primary ml-1">Confirmar</label>
+                    <label htmlFor="cadastro-confirmar" className="text-xs font-bold text-text-primary ml-1">Confirmar</label>
                     <div className="relative group">
                       <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-text-secondary group-focus-within:text-primary transition-colors">
                         <Lock className="h-4 w-4" />
                       </div>
                       <input
+                        id="cadastro-confirmar"
                         type="password"
                         value={confirmarSenha}
                         onChange={(e) => setConfirmarSenha(e.target.value)}

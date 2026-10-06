@@ -154,7 +154,7 @@ export function NovaSessao() {
   return (
     <div className="max-w-3xl mx-auto space-y-6 fade-in pb-12">
       <div className="flex items-center gap-4 bg-white p-6 rounded-2xl shadow-sm border border-primary-light">
-        <button onClick={() => navigate('/agenda')} className="p-2 hover:bg-primary-light rounded-full transition-colors">
+        <button type="button" onClick={() => navigate('/agenda')} className="p-2 hover:bg-primary-light rounded-full transition-colors" aria-label="Voltar para a agenda">
           <ArrowLeft className="h-5 w-5 text-text-secondary" />
         </button>
         <div>
@@ -165,10 +165,11 @@ export function NovaSessao() {
 
       <form onSubmit={handleSubmit} className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-primary-light space-y-6">
         <div className="space-y-1.5">
-          <label className="text-sm font-bold text-text-primary flex items-center gap-2">
+          <label htmlFor="novasessao-aprendente" className="text-sm font-bold text-text-primary flex items-center gap-2">
             <User className="h-4 w-4 text-text-secondary" /> Aprendente
           </label>
           <select
+            id="novasessao-aprendente"
             value={aprendenteId}
             onChange={(e) => setAprendenteId(e.target.value)}
             className="w-full p-3.5 rounded-xl border border-primary-light focus:ring-2 focus:ring-primary outline-none bg-background focus:bg-white transition-all font-medium text-text-primary"
@@ -192,17 +193,19 @@ export function NovaSessao() {
           disabled={loading}
         />
 
+        {/* Grupo de botões, não um campo: o título nomeia o grupo (aria-labelledby). */}
         <div className="space-y-1.5">
-          <label className="text-sm font-bold text-text-primary flex items-center gap-2">
+          <span id="novasessao-duracao" className="text-sm font-bold text-text-primary flex items-center gap-2">
             <Timer className="h-4 w-4 text-text-secondary" /> Duração da Sessão
-          </label>
-          <div className="grid grid-cols-4 gap-2">
+          </span>
+          <div role="group" aria-labelledby="novasessao-duracao" className="grid grid-cols-4 gap-2">
             {DURACOES.map((opcao) => (
               <button
                 key={opcao}
                 type="button"
                 onClick={() => setDuracaoMinutos(opcao)}
                 disabled={loading}
+                aria-pressed={duracaoMinutos === opcao}
                 className={`py-2.5 rounded-xl border font-semibold text-sm transition-all ${
                   duracaoMinutos === opcao
                     ? 'bg-primary border-primary text-white shadow-sm'
@@ -227,9 +230,9 @@ export function NovaSessao() {
         />
 
         <div className="space-y-1.5">
-          <label className="text-sm font-bold text-text-primary flex items-center gap-2">
+          <span id="novasessao-horario" className="text-sm font-bold text-text-primary flex items-center gap-2">
             <Clock className="h-4 w-4 text-text-secondary" /> Horário
-          </label>
+          </span>
 
           {!data ? (
             <p className="text-sm text-text-secondary italic p-4 bg-background rounded-xl border border-primary-light">
@@ -240,13 +243,14 @@ export function NovaSessao() {
               Carregando disponibilidade...
             </p>
           ) : (
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2 max-h-72 overflow-y-auto pr-1">
+            <div role="group" aria-labelledby="novasessao-horario" className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2 max-h-72 overflow-y-auto pr-1">
               {horariosDisponibilidade.map(({ horario, ocupado }) => (
                 <button
                   key={horario}
                   type="button"
                   disabled={ocupado || loading}
                   onClick={() => setHora(horario)}
+                  aria-pressed={hora === horario}
                   className={`py-2.5 rounded-xl border text-sm font-semibold transition-all ${
                     ocupado
                       ? 'bg-background border-primary-light text-text-secondary/50 cursor-not-allowed line-through'

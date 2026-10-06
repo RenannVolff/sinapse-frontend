@@ -123,12 +123,13 @@ export function RedefinirSenha() {
           {status === 'formulario' && (
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="space-y-1.5">
-                <label className="text-sm font-bold text-text-primary ml-1">Nova senha</label>
+                <label htmlFor="redefinirsenha-nova-senha" className="text-sm font-bold text-text-primary ml-1">Nova senha</label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-text-secondary group-focus-within:text-primary transition-colors">
                     <Lock className="h-5 w-5" />
                   </div>
                   <input
+                    id="redefinirsenha-nova-senha"
                     type="password"
                     value={novaSenha}
                     onChange={(e) => setNovaSenha(e.target.value)}
@@ -141,12 +142,13 @@ export function RedefinirSenha() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-sm font-bold text-text-primary ml-1">Confirmar nova senha</label>
+                <label htmlFor="redefinirsenha-confirmar-nova-senha" className="text-sm font-bold text-text-primary ml-1">Confirmar nova senha</label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-text-secondary group-focus-within:text-primary transition-colors">
                     <Lock className="h-5 w-5" />
                   </div>
                   <input
+                    id="redefinirsenha-confirmar-nova-senha"
                     type="password"
                     value={confirmarSenha}
                     onChange={(e) => setConfirmarSenha(e.target.value)}
