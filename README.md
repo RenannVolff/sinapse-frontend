@@ -7,6 +7,10 @@ Currently, two official plugins are available:
 - [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
 - [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
+## Deploy na Vercel
+
+O projeto é publicado na Vercel a partir da branch `main` (preset Vite: `npm run build`, saída em `dist`). Em *Settings → Environment Variables*, defina `VITE_API_URL` com a URL do backend no Render (ver `.env.example`); como o Vite embute a variável no build, qualquer alteração exige um novo deploy. O `vercel.json` reescreve todas as rotas para `/index.html`, de modo que links diretos como `/verificar-email` e `/redefinir-senha` (enviados por e-mail) abram normalmente; arquivos estáticos continuam sendo servidos antes da reescrita.
+
 ## React Compiler
 
 The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).

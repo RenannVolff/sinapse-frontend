@@ -5,8 +5,19 @@ import { emitToast } from './toastBridge';
 export const TOKEN_STORAGE_KEY = '@SinapseEdu:token';
 export const USER_STORAGE_KEY = '@SinapseEdu:user';
 
+// O fallback /backend-api só existe no proxy do Vite em desenvolvimento;
+// em produção a URL do backend tem que vir de VITE_API_URL.
+const apiUrl = import.meta.env.VITE_API_URL;
+
+if (!apiUrl && import.meta.env.PROD) {
+  console.error(
+    '[API Config] VITE_API_URL não definida no build de produção. ' +
+      'Configure-a com a URL do backend (ex.: no painel da Vercel) e gere o build de novo.',
+  );
+}
+
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/backend-api',
+  baseURL: apiUrl || '/backend-api',
 });
 
 api.interceptors.request.use(

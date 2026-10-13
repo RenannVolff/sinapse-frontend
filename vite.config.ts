@@ -5,7 +5,6 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   server: {
-    allowedHosts: ['kabob-book-giving.ngrok-free.dev'],
     proxy: {
       '/backend-api': {
         target: 'http://localhost:3000',
