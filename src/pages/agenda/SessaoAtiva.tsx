@@ -42,6 +42,9 @@ const STATUS_FINALIZADO_INFO = {
   FALTA: { label: 'FALTA DO APRENDENTE', badgeClass: 'bg-amber-100 text-amber-700', Icon: UserX },
 } as const;
 
+const isStatusFinalizado = (status: AtendimentoDetalhe['status']) =>
+  status === 'CONCLUIDO' || status === 'CANCELADO' || status === 'FALTA';
+
 export function SessaoAtiva() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -106,7 +109,7 @@ export function SessaoAtiva() {
   };
 
   const handleToggleChecklist = (atividadeId: string, itemId: string, statusAtual: boolean) => {
-    if (atendimento?.status === 'CONCLUIDO') return;
+    if (!atendimento || isStatusFinalizado(atendimento.status)) return;
 
     setAtendimento((prev) => {
       if (!prev) return prev;
@@ -251,7 +254,7 @@ export function SessaoAtiva() {
     </div>
   );
 
-  const isFinalizada = atendimento.status === 'CONCLUIDO' || atendimento.status === 'CANCELADO' || atendimento.status === 'FALTA';
+  const isFinalizada = isStatusFinalizado(atendimento.status);
   const finalizadoInfo = STATUS_FINALIZADO_INFO[atendimento.status as keyof typeof STATUS_FINALIZADO_INFO];
 
   return (
