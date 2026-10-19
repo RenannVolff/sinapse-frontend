@@ -92,7 +92,7 @@ export function RedefinirSenha() {
               </Link>
 
               <Link to="/" className="text-sm text-primary font-bold hover:text-primary-hover transition-colors">
-                Voltar para o login
+                Voltar para a tela de entrada
               </Link>
             </div>
           )}
@@ -103,7 +103,7 @@ export function RedefinirSenha() {
                 <CheckCircle2 className="h-7 w-7 text-green-600" />
               </div>
               <p className="text-text-primary font-bold">
-                Senha redefinida com sucesso. Você já pode fazer login.
+                Senha redefinida com sucesso. Você já pode entrar.
               </p>
 
               <Link to="/" className="w-full pt-2">
@@ -112,7 +112,7 @@ export function RedefinirSenha() {
                   className="w-full relative group overflow-hidden rounded-xl bg-primary text-white font-bold h-14 transition-all duration-300 hover:bg-primary-hover hover:shadow-lg hover:shadow-primary/30 active:scale-[0.98]"
                 >
                   <span className="relative flex items-center justify-center gap-2">
-                    Ir para o login
+                    Ir para a tela de entrada
                     <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
                   </span>
                 </button>

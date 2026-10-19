@@ -2,9 +2,11 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>sinapse-frontend</title>
+    <meta name="description" content="Gestão de atendimento neuropsicopedagógico baseada no PEI: aprendentes, sessões, evolução e relatórios." />
+    <meta name="theme-color" content="#1F5A56" />
+    <title>Sinapse Edu - Acompanhamento Neuropsicopedagógico</title>
   </head>
   <body>
     <div id="root"></div>
@@ -14,9 +16,12 @@
       AccessibilityWidgetsPositioner assumir. Esse script tambem sobrescreve
       dinamicamente o bottom quando a barra de cookies esta visivel (ela pode
       passar de 24px de altura) — ver src/components/ui/AccessibilityWidgetsPositioner.tsx.
+      data-lang fixa o idioma do menu em português (sem ele o Sienna cai no
+      lang do <html> e, na falta, no idioma do navegador).
     -->
     <script
       src="https://cdn.jsdelivr.net/npm/sienna-accessibility@2.2.333/dist/sienna-accessibility.umd.js"
+      data-lang="pt"
       data-position="bottom-right"
       data-offset="24,24"
       defer

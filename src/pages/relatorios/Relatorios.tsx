@@ -172,7 +172,7 @@ function GraficoAbAbab({ dados, transicoes, dimensao }: { dados: PontoAcompanham
           formatter={(value: number | undefined, _name, item) => {
             const fase = (item?.payload as PontoAcompanhamento | undefined)?.fase;
             const rotuloFase = fase === 'INTERVENCAO' ? 'Intervenção' : 'Linha de Base';
-            return value !== undefined ? [`${value}% (${rotuloFase})`, 'Score'] : ['-', 'Score'];
+            return value !== undefined ? [`${value}% (${rotuloFase})`, 'Pontuação'] : ['-', 'Pontuação'];
           }}
         />
         {transicoes.map((ponto, i) => (
@@ -196,10 +196,10 @@ function GraficoCiclos({ ciclos, dimensao }: { ciclos: CicloAcompanhamento[]; di
           labelStyle={{ fontWeight: 'bold', color: '#1E293B', marginBottom: '4px' }}
           formatter={(value: number | undefined, _name, item) => {
             const dados = item?.payload as CicloAcompanhamento | undefined;
-            if (!dados || value === undefined) return ['-', 'Score Médio'];
+            if (!dados || value === undefined) return ['-', 'Pontuação Média'];
             const rotuloFase = dados.fase === 'INTERVENCAO' ? 'Intervenção' : 'Linha de Base';
             const sessoesLabel = dados.quantidade === 1 ? '1 sessão' : `${dados.quantidade} sessões`;
-            return [`${value}% (${rotuloFase}, ${sessoesLabel})`, 'Score Médio'];
+            return [`${value}% (${rotuloFase}, ${sessoesLabel})`, 'Pontuação Média'];
           }}
         />
         <Bar dataKey="mediaScore" radius={[4, 4, 0, 0]} barSize={60} animationDuration={1500}>
@@ -229,7 +229,7 @@ function GraficoRegressao({ dados, dimensao }: { dados: PontoRegressao[]; dimens
             }
             const fase = (item?.payload as PontoRegressao | undefined)?.fase;
             const rotuloFase = fase === 'INTERVENCAO' ? 'Intervenção' : 'Linha de Base';
-            return [`${value}% (${rotuloFase})`, 'Score Real'];
+            return [`${value}% (${rotuloFase})`, 'Pontuação Real'];
           }}
         />
         <Scatter dataKey="score" fill="#1F5A56" shape={<ShapePontoRegressao />} />
@@ -477,7 +477,7 @@ export function Relatorios() {
         <Tooltip 
           contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
           labelStyle={{ fontWeight: 'bold', color: '#1E293B', marginBottom: '4px' }}
-          formatter={(value: number | undefined) => value !== undefined ? [`${value}% de Desempenho`, 'Score'] : ['-', 'Score']}
+          formatter={(value: number | undefined) => value !== undefined ? [`${value}% de Desempenho`, 'Pontuação'] : ['-', 'Pontuação']}
         />
       </>
     );
@@ -716,7 +716,7 @@ export function Relatorios() {
           <div className="bg-white p-6 md:p-8 rounded-xl border border-primary-light shadow-sm">
             <div className="mb-8">
               <h3 className="text-xl font-bold text-text-primary">Análise Cognitiva Gráfica</h3>
-              <p className="text-sm text-text-secondary">Média de desempenho (Score) no período selecionado.</p>
+              <p className="text-sm text-text-secondary">Média de desempenho (pontuação) no período selecionado.</p>
             </div>
 
             {dadosEvolucao.length === 0 ? (
@@ -740,7 +740,7 @@ export function Relatorios() {
           <div className="bg-white p-6 md:p-8 rounded-xl border border-primary-light shadow-sm">
             <div className="mb-8">
               <h3 className="text-xl font-bold text-text-primary">Gráfico de Acompanhamento (AB-ABAB)</h3>
-              <p className="text-sm text-text-secondary">Score por sessão, sem uso de IA — dados calculados matematicamente.</p>
+              <p className="text-sm text-text-secondary">Pontuação por sessão, sem uso de IA — dados calculados matematicamente.</p>
             </div>
 
             {loadingAcompanhamento ? (
@@ -786,7 +786,7 @@ export function Relatorios() {
           <div className="bg-white p-6 md:p-8 rounded-xl border border-primary-light shadow-sm">
             <div className="mb-8">
               <h3 className="text-xl font-bold text-text-primary">Média por Período</h3>
-              <p className="text-sm text-text-secondary">Score médio por ciclo de fase (Linha de Base / Intervenção), sem uso de IA.</p>
+              <p className="text-sm text-text-secondary">Pontuação média por ciclo de fase (Linha de Base / Intervenção), sem uso de IA.</p>
             </div>
 
             {loadingAcompanhamento ? (
@@ -832,7 +832,7 @@ export function Relatorios() {
           <div className="bg-white p-6 md:p-8 rounded-xl border border-primary-light shadow-sm">
             <div className="mb-8">
               <h3 className="text-xl font-bold text-text-primary">Regressão Linear</h3>
-              <p className="text-sm text-text-secondary">Tendência de evolução do score ao longo das sessões, sem uso de IA.</p>
+              <p className="text-sm text-text-secondary">Tendência de evolução da pontuação ao longo das sessões, sem uso de IA.</p>
             </div>
 
             {loadingAcompanhamento ? (

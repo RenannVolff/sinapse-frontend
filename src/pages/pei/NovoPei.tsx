@@ -114,7 +114,7 @@ export function NovoPei() {
         <p className="text-sm text-text-primary leading-relaxed">
           O PEI é um esboço de idealização do suporte que o profissional cria para acompanhar o aprendente
           de acordo com suas dificuldades específicas — cada PEI é único e deve ser adaptado individualmente,
-          mesmo partindo de um template.
+          mesmo partindo de um modelo.
         </p>
       </aside>
 
@@ -124,7 +124,7 @@ export function NovoPei() {
 
         <div className="relative z-10 space-y-1.5">
           <label htmlFor="novopei-molde" className="text-sm font-semibold text-text-primary flex items-center gap-2">
-            <LayoutTemplate className="h-4 w-4 text-text-secondary" /> Partir de um template (opcional)
+            <LayoutTemplate className="h-4 w-4 text-text-secondary" /> Partir de um modelo (opcional)
           </label>
           <select
             id="novopei-molde"

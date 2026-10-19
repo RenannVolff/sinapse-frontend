@@ -39,7 +39,7 @@ export function Configuracoes() {
     e.preventDefault();
     
     if (!user?.id) {
-      setErro('Sessão inválida. Faça login novamente.');
+      setErro('Sessão inválida. Entre novamente.');
       return;
     }
 
@@ -75,7 +75,7 @@ export function Configuracoes() {
     api.patch(`/usuarios/${user.id}`, payload)
       .then((response) => {
         if (payload.senha) {
-          setSucesso('Senha alterada com sucesso! Redirecionando para o login...');
+          setSucesso('Senha alterada com sucesso! Redirecionando para a tela de entrada...');
           
           setTimeout(() => {
             signOut();
@@ -151,7 +151,7 @@ export function Configuracoes() {
                 required
               />
               <Input 
-                label="E-mail de Acesso (Login)" 
+                label="E-mail de Acesso" 
                 type="email"
                 value={email} 
                 onChange={(e) => setEmail(e.target.value)}

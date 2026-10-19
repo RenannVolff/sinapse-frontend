@@ -26,7 +26,7 @@ export function NovoAprendente() {
     setSucesso('');
 
     if (!user?.id) {
-      setErro('Sessão inválida. Faça login novamente.');
+      setErro('Sessão inválida. Entre novamente.');
       return;
     }
 

@@ -36,7 +36,7 @@ export function DoisFatoresSection() {
   const [senhaAtual, setSenhaAtual] = useState('');
   const [erroDesativar, setErroDesativar] = useState('');
 
-  // Os códigos de backup não podem ser recuperados depois: avisa antes de
+  // Os códigos de recuperação não podem ser recuperados depois: avisa antes de
   // recarregar/fechar a aba enquanto ainda não foram confirmados como salvos.
   useEffect(() => {
     if (etapa !== 'codigosBackup') return;
@@ -111,7 +111,7 @@ export function DoisFatoresSection() {
 
   const handleCopiarCodigos = () => {
     navigator.clipboard.writeText(codigosBackup.join('\n'))
-      .then(() => showSuccess('Códigos de backup copiados.'))
+      .then(() => showSuccess('Códigos de recuperação copiados.'))
       .catch(() => showError('Não foi possível copiar. Anote os códigos manualmente.'));
   };
 
@@ -240,7 +240,7 @@ export function DoisFatoresSection() {
           <div className="p-4 bg-amber-50 text-amber-800 text-sm font-medium rounded-lg border border-amber-200 flex items-start gap-2">
             <AlertTriangle className="h-5 w-5 flex-shrink-0 mt-0.5" />
             <p>
-              <span className="font-bold">Salve estes códigos de backup agora.</span> Eles não serão exibidos
+              <span className="font-bold">Salve estes códigos de recuperação agora.</span> Eles não serão exibidos
               novamente. Cada código pode ser usado uma única vez para entrar caso você perca acesso ao app
               autenticador.
             </p>
@@ -274,7 +274,7 @@ export function DoisFatoresSection() {
             Autenticação de dois fatores está ativa.
           </div>
           <p className="text-sm text-text-secondary">
-            Ao entrar, será pedido o código do seu app autenticador (ou um código de backup).
+            Ao entrar, será pedido o código do seu app autenticador (ou um código de recuperação).
           </p>
           <Button
             variant="outline"

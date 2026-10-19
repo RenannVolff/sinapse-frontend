@@ -12,7 +12,7 @@ export function HoneypotField({ value, onChange }: HoneypotFieldProps) {
       aria-hidden="true"
       style={{ position: 'absolute', left: '-10000px', top: 'auto', width: 1, height: 1, overflow: 'hidden' }}
     >
-      <label htmlFor="website">Website</label>
+      <label htmlFor="website">Site</label>
       <input
         id="website"
         name="website"

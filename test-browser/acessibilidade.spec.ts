@@ -376,10 +376,10 @@ test.describe('B. Acessibilidade — navegação só por teclado', () => {
     await auditarTeclado(page, testInfo, 16, 'Cadastro', [
       'campo "Ex: Dr. João Silva"',
       'campo "seu@email.com.br"',
-      'campo "Mín. 8 char"',
+      'campo "Mín. 8 caracteres"',
       'campo "Repita a senha"',
       'botão "Cadastrar e Acessar"',
-      'link "Faça login aqui"',
+      'link "Entre aqui"',
     ]);
   });
 });

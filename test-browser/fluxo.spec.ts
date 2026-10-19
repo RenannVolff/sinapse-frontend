@@ -40,13 +40,13 @@ test.describe('A. Fluxo entre páginas', () => {
     await aguardarTela(page, 'Crie sua conta');
     await page.getByPlaceholder('Ex: Dr. João Silva').fill('Terapeuta Cadastro');
     await page.getByPlaceholder('seu@email.com.br').fill(email);
-    await page.getByPlaceholder('Mín. 8 char').fill(SENHA_PADRAO);
+    await page.getByPlaceholder('Mín. 8 caracteres').fill(SENHA_PADRAO);
     await page.getByPlaceholder('Repita a senha').fill(SENHA_PADRAO);
     await page.getByRole('button', { name: 'Cadastrar e Acessar' }).click();
 
     await expect(page.getByRole('heading', { name: 'Cadastro realizado!' })).toBeVisible();
     await expect(page.getByText(email)).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Reenviar email' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Reenviar e-mail' })).toBeVisible();
     // Não entra direto no sistema: o login exige e-mail verificado.
     await expect(page).toHaveURL(`${URL_FRONTEND}/cadastro`);
   });
@@ -143,16 +143,16 @@ test.describe('A. Fluxo entre páginas', () => {
 
     await test.step('criar molde (template) de PEI', async () => {
       await menuLateral(page).getByRole('link', { name: 'Modelos de PEI' }).click();
-      await aguardarTela(page, 'Templates de PEI');
-      await page.getByRole('button', { name: 'Novo Template' }).click();
-      await aguardarTela(page, 'Novo Template de PEI');
+      await aguardarTela(page, 'Modelos de PEI');
+      await page.getByRole('button', { name: 'Novo Modelo' }).click();
+      await aguardarTela(page, 'Novo Modelo de PEI');
       await page.getByPlaceholder('Ex: Suporte para Dificuldades de Leitura').fill(nomeMolde);
-      await page.getByPlaceholder('Descreva as dificuldades típicas cobertas por este template...').fill('Troca de fonemas surdos/sonoros.');
-      await page.getByPlaceholder('Descreva os objetivos padrão deste template...').fill('Discriminar pares mínimos em 80% das tentativas.');
-      await page.getByPlaceholder('Descreva as estratégias de suporte padrão deste template...').fill('Consciência fonológica com apoio visual.');
-      await page.getByRole('button', { name: 'Cadastrar Template' }).click();
+      await page.getByPlaceholder('Descreva as dificuldades típicas cobertas por este modelo...').fill('Troca de fonemas surdos/sonoros.');
+      await page.getByPlaceholder('Descreva os objetivos padrão deste modelo...').fill('Discriminar pares mínimos em 80% das tentativas.');
+      await page.getByPlaceholder('Descreva as estratégias de suporte padrão deste modelo...').fill('Consciência fonológica com apoio visual.');
+      await page.getByRole('button', { name: 'Cadastrar Modelo' }).click();
 
-      await expect(page.getByText('Template cadastrado com sucesso!')).toBeVisible();
+      await expect(page.getByText('Modelo cadastrado com sucesso!')).toBeVisible();
       await expect(page).toHaveURL(`${URL_FRONTEND}/pei-templates`, { timeout: 10_000 });
       await expect(page.getByText(nomeMolde)).toBeVisible();
     });
@@ -339,7 +339,7 @@ test.describe('A. Fluxo entre páginas', () => {
   test.describe('2FA', () => {
     test.use({ storageState: arquivoSessao('doisFatores') });
 
-    test('ativar 2FA em Configurações até exibir os códigos de backup', async ({ page }) => {
+    test('ativar 2FA em Configurações até exibir os códigos de recuperação', async ({ page }) => {
       await page.goto('/configuracoes');
       await aguardarTela(page, 'Minha Conta');
       await page.getByRole('button', { name: 'Ativar autenticação de dois fatores' }).click();
@@ -352,7 +352,7 @@ test.describe('A. Fluxo entre páginas', () => {
       await page.getByPlaceholder('000000').fill(gerarCodigoTotp(segredo));
       await page.getByRole('button', { name: 'Confirmar e ativar' }).click();
 
-      await expect(page.getByText('Salve estes códigos de backup agora.')).toBeVisible();
+      await expect(page.getByText('Salve estes códigos de recuperação agora.')).toBeVisible();
       const codigos = page.locator('li.font-mono');
       await expect(codigos).toHaveCount(8);
       for (const codigo of await codigos.allInnerTexts()) {

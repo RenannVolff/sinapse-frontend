@@ -1,6 +1,6 @@
 # Relatório de acessibilidade — Sinapse Edu
 
-Gerado automaticamente por `npm run test:browser` em 13/10/2026 às 15:24. Ferramenta: axe-core 4.13.0 (via @axe-core/playwright, textos em pt-BR), Chromium, viewport 1280×800. Regras: tags `wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`, `wcag22aa` (WCAG 2.2 nível AA).
+Gerado automaticamente por `npm run test:browser` em 19/10/2026 às 14:47. Ferramenta: axe-core 4.13.0 (via @axe-core/playwright, textos em pt-BR), Chromium, viewport 1280×800. Regras: tags `wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`, `wcag22aa` (WCAG 2.2 nível AA).
 
 Telas públicas (login, cadastro, esqueci a senha) são auditadas como no primeiro acesso, com o banner de cookies aberto; é nelas que o banner entra na análise. Telas autenticadas são auditadas depois de o banner ser respondido ("Rejeitar não essenciais"), como o usuário as vê no dia a dia: com o banner aberto o axe deixa de reportar ao menos uma regra do sistema (verificado na auditoria inicial com `aria-hidden-focus` em Relatórios). Os dados exibidos (aprendente, sessões, molde de PEI) são fictícios, criados pela própria suíte no banco de teste.
 
@@ -120,7 +120,7 @@ A partir do carregamento da página, a tecla Tab é pressionada repetidamente. P
 
 ### Teclado — Cadastro
 
-- **Ordem dos campos:** correta — `campo "Ex: Dr. João Silva"` → `campo "seu@email.com.br"` → `campo "Mín. 8 char"` → `campo "Repita a senha"` → `botão "Cadastrar e Acessar"` → `link "Faça login aqui"`
+- **Ordem dos campos:** correta — `campo "Ex: Dr. João Silva"` → `campo "seu@email.com.br"` → `campo "Mín. 8 caracteres"` → `campo "Repita a senha"` → `botão "Cadastrar e Acessar"` → `link "Entre aqui"`
 - **Foco visível:** presente em todas as paradas do sistema
 - **Ciclo do Tab:** depois da parada 9, o foco volta para `botão "Aceitar todos" (<button>)` — o foco fica preso dentro do widget "Banner de cookies (vanilla-cookieconsent)" até o usuário agir nele.
 
@@ -128,10 +128,10 @@ A partir do carregamento da página, a tecla Tab é pressionada repetidamente. P
 |---:|---|---|---|
 | 1 | campo "Ex: Dr. João Silva" (<input type=text>) | sim | sistema |
 | 2 | campo "seu@email.com.br" (<input type=email>) | sim | sistema |
-| 3 | campo "Mín. 8 char" (<input type=password>) | sim | sistema |
+| 3 | campo "Mín. 8 caracteres" (<input type=password>) | sim | sistema |
 | 4 | campo "Repita a senha" (<input type=password>) | sim | sistema |
 | 5 | botão "Cadastrar e Acessar" (<button>) | sim | sistema |
-| 6 | link "Faça login aqui" (<a>) | sim | sistema |
+| 6 | link "Entre aqui" (<a>) | sim | sistema |
 | 7 | botão "Aceitar todos" (<button>) | sim | Banner de cookies (vanilla-cookieconsent) |
 | 8 | botão "Rejeitar não essenciais" (<button>) | sim | Banner de cookies (vanilla-cookieconsent) |
 | 9 | botão "Gerenciar preferências" (<button>) | sim | Banner de cookies (vanilla-cookieconsent) |

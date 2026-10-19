@@ -46,7 +46,7 @@ export function VerificarEmail() {
     setReenviando(true);
 
     api.post('/auth/reenviar-verificacao', { email: emailReenvio })
-      .then(() => showSuccess('Se este email estiver cadastrado, um novo link de confirmação foi enviado.'))
+      .then(() => showSuccess('Se este e-mail estiver cadastrado, um novo link de confirmação foi enviado.'))
       .catch((err: unknown) => {
         console.error('[VerificarEmail] Erro ao reenviar verificação:', getSafeErrorLog(err));
       })
@@ -71,7 +71,7 @@ export function VerificarEmail() {
           {status === 'carregando' && (
             <div className="flex flex-col items-center gap-4 py-6 text-center">
               <Loader2 className="h-10 w-10 text-primary animate-spin" />
-              <p className="text-text-secondary font-medium">Confirmando seu email...</p>
+              <p className="text-text-secondary font-medium">Confirmando seu e-mail...</p>
             </div>
           )}
 
@@ -81,7 +81,7 @@ export function VerificarEmail() {
                 <CheckCircle2 className="h-7 w-7 text-green-600" />
               </div>
               <p className="text-text-primary font-bold">
-                Email confirmado! Você já pode fazer login.
+                E-mail confirmado! Você já pode entrar.
               </p>
 
               <Link to="/" className="w-full pt-2">
@@ -90,7 +90,7 @@ export function VerificarEmail() {
                   className="w-full relative group overflow-hidden rounded-xl bg-primary text-white font-bold h-14 transition-all duration-300 hover:bg-primary-hover hover:shadow-lg hover:shadow-primary/30 active:scale-[0.98]"
                 >
                   <span className="relative flex items-center justify-center gap-2">
-                    Ir para o login
+                    Ir para a tela de entrada
                     <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
                   </span>
                 </button>
@@ -131,13 +131,13 @@ export function VerificarEmail() {
                   className="w-full relative group overflow-hidden rounded-xl bg-primary text-white font-bold h-14 transition-all duration-300 hover:bg-primary-hover hover:shadow-lg hover:shadow-primary/30 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
                 >
                   <span className="relative flex items-center justify-center gap-2">
-                    {reenviando ? <Loader2 className="h-6 w-6 animate-spin" /> : 'Reenviar email de verificação'}
+                    {reenviando ? <Loader2 className="h-6 w-6 animate-spin" /> : 'Reenviar e-mail de verificação'}
                   </span>
                 </button>
               </form>
 
               <Link to="/" className="text-sm text-primary font-bold hover:text-primary-hover transition-colors">
-                Voltar para o login
+                Voltar para a tela de entrada
               </Link>
             </div>
           )}

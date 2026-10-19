@@ -44,7 +44,7 @@ export function Auditoria() {
         <div>
           <h1 className="text-2xl font-bold text-text-primary flex items-center gap-2">
             <History className="h-6 w-6 text-primary" />
-            Log de Auditoria
+            Registro de Auditoria
           </h1>
           <p className="text-text-secondary text-sm mt-1">Últimas 50 ações realizadas na sua conta.</p>
         </div>

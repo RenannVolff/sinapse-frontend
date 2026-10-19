@@ -15,6 +15,11 @@ ligado ao banco **de teste**:
   [`relatorio-acessibilidade-inicial.md`](./relatorio-acessibilidade-inicial.md)
   é a auditoria feita antes das correções e não deve ser regenerado nem
   editado (é o "antes" do TCC).
+- `idioma.spec.ts` — **C. Idioma** (percorre todas as rotas e alguns estados,
+  como erro de login, diálogo de exclusão e relatório emitido, coletando o
+  texto visível e `aria-label`/`placeholder`/`title`/`alt`; falha se achar
+  termo comum de interface em inglês). Sienna e VLibras ficam de fora da
+  verificação; um teste à parte só registra em que idioma eles aparecem.
 
 ## Pré-requisitos
 
@@ -36,6 +41,7 @@ ligado ao banco **de teste**:
 npm run test:browser                                    # tudo
 npx playwright test -c test-browser fluxo               # só o fluxo (A)
 npx playwright test -c test-browser acessibilidade      # só acessibilidade (B)
+npx playwright test -c test-browser idioma              # só idioma (C)
 npx playwright show-report playwright-report            # relatório HTML da execução
 ```
 

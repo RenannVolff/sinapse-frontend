@@ -62,7 +62,7 @@ export function CookieBanner() {
                 {
                   title: 'Funcionais',
                   description:
-                    'Usados para lembrar preferências não essenciais, como tema ou configurações salvas do dashboard, em armazenamento local do navegador.',
+                    'Usados para lembrar preferências não essenciais, como tema ou configurações salvas do painel, em armazenamento local do navegador.',
                   linkedCategory: 'functional',
                 },
               ],

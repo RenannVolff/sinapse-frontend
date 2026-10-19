@@ -61,7 +61,7 @@ api.interceptors.response.use(
 
     if (hasResponse && error.response.status === 401 && !isLoginAttempt) {
       consecutiveNetworkFailures = 0;
-      emitToast('Sua sessão expirou. Faça login novamente.', 'error');
+      emitToast('Sua sessão expirou. Entre novamente.', 'error');
 
       localStorage.removeItem(USER_STORAGE_KEY);
       localStorage.removeItem(TOKEN_STORAGE_KEY);
@@ -72,7 +72,7 @@ api.interceptors.response.use(
 
       if (consecutiveNetworkFailures >= MAX_CONSECUTIVE_NETWORK_FAILURES) {
         consecutiveNetworkFailures = 0;
-        emitToast('Não foi possível confirmar sua sessão. Faça login novamente.', 'error');
+        emitToast('Não foi possível confirmar sua sessão. Entre novamente.', 'error');
 
         localStorage.removeItem(USER_STORAGE_KEY);
         localStorage.removeItem(TOKEN_STORAGE_KEY);

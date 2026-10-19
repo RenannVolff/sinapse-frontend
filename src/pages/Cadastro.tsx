@@ -63,7 +63,7 @@ export function Cadastro() {
     setReenviando(true);
 
     api.post('/auth/reenviar-verificacao', { email: emailCadastrado })
-      .then(() => showSuccess('Email de confirmação reenviado. Verifique sua caixa de entrada.'))
+      .then(() => showSuccess('E-mail de confirmação reenviado. Verifique sua caixa de entrada.'))
       .catch((err: unknown) => {
         console.error('[Cadastro] Erro ao reenviar verificação:', getSafeErrorLog(err));
       })
@@ -91,7 +91,7 @@ export function Cadastro() {
               <div>
                 <h1 className="text-xl font-black text-text-primary tracking-tight">Cadastro realizado!</h1>
                 <p className="text-sm text-text-secondary mt-2">
-                  Enviamos um email de confirmação para{' '}
+                  Enviamos um e-mail de confirmação para{' '}
                   <span className="font-bold text-text-primary">{emailCadastrado}</span>.
                   Verifique sua caixa de entrada (e o spam) para ativar sua conta.
                 </p>
@@ -104,13 +104,13 @@ export function Cadastro() {
                 className="inline-flex items-center gap-2 text-sm font-bold text-primary hover:text-primary-hover transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {reenviando ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-                Reenviar email
+                Reenviar e-mail
               </button>
 
               <div className="w-full pt-4 mt-2 border-t border-primary-light/60">
                 <Link to="/" className="text-xs text-text-secondary font-medium">
-                  Voltar para o{' '}
-                  <span className="text-primary font-bold hover:text-primary-hover transition-colors">login</span>
+                  Voltar para a{' '}
+                  <span className="text-primary font-bold hover:text-primary-hover transition-colors">tela de entrada</span>
                 </Link>
               </div>
             </div>
@@ -184,7 +184,7 @@ export function Cadastro() {
                         onChange={(e) => setSenha(e.target.value)}
                         disabled={loading}
                         required
-                        placeholder="Mín. 8 char"
+                        placeholder="Mín. 8 caracteres"
                         className="w-full bg-background border-2 border-primary-light rounded-xl py-2.5 pl-10 pr-4 outline-none text-text-primary text-sm font-medium transition-all duration-300 focus:border-primary focus:bg-white focus:ring-4 focus:ring-primary/10"
                       />
                     </div>
@@ -251,7 +251,7 @@ export function Cadastro() {
                 <p className="text-xs text-text-secondary font-medium">
                   Já possui uma conta?{' '}
                   <Link to="/" className="text-primary font-bold hover:text-primary-hover transition-colors">
-                    Faça login aqui
+                    Entre aqui
                   </Link>
                 </p>
               </div>

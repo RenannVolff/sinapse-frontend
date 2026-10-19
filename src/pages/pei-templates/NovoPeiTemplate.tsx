@@ -34,12 +34,12 @@ export function NovoPeiTemplate() {
       estrategias,
     })
       .then(() => {
-        setSucesso('Template cadastrado com sucesso! Redirecionando...');
+        setSucesso('Modelo cadastrado com sucesso! Redirecionando...');
         setTimeout(() => navigate('/pei-templates'), 2000);
       })
       .catch((err) => {
         console.error('[NovoPeiTemplate] Erro no cadastro:', getSafeErrorLog(err));
-        setErro(getErrorMessage(err, 'Ocorreu um erro ao cadastrar o template. Verifique os dados.'));
+        setErro(getErrorMessage(err, 'Ocorreu um erro ao cadastrar o modelo. Verifique os dados.'));
       })
       .finally(() => {
         setLoading(false);
@@ -61,7 +61,7 @@ export function NovoPeiTemplate() {
         <div>
           <h1 className="text-2xl font-bold text-text-primary flex items-center gap-2">
             <LayoutTemplate className="h-6 w-6 text-primary" />
-            Novo Template de PEI
+            Novo Modelo de PEI
           </h1>
           <p className="text-text-secondary text-sm mt-1">Crie um modelo reutilizável para agilizar a criação de novos PEIs.</p>
         </div>
@@ -73,7 +73,7 @@ export function NovoPeiTemplate() {
 
         <div className="relative z-10">
           <Input
-            label="Nome do Template"
+            label="Nome do Modelo"
             value={nome}
             onChange={(e) => setNome(e.target.value)}
             placeholder="Ex: Suporte para Dificuldades de Leitura"
@@ -89,7 +89,7 @@ export function NovoPeiTemplate() {
               id="novopeitemplate-dificuldades"
               value={dificuldades}
               onChange={(e) => setDificuldades(e.target.value)}
-              placeholder="Descreva as dificuldades típicas cobertas por este template..."
+              placeholder="Descreva as dificuldades típicas cobertas por este modelo..."
               className={textareaClassName}
               required
               disabled={loading || !!sucesso}
@@ -102,7 +102,7 @@ export function NovoPeiTemplate() {
               id="novopeitemplate-objetivos"
               value={objetivos}
               onChange={(e) => setObjetivos(e.target.value)}
-              placeholder="Descreva os objetivos padrão deste template..."
+              placeholder="Descreva os objetivos padrão deste modelo..."
               className={textareaClassName}
               required
               disabled={loading || !!sucesso}
@@ -115,7 +115,7 @@ export function NovoPeiTemplate() {
               id="novopeitemplate-estrategias"
               value={estrategias}
               onChange={(e) => setEstrategias(e.target.value)}
-              placeholder="Descreva as estratégias de suporte padrão deste template..."
+              placeholder="Descreva as estratégias de suporte padrão deste modelo..."
               className={textareaClassName}
               required
               disabled={loading || !!sucesso}
@@ -137,7 +137,7 @@ export function NovoPeiTemplate() {
 
         <div className="flex justify-end pt-4 border-t border-primary-light">
           <Button type="submit" isLoading={loading} disabled={!!sucesso} className="w-full md:w-auto px-10 h-12 text-base">
-            <LayoutTemplate className="h-5 w-5 mr-2" /> Cadastrar Template
+            <LayoutTemplate className="h-5 w-5 mr-2" /> Cadastrar Modelo
           </Button>
         </div>
       </form>

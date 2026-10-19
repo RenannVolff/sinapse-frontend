@@ -50,7 +50,7 @@ export function Login() {
       .catch((err: unknown) => {
         if (isAxiosError(err) && err.response?.status === 403) {
           setEmailNaoVerificado(true);
-          setError('Confirme seu email antes de fazer login.');
+          setError('Confirme seu e-mail antes de entrar.');
         } else {
           setError('Acesso negado. E-mail ou senha incorretos.');
         }
@@ -92,7 +92,7 @@ export function Login() {
     setReenviando(true);
 
     api.post('/auth/reenviar-verificacao', { email })
-      .then(() => showSuccess('Email de verificação reenviado. Verifique sua caixa de entrada.'))
+      .then(() => showSuccess('E-mail de verificação reenviado. Verifique sua caixa de entrada.'))
       .catch((err: unknown) => {
         console.error('[Login] Erro ao reenviar verificação:', getSafeErrorLog(err));
       })
@@ -124,14 +124,14 @@ export function Login() {
                 <ShieldCheck className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
                 <p className="text-sm text-text-secondary font-medium">
                   {usandoBackup
-                    ? 'Digite um dos seus códigos de backup. Cada código só pode ser usado uma vez.'
+                    ? 'Digite um dos seus códigos de recuperação. Cada código só pode ser usado uma vez.'
                     : 'Digite o código de 6 dígitos exibido no seu app autenticador.'}
                 </p>
               </div>
 
               <div className="space-y-1.5">
                 <label htmlFor="login-codigo" className="text-sm font-bold text-text-primary ml-1">
-                  {usandoBackup ? 'Código de Backup' : 'Código de Verificação'}
+                  {usandoBackup ? 'Código de Recuperação' : 'Código de Verificação'}
                 </label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-text-secondary group-focus-within:text-primary transition-colors">
@@ -170,7 +170,7 @@ export function Login() {
                   disabled={loading}
                   className="text-xs font-bold text-primary hover:text-primary-hover transition-colors disabled:opacity-60"
                 >
-                  {usandoBackup ? 'Usar o app autenticador' : 'Usar um código de backup'}
+                  {usandoBackup ? 'Usar o app autenticador' : 'Usar um código de recuperação'}
                 </button>
               </div>
 
@@ -262,7 +262,7 @@ export function Login() {
                     className="self-start inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:text-primary-hover transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                   >
                     {reenviando ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
-                    Reenviar email de verificação
+                    Reenviar e-mail de verificação
                   </button>
                 )}
               </div>

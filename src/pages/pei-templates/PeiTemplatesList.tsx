@@ -33,13 +33,13 @@ export function PeiTemplatesList() {
         <div>
           <h1 className="text-2xl font-bold text-text-primary flex items-center gap-2">
             <LayoutTemplate className="h-6 w-6 text-primary" />
-            Templates de PEI
+            Modelos de PEI
           </h1>
           <p className="text-text-secondary text-sm mt-1">Modelos reutilizáveis para agilizar a criação de novos PEIs.</p>
         </div>
         <Button onClick={() => navigate('/pei-templates/novo')} className="w-full md:w-auto px-6 h-12">
           <Plus className="h-5 w-5 mr-2" />
-          Novo Template
+          Novo Modelo
         </Button>
       </div>
 
@@ -48,15 +48,15 @@ export function PeiTemplatesList() {
         {loading ? (
           <div className="flex flex-col items-center justify-center p-16">
             <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
-            <p className="text-text-secondary font-medium">Buscando templates...</p>
+            <p className="text-text-secondary font-medium">Buscando modelos...</p>
           </div>
         ) : templates.length === 0 ? (
           <div className="text-center p-16">
             <div className="bg-background h-20 w-20 rounded-full flex items-center justify-center mx-auto mb-4">
               <LayoutTemplate className="h-10 w-10 text-text-secondary" />
             </div>
-            <h3 className="text-xl font-bold text-text-primary">Nenhum template cadastrado</h3>
-            <p className="text-text-secondary mt-2">Crie um template para reutilizar ao criar novos PEIs.</p>
+            <h3 className="text-xl font-bold text-text-primary">Nenhum modelo cadastrado</h3>
+            <p className="text-text-secondary mt-2">Crie um modelo para reutilizar ao criar novos PEIs.</p>
           </div>
         ) : (
           <div className="divide-y divide-primary-light">

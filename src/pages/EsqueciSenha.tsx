@@ -53,11 +53,11 @@ export function EsqueciSenha() {
                 <MailCheck className="h-7 w-7 text-green-600" />
               </div>
               <p className="text-text-primary font-medium">
-                Se esse email estiver cadastrado, você receberá um link de recuperação.
+                Se esse e-mail estiver cadastrado, você receberá um link de recuperação.
               </p>
 
               <Link to="/" className="text-sm text-primary font-bold hover:text-primary-hover transition-colors pt-2">
-                Voltar para o login
+                Voltar para a tela de entrada
               </Link>
             </div>
           ) : (
@@ -96,7 +96,7 @@ export function EsqueciSenha() {
 
               <div className="pt-2 text-center">
                 <Link to="/" className="text-sm text-primary font-bold hover:text-primary-hover transition-colors">
-                  Voltar para o login
+                  Voltar para a tela de entrada
                 </Link>
               </div>
             </form>

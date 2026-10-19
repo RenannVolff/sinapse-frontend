@@ -12,7 +12,7 @@ import {
 
 export function Sidebar() {
   const navItems = [
-    { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { path: '/dashboard', label: 'Painel', icon: LayoutDashboard },
     { path: '/aprendentes', label: 'Meus Aprendentes', icon: Users },
     { path: '/agenda', label: 'Agenda', icon: Calendar },
     { path: '/pei-templates', label: 'Modelos de PEI', icon: LayoutTemplate },
