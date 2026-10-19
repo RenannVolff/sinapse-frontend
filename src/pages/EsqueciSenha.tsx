@@ -1,31 +1,35 @@
 import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
-import { BrainCircuit, Mail, Loader2, MailCheck } from 'lucide-react';
+import { BrainCircuit, Mail, Loader2, MailCheck, AlertCircle } from 'lucide-react';
 import { api } from '../services/api';
-import { getSafeErrorLog } from '../services/apiError';
+import { getRateLimitMessage, getSafeErrorLog } from '../services/apiError';
 import { SynapseBackground } from '../components/ui/SynapseBackground';
 
 export function EsqueciSenha() {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [enviado, setEnviado] = useState(false);
+  const [erro, setErro] = useState('');
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (!email) return;
 
     setLoading(true);
+    setErro('');
 
     // A resposta do backend é sempre genérica (não revela se o email existe),
-    // então sempre mostramos a mesma tela de sucesso, independente do resultado.
+    // então mostramos a mesma tela de sucesso independente do resultado. A
+    // exceção é o limite de tentativas: aí o pedido nem foi processado.
     api.post('/auth/esqueci-senha', { email })
+      .then(() => setEnviado(true))
       .catch((err: unknown) => {
         console.error('[EsqueciSenha] Erro ao solicitar redefinição:', getSafeErrorLog(err));
+        const limite = getRateLimitMessage(err);
+        if (limite) setErro(limite);
+        else setEnviado(true);
       })
-      .finally(() => {
-        setLoading(false);
-        setEnviado(true);
-      });
+      .finally(() => setLoading(false));
   };
 
   return (
@@ -80,6 +84,13 @@ export function EsqueciSenha() {
                   />
                 </div>
               </div>
+
+              {erro && (
+                <div role="alert" className="p-3.5 bg-red-50 text-red-700 text-sm font-bold rounded-xl border border-red-100 flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
+                  <AlertCircle className="h-5 w-5 flex-shrink-0" />
+                  {erro}
+                </div>
+              )}
 
               <div className="pt-2">
                 <button

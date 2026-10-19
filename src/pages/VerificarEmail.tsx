@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, type FormEvent } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { BrainCircuit, Mail, Loader2, AlertCircle, CheckCircle2, ArrowRight } from 'lucide-react';
 import { api } from '../services/api';
-import { getErrorMessage, getSafeErrorLog } from '../services/apiError';
+import { getErrorMessage, getRateLimitMessage, getSafeErrorLog } from '../services/apiError';
 import { useToast } from '../hooks/useToast';
 import { SynapseBackground } from '../components/ui/SynapseBackground';
 
@@ -20,6 +20,7 @@ export function VerificarEmail() {
 
   const [emailReenvio, setEmailReenvio] = useState('');
   const [reenviando, setReenviando] = useState(false);
+  const [erroReenvio, setErroReenvio] = useState('');
 
   // Token é de uso único: evita a segunda chamada do StrictMode em dev
   const jaChamouRef = useRef(false);
@@ -34,7 +35,7 @@ export function VerificarEmail() {
       .then(() => setStatus('sucesso'))
       .catch((err: unknown) => {
         console.error('[VerificarEmail] Erro ao verificar email:', getSafeErrorLog(err));
-        setMensagemErro(getErrorMessage(err, 'Token de verificação inválido ou expirado.'));
+        setMensagemErro(getRateLimitMessage(err) ?? getErrorMessage(err, 'Token de verificação inválido ou expirado.'));
         setStatus('erro');
       });
   }, [token]);
@@ -44,11 +45,14 @@ export function VerificarEmail() {
     if (!emailReenvio) return;
 
     setReenviando(true);
+    setErroReenvio('');
 
     api.post('/auth/reenviar-verificacao', { email: emailReenvio })
       .then(() => showSuccess('Se este e-mail estiver cadastrado, um novo link de confirmação foi enviado.'))
       .catch((err: unknown) => {
         console.error('[VerificarEmail] Erro ao reenviar verificação:', getSafeErrorLog(err));
+        const limite = getRateLimitMessage(err);
+        if (limite) setErroReenvio(limite);
       })
       .finally(() => setReenviando(false));
   };
@@ -124,6 +128,13 @@ export function VerificarEmail() {
                     />
                   </div>
                 </div>
+
+                {erroReenvio && (
+                  <div role="alert" className="p-3.5 bg-red-50 text-red-700 text-sm font-bold rounded-xl border border-red-100 flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
+                    <AlertCircle className="h-5 w-5 flex-shrink-0" />
+                    {erroReenvio}
+                  </div>
+                )}
 
                 <button
                   type="submit"

@@ -43,6 +43,15 @@ api.interceptors.request.use(
 // Sem resposta do servidor (rede/timeout) não quer dizer token inválido, então
 // só desloga depois de algumas falhas seguidas.
 const MAX_CONSECUTIVE_NETWORK_FAILURES = 3;
+
+const ROTAS_TELAS_DE_ACESSO = [
+  '/auth/login',
+  '/auth/2fa/verificar-login',
+  '/auth/esqueci-senha',
+  '/auth/redefinir-senha',
+  '/auth/reenviar-verificacao',
+  '/auth/verificar-email',
+];
 let consecutiveNetworkFailures = 0;
 
 api.interceptors.response.use(
@@ -59,7 +68,18 @@ api.interceptors.response.use(
     const isLoginAttempt = !!url && (url.includes('/auth/login') || url.includes('/auth/2fa/verificar-login'));
     const hasResponse = !!error.response;
 
-    if (hasResponse && error.response.status === 401 && !isLoginAttempt) {
+    // Telas de acesso mostram o 429 elas mesmas (com o tempo de espera); o
+    // toast genérico aqui só duplicaria o aviso.
+    const isRateLimitOnAccessScreen =
+      hasResponse &&
+      error.response.status === 429 &&
+      !!url &&
+      (ROTAS_TELAS_DE_ACESSO.some((rota) => url.startsWith(rota)) ||
+        (url === '/usuarios' && error.config?.method === 'post'));
+
+    if (isRateLimitOnAccessScreen) {
+      // Nada a fazer: a tela trata.
+    } else if (hasResponse && error.response.status === 401 && !isLoginAttempt) {
       consecutiveNetworkFailures = 0;
       emitToast('Sua sessão expirou. Entre novamente.', 'error');
 

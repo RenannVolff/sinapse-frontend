@@ -141,6 +141,24 @@ test.describe('C. Idioma — telas públicas', () => {
     await verificarIdioma(page, testInfo);
   });
 
+  test('login com excesso de tentativas (429)', async ({ page }, testInfo) => {
+    // Resposta simulada no formato do backend (ver o teste equivalente em fluxo.spec.ts).
+    await page.route('**/backend-api/auth/login', (route) =>
+      route.fulfill({
+        status: 429,
+        contentType: 'application/json',
+        body: JSON.stringify({ statusCode: 429, message: 'Muitas requisições. Aguarde um momento e tente novamente.' }),
+      }),
+    );
+    await page.goto('/');
+    await aguardarTela(page, 'Sinapse Edu');
+    await page.getByPlaceholder('admin@sinapse.edu.br').fill('ninguem@playwright.sinapse.test');
+    await page.getByPlaceholder('••••••••').fill('SenhaErrada@123');
+    await page.getByRole('button', { name: 'Entrar na Clínica' }).click();
+    await expect(page.getByText('Muitas tentativas em pouco tempo. Aguarde cerca de 1 minuto e tente novamente.', { exact: true })).toBeVisible();
+    await verificarIdioma(page, testInfo);
+  });
+
   test('cadastro', async ({ page }, testInfo) => {
     await page.goto('/cadastro');
     await aguardarTela(page, 'Crie sua conta');

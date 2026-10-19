@@ -3,7 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { isAxiosError } from 'axios';
 import { Lock, Loader2, AlertCircle, CheckCircle2, KeyRound, ArrowRight } from 'lucide-react';
 import { api } from '../services/api';
-import { getErrorMessage, getSafeErrorLog } from '../services/apiError';
+import { getErrorMessage, getRateLimitMessage, getSafeErrorLog } from '../services/apiError';
 import { SynapseBackground } from '../components/ui/SynapseBackground';
 import { DICA_SENHA_FORTE, MENSAGEM_SENHA_FRACA, senhaEhForte } from '../utils/senha';
 
@@ -44,7 +44,10 @@ export function RedefinirSenha() {
       .then(() => setStatus('sucesso'))
       .catch((err: unknown) => {
         console.error('[RedefinirSenha] Erro ao redefinir senha:', getSafeErrorLog(err));
-        if (isAxiosError(err) && err.response?.status === 400) {
+        const limite = getRateLimitMessage(err);
+        if (limite) {
+          setErro(limite);
+        } else if (isAxiosError(err) && err.response?.status === 400) {
           setStatus('tokenInvalido');
         } else {
           setErro(getErrorMessage(err, 'Não foi possível redefinir sua senha. Tente novamente.'));

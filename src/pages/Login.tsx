@@ -5,14 +5,14 @@ import { BrainCircuit, Mail, Lock, Loader2, AlertCircle, ArrowRight, RefreshCw, 
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
 import { api } from '../services/api';
-import { getErrorMessage, getSafeErrorLog } from '../services/apiError';
+import { getErrorMessage, getRateLimitMessage, getSafeErrorLog } from '../services/apiError';
 import { SynapseBackground } from '../components/ui/SynapseBackground';
 import { HoneypotField } from '../components/ui/HoneypotField';
 
 export function Login() {
   const navigate = useNavigate();
   const { signIn, confirmarDoisFatores } = useAuth();
-  const { showSuccess } = useToast();
+  const { showSuccess, showError } = useToast();
 
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
@@ -48,7 +48,10 @@ export function Login() {
         navigate('/dashboard');
       })
       .catch((err: unknown) => {
-        if (isAxiosError(err) && err.response?.status === 403) {
+        const limite = getRateLimitMessage(err);
+        if (limite) {
+          setError(limite);
+        } else if (isAxiosError(err) && err.response?.status === 403) {
           setEmailNaoVerificado(true);
           setError('Confirme seu e-mail antes de entrar.');
         } else {
@@ -75,7 +78,7 @@ export function Login() {
       .catch((err: unknown) => {
         // A mensagem do backend distingue código errado de token temporário
         // expirado (5 min). Pode mostrar direto, nenhuma das duas vaza nada.
-        setError(getErrorMessage(err, 'Código de verificação inválido.'));
+        setError(getRateLimitMessage(err) ?? getErrorMessage(err, 'Código de verificação inválido.'));
       })
       .finally(() => setLoading(false));
   };
@@ -95,6 +98,8 @@ export function Login() {
       .then(() => showSuccess('E-mail de verificação reenviado. Verifique sua caixa de entrada.'))
       .catch((err: unknown) => {
         console.error('[Login] Erro ao reenviar verificação:', getSafeErrorLog(err));
+        const limite = getRateLimitMessage(err);
+        if (limite) showError(limite);
       })
       .finally(() => setReenviando(false));
   };

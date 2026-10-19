@@ -2,14 +2,14 @@ import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { BrainCircuit, Mail, Lock, User, UserPlus, Loader2, AlertCircle, MailCheck, RefreshCw } from 'lucide-react';
 import { api } from '../services/api';
-import { getErrorMessage, getSafeErrorLog } from '../services/apiError';
+import { getErrorMessage, getRateLimitMessage, getSafeErrorLog } from '../services/apiError';
 import { useToast } from '../hooks/useToast';
 import { SynapseBackground } from '../components/ui/SynapseBackground';
 import { HoneypotField } from '../components/ui/HoneypotField';
 import { DICA_SENHA_FORTE, MENSAGEM_SENHA_FRACA, senhaEhForte } from '../utils/senha';
 
 export function Cadastro() {
-  const { showSuccess } = useToast();
+  const { showSuccess, showError } = useToast();
 
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
@@ -52,7 +52,7 @@ export function Cadastro() {
       })
       .catch((err: unknown) => {
         console.error('[Cadastro] Erro ao cadastrar:', getSafeErrorLog(err));
-        setErro(getErrorMessage(err, 'Erro no servidor. Tente novamente.'));
+        setErro(getRateLimitMessage(err) ?? getErrorMessage(err, 'Erro no servidor. Tente novamente.'));
       })
       .finally(() => {
         setLoading(false);
@@ -66,6 +66,8 @@ export function Cadastro() {
       .then(() => showSuccess('E-mail de confirmação reenviado. Verifique sua caixa de entrada.'))
       .catch((err: unknown) => {
         console.error('[Cadastro] Erro ao reenviar verificação:', getSafeErrorLog(err));
+        const limite = getRateLimitMessage(err);
+        if (limite) showError(limite);
       })
       .finally(() => setReenviando(false));
   };

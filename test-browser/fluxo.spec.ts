@@ -51,6 +51,37 @@ test.describe('A. Fluxo entre páginas', () => {
     await expect(page).toHaveURL(`${URL_FRONTEND}/cadastro`);
   });
 
+  test('login com excesso de tentativas (429) mostra a mensagem fixa com o tempo de espera', async ({ page }) => {
+    // Disparar o rate limit de verdade levaria dezenas de requisições e
+    // deixaria o IP bloqueado; a resposta é simulada no formato do
+    // GlobalExceptionFilter do backend.
+    const mensagemBackend = 'Muitas requisições. Aguarde um momento e tente novamente.';
+    await page.route('**/backend-api/auth/login', (route) =>
+      route.request().method() === 'POST'
+        ? route.fulfill({
+            status: 429,
+            contentType: 'application/json',
+            body: JSON.stringify({ statusCode: 429, message: mensagemBackend, path: '/auth/login' }),
+          })
+        : route.fallback(),
+    );
+
+    await page.goto('/');
+    await aguardarTela(page, 'Sinapse Edu');
+    await page.getByPlaceholder('admin@sinapse.edu.br').fill('qualquer@playwright.sinapse.test');
+    await page.getByPlaceholder('••••••••').fill(SENHA_PADRAO);
+    await page.getByRole('button', { name: 'Entrar na Clínica' }).click();
+
+    const aviso = page.getByText('Muitas tentativas em pouco tempo. Aguarde cerca de 1 minuto e tente novamente.', { exact: true });
+    await expect(aviso).toBeVisible();
+    // Uma vez só (sem toast repetindo), sem o texto do backend (que repetiria
+    // o "aguarde") e sem a mensagem de credenciais.
+    await expect(aviso).toHaveCount(1);
+    await expect(page.getByText(mensagemBackend)).toHaveCount(0);
+    await expect(page.getByText('E-mail ou senha incorretos')).toHaveCount(0);
+    await expect(page).toHaveURL(`${URL_FRONTEND}/`);
+  });
+
   test('jornada principal: login → dashboard → aprendente → sessão → agenda → PEI por molde → Relatórios (4 modos) → exportação .docx', async ({ page }, testInfo) => {
     const { fluxo } = lerEstado();
     const sufixo = Date.now().toString().slice(-5);

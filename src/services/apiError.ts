@@ -34,6 +34,21 @@ export function getErrorMessage(error: unknown, fallback: string = DEFAULT_ERROR
   return fallback;
 }
 
+export const RATE_LIMIT_MESSAGE = 'Muitas tentativas em pouco tempo. Aguarde cerca de 1 minuto e tente novamente.';
+
+export function isRateLimitError(error: unknown): boolean {
+  return isAxiosError(error) && error.response?.status === 429;
+}
+
+/**
+ * 429 (rate limit do backend): mensagem fixa com quanto esperar. O texto do
+ * backend é ignorado (ele já diz "aguarde um momento" e sairia repetido).
+ * Retorna null para qualquer outro erro, para a tela seguir com a mensagem dela.
+ */
+export function getRateLimitMessage(error: unknown): string | null {
+  return isRateLimitError(error) ? RATE_LIMIT_MESSAGE : null;
+}
+
 export interface SafeErrorLog {
   statusCode?: number;
   message: string;
