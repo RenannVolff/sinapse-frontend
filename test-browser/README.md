@@ -20,6 +20,16 @@ ligado ao banco **de teste**:
   texto visível e `aria-label`/`placeholder`/`title`/`alt`; falha se achar
   termo comum de interface em inglês). Sienna e VLibras ficam de fora da
   verificação; um teste à parte só registra em que idioma eles aparecem.
+- `responsividade.spec.ts` — **D. Responsividade** (todas as rotas do
+  `App.tsx` e alguns estados em 320, 360, 390, 768, 1024, 1366 e 1920 px de
+  largura: rolagem horizontal, menu de navegação abaixo de lg, alvos menores
+  que 24×24 px, modais que não cabem, campos com fonte < 16 px, elementos sob
+  os botões flutuantes ou o banner de cookies). Grava capturas em
+  `capturas/<tela>-<largura>.png` e gera
+  [`relatorio-responsividade.md`](./relatorio-responsividade.md). Só a falta do
+  botão de menu abaixo de lg falha o teste; o resto vai para o relatório.
+  [`relatorio-responsividade-inicial.md`](./relatorio-responsividade-inicial.md)
+  é a medição feita antes dos ajustes de layout e não deve ser regenerado.
 
 ## Pré-requisitos
 
@@ -42,6 +52,7 @@ npm run test:browser                                    # tudo
 npx playwright test -c test-browser fluxo               # só o fluxo (A)
 npx playwright test -c test-browser acessibilidade      # só acessibilidade (B)
 npx playwright test -c test-browser idioma              # só idioma (C)
+npx playwright test -c test-browser responsividade      # só responsividade (D)
 npx playwright show-report playwright-report            # relatório HTML da execução
 ```
 

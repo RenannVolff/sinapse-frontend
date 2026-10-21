@@ -32,7 +32,7 @@ export function ConfirmDialog({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden">
+      <div className="bg-white rounded-3xl w-full max-w-md max-h-full shadow-2xl animate-in zoom-in-95 duration-200 overflow-y-auto">
         <div className="p-6 text-center relative">
           <button
             onClick={onCancel}

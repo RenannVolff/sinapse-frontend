@@ -58,7 +58,7 @@ export function VerificarEmail() {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden flex items-center justify-center bg-gradient-to-br from-[#0F2B29] via-[#153F3B] to-[#1F5A56] p-4">
+    <div className="min-h-screen min-h-dvh relative overflow-hidden flex items-center justify-center bg-gradient-to-br from-[#0F2B29] via-[#153F3B] to-[#1F5A56] p-4 max-lg:pb-[calc(var(--cookie-bar-altura,0px)+1rem)]">
       <SynapseBackground className="absolute inset-0 w-full h-full text-white/[0.12]" />
 
       <div className="relative z-10 w-full max-w-[440px] animate-in slide-in-from-bottom-8 duration-700 fade-in zoom-in-95">

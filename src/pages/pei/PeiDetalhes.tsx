@@ -118,7 +118,7 @@ export function PeiDetalhes() {
 
   if (loading) {
     return (
-      <div className="flex flex-col h-[60vh] items-center justify-center gap-3">
+      <div className="flex flex-col h-[60dvh] items-center justify-center gap-3">
         <Loader2 className="h-10 w-10 animate-spin text-primary" />
         <p className="text-text-secondary font-medium">Carregando PEI...</p>
       </div>
@@ -127,7 +127,7 @@ export function PeiDetalhes() {
 
   if (error || !pei) {
     return (
-      <div className="flex flex-col h-[60vh] items-center justify-center text-center px-4">
+      <div className="flex flex-col h-[60dvh] items-center justify-center text-center px-4">
         <div className="bg-red-50 p-6 rounded-full mb-4">
           <AlertTriangle className="h-12 w-12 text-red-500" />
         </div>

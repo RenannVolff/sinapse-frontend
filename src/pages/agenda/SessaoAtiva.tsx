@@ -241,7 +241,7 @@ export function SessaoAtiva() {
   };
 
   if (loading) return (
-    <div className="flex flex-col h-[60vh] items-center justify-center gap-3">
+    <div className="flex flex-col h-[60dvh] items-center justify-center gap-3">
       <Loader2 className="h-10 w-10 animate-spin text-primary" />
       <p className="text-text-secondary font-medium">Carregando prontuário do aprendente...</p>
     </div>
@@ -260,18 +260,18 @@ export function SessaoAtiva() {
   return (
     <div className="max-w-5xl mx-auto space-y-6 fade-in pb-12 relative">
       
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 rounded-2xl shadow-sm border border-primary-light sticky top-4 z-30">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-col lg:flex-row lg:flex-wrap xl:flex-nowrap lg:items-center justify-between gap-4 bg-white p-5 rounded-2xl shadow-sm border border-primary-light sticky top-4 z-30">
+        <div className="flex items-center gap-4 max-xl:min-w-0">
           <button onClick={() => navigate('/agenda')} className="p-2 text-text-secondary hover:text-primary hover:bg-primary-light rounded-xl transition-all" aria-label="Voltar para a agenda">
             <ArrowLeft className="h-6 w-6" />
           </button>
-          <div>
-            <h1 className="text-xl font-black text-text-primary leading-tight">{atendimento.tituloSessao}</h1>
+          <div className="max-xl:min-w-0">
+            <h1 className="text-xl font-black text-text-primary leading-tight break-words">{atendimento.tituloSessao}</h1>
             <p className="text-sm text-text-secondary font-medium">Aprendente: <span className="text-primary">{atendimento.aprendente.nomeCompleto}</span></p>
           </div>
         </div>
 
-        <div className="flex gap-3">
+        <div className="flex flex-wrap xl:flex-nowrap gap-3 lg:ml-auto">
           <button
             onClick={() => setModalExcluirOpen(true)}
             className="p-2.5 text-text-secondary hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
@@ -282,14 +282,14 @@ export function SessaoAtiva() {
           </button>
           {!isFinalizada ? (
             <>
-              <Button variant="outline" onClick={handlePausar} isLoading={loadingAcao} className="border-primary/30 text-primary hover:bg-primary-light">
+              <Button variant="outline" onClick={handlePausar} isLoading={loadingAcao} className="max-xl:w-auto max-xl:flex-auto border-primary/30 text-primary hover:bg-primary-light">
                 <Save className="h-4 w-4 mr-2" /> Salvar e Pausar
               </Button>
               <Button
                 variant="outline"
                 onClick={() => setModalFaltaOpen(true)}
                 isLoading={loadingAcao}
-                className="border-amber-200 text-amber-700 hover:bg-amber-50"
+                className="max-xl:w-auto max-xl:flex-auto border-amber-200 text-amber-700 hover:bg-amber-50"
                 title="O aprendente não compareceu à sessão"
               >
                 <UserX className="h-4 w-4 mr-2" /> Marcar Falta
@@ -298,12 +298,12 @@ export function SessaoAtiva() {
                 variant="outline"
                 onClick={() => setModalCancelarOpen(true)}
                 isLoading={loadingAcao}
-                className="border-slate-200 text-slate-600 hover:bg-slate-50"
+                className="max-xl:w-auto max-xl:flex-auto border-slate-200 text-slate-600 hover:bg-slate-50"
                 title="A sessão não vai ocorrer (decisão do terapeuta ou impedimento)"
               >
                 <Ban className="h-4 w-4 mr-2" /> Cancelar
               </Button>
-              <Button onClick={() => setModalEncerrarOpen(true)} className="bg-green-600 hover:bg-green-700 shadow-lg shadow-green-600/20">
+              <Button onClick={() => setModalEncerrarOpen(true)} className="max-xl:w-auto max-xl:flex-auto bg-green-600 hover:bg-green-700 shadow-lg shadow-green-600/20">
                 <CheckCheck className="h-5 w-5 mr-2" /> Encerrar Sessão
               </Button>
             </>
@@ -312,7 +312,7 @@ export function SessaoAtiva() {
               <div className={`px-4 py-2 rounded-xl font-bold flex items-center gap-2 ${finalizadoInfo.badgeClass}`}>
                 <finalizadoInfo.Icon className="h-5 w-5" /> {finalizadoInfo.label}
               </div>
-              <Button onClick={() => setModalReabrirOpen(true)} isLoading={loadingAcao} className="bg-orange-500 hover:bg-orange-600 shadow-lg shadow-orange-500/20 text-white">
+              <Button onClick={() => setModalReabrirOpen(true)} isLoading={loadingAcao} className="max-xl:w-auto max-xl:flex-auto bg-orange-500 hover:bg-orange-600 shadow-lg shadow-orange-500/20 text-white">
                 <Unlock className="h-5 w-5 mr-2" /> Reabrir Sessão
               </Button>
             </>
@@ -365,12 +365,12 @@ export function SessaoAtiva() {
         ) : (
           atendimento.atividades.map((atividade, idx) => (
             <div key={atividade.id} className="bg-white rounded-3xl border border-primary-light shadow-sm overflow-hidden animate-in slide-in-from-bottom-4 duration-300" style={{ animationDelay: `${idx * 100}ms` }}>
-              <div className="p-6 border-b border-primary-light flex justify-between items-center bg-primary-light/30">
-                <div className="flex items-center gap-4">
-                  <span className="h-8 w-8 bg-primary text-white rounded-xl flex items-center justify-center font-black text-sm shadow-md shadow-primary/20">{idx + 1}</span>
-                  <h3 className="text-lg font-bold text-text-primary">{atividade.titulo}</h3>
+              <div className="p-4 sm:p-6 border-b border-primary-light flex justify-between items-center gap-3 lg:gap-0 bg-primary-light/30">
+                <div className="flex items-center gap-4 min-w-0">
+                  <span className="h-8 w-8 shrink-0 bg-primary text-white rounded-xl flex items-center justify-center font-black text-sm shadow-md shadow-primary/20">{idx + 1}</span>
+                  <h3 className="text-lg font-bold text-text-primary min-w-0 break-words">{atividade.titulo}</h3>
                 </div>
-                <div className="flex items-center gap-1 px-3 py-1.5 bg-primary-light text-primary-hover rounded-full border border-primary-light">
+                <div className="flex items-center gap-1 px-3 py-1.5 shrink-0 bg-primary-light text-primary-hover rounded-full border border-primary-light">
                   <Star className="h-4 w-4 fill-primary" />
                   <span className="text-xs font-black uppercase tracking-tight">Nível {atividade.nivelDificuldade}</span>
                 </div>
@@ -424,7 +424,7 @@ export function SessaoAtiva() {
 
       {modalEncerrarOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-text-primary/40 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden">
+          <div className="bg-white rounded-3xl w-full max-w-md max-h-full shadow-2xl animate-in zoom-in-95 duration-200 overflow-y-auto">
             <div className="p-6 text-center">
               <div className="mx-auto w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-4">
                 <CheckCheck className="h-8 w-8" />
@@ -448,7 +448,7 @@ export function SessaoAtiva() {
 
       {modalReabrirOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-text-primary/40 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden">
+          <div className="bg-white rounded-3xl w-full max-w-md max-h-full shadow-2xl animate-in zoom-in-95 duration-200 overflow-y-auto">
             <div className="p-6 text-center relative">
               <button onClick={() => setModalReabrirOpen(false)} className="absolute top-4 right-4 p-2 text-text-secondary hover:bg-primary-light rounded-full transition-colors" aria-label="Fechar">
                 <X className="h-5 w-5" />
@@ -472,7 +472,7 @@ export function SessaoAtiva() {
 
       {modalFaltaOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-text-primary/40 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden">
+          <div className="bg-white rounded-3xl w-full max-w-md max-h-full shadow-2xl animate-in zoom-in-95 duration-200 overflow-y-auto">
             <div className="p-6 text-center relative">
               <button onClick={() => setModalFaltaOpen(false)} className="absolute top-4 right-4 p-2 text-text-secondary hover:bg-primary-light rounded-full transition-colors" aria-label="Fechar">
                 <X className="h-5 w-5" />
@@ -499,7 +499,7 @@ export function SessaoAtiva() {
 
       {modalCancelarOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-text-primary/40 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden">
+          <div className="bg-white rounded-3xl w-full max-w-md max-h-full shadow-2xl animate-in zoom-in-95 duration-200 overflow-y-auto">
             <div className="p-6 text-center relative">
               <button onClick={() => setModalCancelarOpen(false)} className="absolute top-4 right-4 p-2 text-text-secondary hover:bg-primary-light rounded-full transition-colors" aria-label="Fechar">
                 <X className="h-5 w-5" />

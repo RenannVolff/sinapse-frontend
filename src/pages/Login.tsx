@@ -105,7 +105,7 @@ export function Login() {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden flex items-center justify-center bg-gradient-to-br from-[#0F2B29] via-[#153F3B] to-[#1F5A56] p-4">
+    <div className="min-h-screen min-h-dvh relative overflow-hidden flex items-center justify-center bg-gradient-to-br from-[#0F2B29] via-[#153F3B] to-[#1F5A56] p-4 pb-[calc(var(--cookie-bar-altura,0px)+1rem)]">
 
       <SynapseBackground className="absolute inset-0 w-full h-full text-white/[0.12]" />
 

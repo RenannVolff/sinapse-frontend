@@ -589,7 +589,7 @@ export function Relatorios() {
         </div>
       )}
 
-      <div className="inline-flex items-center gap-1 p-1 bg-white border border-primary-light rounded-lg shadow-sm">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:inline-flex items-center gap-1 p-1 bg-white border border-primary-light rounded-lg shadow-sm">
         <button
           type="button"
           onClick={() => setModo('ia')}
@@ -671,7 +671,7 @@ export function Relatorios() {
         )}
 
         {modo === 'ia' && (
-          <div className="flex justify-between items-center pt-2 border-t border-primary-light mt-6">
+          <div className="flex flex-col md:flex-row gap-4 md:gap-0 justify-between items-stretch md:items-center pt-2 border-t border-primary-light mt-6">
             <div className="flex items-center gap-2">
               <Settings2 className="h-5 w-5 text-text-secondary" />
               <label htmlFor="relatorios-tipo-grafico" className="sr-only">Tipo de gráfico</label>
@@ -679,7 +679,7 @@ export function Relatorios() {
                 id="relatorios-tipo-grafico"
                 value={tipoGrafico}
                 onChange={(e) => setTipoGrafico(e.target.value as TipoGrafico)}
-                className="text-sm font-medium text-text-primary bg-background border border-primary-light rounded-lg py-2 px-3 outline-none focus:border-primary cursor-pointer"
+                className="text-base md:text-sm font-medium text-text-primary bg-background border border-primary-light rounded-lg py-2 px-3 outline-none focus:border-primary cursor-pointer"
               >
                 <option value="linha">Gráfico de Linha</option>
                 <option value="barra">Gráfico de Barras</option>

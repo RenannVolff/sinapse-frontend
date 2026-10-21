@@ -74,6 +74,10 @@ function positionVLibras() {
 export function AccessibilityWidgetsPositioner() {
   useEffect(() => {
     function repositionAll() {
+      // Altura que a barra de cookies ocupa no fim da tela (0 sem ela): as
+      // telas públicas usam como folga embaixo para o conteúdo não ficar
+      // preso sob a barra enquanto ela estiver aberta.
+      document.documentElement.style.setProperty('--cookie-bar-altura', `${getCookieBarClearance()}px`);
       positionSienna();
       positionVLibras();
     }

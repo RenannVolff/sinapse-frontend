@@ -1,6 +1,6 @@
 # Relatório de acessibilidade — Sinapse Edu
 
-Gerado automaticamente por `npm run test:browser` em 19/10/2026 às 16:58. Ferramenta: axe-core 4.13.0 (via @axe-core/playwright, textos em pt-BR), Chromium, viewport 1280×800. Regras: tags `wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`, `wcag22aa` (WCAG 2.2 nível AA).
+Gerado automaticamente por `npm run test:browser` em 21/10/2026 às 00:19. Ferramenta: axe-core 4.13.0 (via @axe-core/playwright, textos em pt-BR), Chromium, viewport 1280×800. Regras: tags `wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`, `wcag22aa` (WCAG 2.2 nível AA).
 
 Telas públicas (login, cadastro, esqueci a senha) são auditadas como no primeiro acesso, com o banner de cookies aberto; é nelas que o banner entra na análise. Telas autenticadas são auditadas depois de o banner ser respondido ("Rejeitar não essenciais"), como o usuário as vê no dia a dia: com o banner aberto o axe deixa de reportar ao menos uma regra do sistema (verificado na auditoria inicial com `aria-hidden-focus` em Relatórios). Os dados exibidos (aprendente, sessões, molde de PEI) são fictícios, criados pela própria suíte no banco de teste.
 

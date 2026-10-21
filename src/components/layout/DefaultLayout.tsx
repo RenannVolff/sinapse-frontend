@@ -4,7 +4,7 @@ import { Header } from './Header';
 
 export function DefaultLayout() {
     return (
-        <div className="min-h-screen bg-background flex">
+        <div className="min-h-screen min-h-dvh bg-background flex">
             {/* Sidebar Fixa */}
             <Sidebar />
 

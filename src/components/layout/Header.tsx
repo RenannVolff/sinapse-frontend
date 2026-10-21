@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
-import { LogOut, Bell, User, Calendar, ListTodo } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { LogOut, Bell, User, Calendar, ListTodo, Menu } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useNotificacoes } from '../../hooks/useNotificacoes';
+import { MobileNav, MOBILE_NAV_ID } from './MobileNav';
 
 export function Header() {
   const navigate = useNavigate();
@@ -10,6 +11,17 @@ export function Header() {
   const { sessoes, tarefas, naoLidasCount, marcarComoLidas } = useNotificacoes();
   const [painelAberto, setPainelAberto] = useState(false);
   const painelRef = useRef<HTMLDivElement>(null);
+  const [menuAberto, setMenuAberto] = useState(false);
+  const menuBotaoRef = useRef<HTMLButtonElement>(null);
+  const fecharMenu = useCallback(() => setMenuAberto(false), []);
+
+  // Trocou de rota (link do menu, voltar do navegador...): o menu fecha.
+  const { pathname } = useLocation();
+  const [rotaAtual, setRotaAtual] = useState(pathname);
+  if (rotaAtual !== pathname) {
+    setRotaAtual(pathname);
+    setMenuAberto(false);
+  }
 
   useEffect(() => {
     if (!painelAberto) return;
@@ -45,17 +57,26 @@ export function Header() {
   const semNotificacoes = sessoes.length === 0 && tarefas.length === 0;
 
   return (
-    <header className="h-16 bg-white border-b border-primary-light flex items-center justify-between px-6 lg:ml-64 transition-all duration-300">
-
-
-      <div className="flex items-center gap-4 sm:flex">
-        <h2 className="text-sm font-bold text-text-secondary uppercase tracking-wider">
+    <header className="h-16 bg-white border-b border-primary-light flex items-center justify-between gap-2 px-4 sm:px-6 lg:gap-0 transition-all duration-300">
+      <div className="flex items-center gap-2 sm:gap-4 max-lg:min-w-0">
+        <button
+          ref={menuBotaoRef}
+          type="button"
+          onClick={() => setMenuAberto(true)}
+          className="lg:hidden -ml-2 h-11 w-11 shrink-0 flex items-center justify-center text-text-secondary hover:text-primary hover:bg-primary-light rounded-lg transition-colors"
+          aria-label="Abrir menu de navegação"
+          aria-expanded={menuAberto}
+          aria-controls={MOBILE_NAV_ID}
+        >
+          <Menu className="h-6 w-6" />
+        </button>
+        <h2 className="text-xs sm:text-sm font-bold text-text-secondary uppercase tracking-wider max-lg:truncate">
           Área do Profissional
         </h2>
       </div>
 
       {/* Ações e Perfil do Usuário */}
-      <div className="flex items-center gap-4 ml-auto">
+      <div className="flex items-center gap-2 sm:gap-4 ml-auto">
         <div className="relative" ref={painelRef}>
           <button
             onClick={handleAbrirPainel}
@@ -71,7 +92,7 @@ export function Header() {
           </button>
 
           {painelAberto && (
-            <div className="absolute right-0 top-full mt-2 w-80 bg-white border border-primary-light rounded-2xl shadow-lg z-50 overflow-hidden">
+            <div className="fixed inset-x-4 top-16 sm:absolute sm:inset-x-auto sm:right-0 sm:top-full mt-2 sm:w-80 bg-white border border-primary-light rounded-2xl shadow-lg z-50 overflow-hidden">
               <div className="px-4 py-3 border-b border-primary-light">
                 <h3 className="text-sm font-bold text-text-primary">Notificações</h3>
               </div>
@@ -151,6 +172,8 @@ export function Header() {
           </button>
         </div>
       </div>
+
+      {menuAberto && <MobileNav onClose={fecharMenu} triggerRef={menuBotaoRef} />}
     </header>
   );
 }

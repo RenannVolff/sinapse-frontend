@@ -162,7 +162,7 @@ export function ListaTarefas() {
                       placeholder="Adicionar anotação..."
                       aria-label={`Anotação da tarefa ${tarefa.texto}`}
                       rows={2}
-                      className="w-full text-sm bg-background border border-primary-light rounded-lg p-2 outline-none focus:border-primary focus:bg-white transition-colors resize-none"
+                      className="w-full text-base md:text-sm bg-background border border-primary-light rounded-lg p-2 outline-none focus:border-primary focus:bg-white transition-colors resize-none"
                     />
                     <div className="flex justify-end mt-1">
                       <button
@@ -189,7 +189,7 @@ export function ListaTarefas() {
           placeholder="Adicionar nova tarefa..."
           aria-label="Nova tarefa"
           disabled={adicionando}
-          className="flex-1 bg-background border border-primary-light rounded-xl px-4 outline-none focus:border-primary focus:bg-white transition-colors disabled:opacity-60"
+          className="flex-1 min-w-0 bg-background border border-primary-light rounded-xl px-4 outline-none focus:border-primary focus:bg-white transition-colors disabled:opacity-60"
         />
         <button type="submit" disabled={!novaTarefa.trim() || adicionando} aria-label="Adicionar tarefa" className="bg-primary hover:bg-primary-hover text-white p-3 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
           {adicionando ? <Loader2 className="h-5 w-5 animate-spin" /> : <Plus className="h-5 w-5" />}

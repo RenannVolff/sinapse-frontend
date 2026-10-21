@@ -31,3 +31,6 @@ dist-ssr
 /playwright-report/
 /blob-report/
 /test-browser/.estado/
+
+# Capturas da suíte de responsividade (geradas a cada execução)
+/test-browser/capturas/

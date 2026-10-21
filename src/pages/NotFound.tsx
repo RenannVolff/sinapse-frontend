@@ -10,7 +10,7 @@ export function NotFound() {
   const isBatata = location.pathname.toLowerCase().includes('batata');
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 fade-in">
+    <div className="min-h-screen min-h-dvh bg-background flex flex-col items-center justify-center p-4 max-lg:pb-[calc(var(--cookie-bar-altura,0px)+1rem)] fade-in">
       <div className="bg-white p-8 md:p-12 rounded-2xl shadow-xl shadow-primary/5 border border-primary-light text-center max-w-md w-full relative overflow-hidden">
         
 

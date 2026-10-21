@@ -74,7 +74,7 @@ export function Cadastro() {
 
   return (
     // Removido o py-12 para centralização absoluta
-    <div className="min-h-screen relative overflow-hidden flex items-center justify-center bg-gradient-to-br from-[#0F2B29] via-[#153F3B] to-[#1F5A56] p-4">
+    <div className="min-h-screen min-h-dvh relative overflow-hidden flex items-center justify-center bg-gradient-to-br from-[#0F2B29] via-[#153F3B] to-[#1F5A56] p-4 pb-[calc(var(--cookie-bar-altura,0px)+1rem)]">
 
       {/* Assinatura visual sutil: rede de sinapses atrás do card */}
       <SynapseBackground className="absolute inset-0 w-full h-full text-white/[0.12]" />
@@ -147,7 +147,7 @@ export function Cadastro() {
                       disabled={loading}
                       required
                       placeholder="Ex: Dr. João Silva"
-                      className="w-full bg-background border-2 border-primary-light rounded-xl py-2.5 pl-10 pr-4 outline-none text-text-primary text-sm font-medium transition-all duration-300 focus:border-primary focus:bg-white focus:ring-4 focus:ring-primary/10"
+                      className="w-full bg-background border-2 border-primary-light rounded-xl py-2.5 pl-10 pr-4 outline-none text-text-primary text-base md:text-sm font-medium transition-all duration-300 focus:border-primary focus:bg-white focus:ring-4 focus:ring-primary/10"
                     />
                   </div>
                 </div>
@@ -166,7 +166,7 @@ export function Cadastro() {
                       disabled={loading}
                       required
                       placeholder="seu@email.com.br"
-                      className="w-full bg-background border-2 border-primary-light rounded-xl py-2.5 pl-10 pr-4 outline-none text-text-primary text-sm font-medium transition-all duration-300 focus:border-primary focus:bg-white focus:ring-4 focus:ring-primary/10"
+                      className="w-full bg-background border-2 border-primary-light rounded-xl py-2.5 pl-10 pr-4 outline-none text-text-primary text-base md:text-sm font-medium transition-all duration-300 focus:border-primary focus:bg-white focus:ring-4 focus:ring-primary/10"
                     />
                   </div>
                 </div>
@@ -187,7 +187,7 @@ export function Cadastro() {
                         disabled={loading}
                         required
                         placeholder="Mín. 8 caracteres"
-                        className="w-full bg-background border-2 border-primary-light rounded-xl py-2.5 pl-10 pr-4 outline-none text-text-primary text-sm font-medium transition-all duration-300 focus:border-primary focus:bg-white focus:ring-4 focus:ring-primary/10"
+                        className="w-full bg-background border-2 border-primary-light rounded-xl py-2.5 pl-10 pr-4 outline-none text-text-primary text-base md:text-sm font-medium transition-all duration-300 focus:border-primary focus:bg-white focus:ring-4 focus:ring-primary/10"
                       />
                     </div>
                   </div>
@@ -206,7 +206,7 @@ export function Cadastro() {
                         disabled={loading}
                         required
                         placeholder="Repita a senha"
-                        className="w-full bg-background border-2 border-primary-light rounded-xl py-2.5 pl-10 pr-4 outline-none text-text-primary text-sm font-medium transition-all duration-300 focus:border-primary focus:bg-white focus:ring-4 focus:ring-primary/10"
+                        className="w-full bg-background border-2 border-primary-light rounded-xl py-2.5 pl-10 pr-4 outline-none text-text-primary text-base md:text-sm font-medium transition-all duration-300 focus:border-primary focus:bg-white focus:ring-4 focus:ring-primary/10"
                       />
                     </div>
                   </div>
