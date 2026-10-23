@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar as CalendarIcon, Clock, User, Plus, ChevronRight, CheckCircle2, Trash2, Check, X, Archive, ArrowLeft } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, User, Plus, ChevronRight, CheckCircle2, Trash2, Check, X, Archive, ArrowLeft, Pencil } from 'lucide-react';
 import { api } from '../../services/api';
 import { getErrorMessage, getSafeErrorLog } from '../../services/apiError';
 import { useToast } from '../../hooks/useToast';
@@ -100,8 +100,8 @@ export function AgendaList() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 fade-in pb-12">
-      <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-white p-6 rounded-2xl shadow-sm border border-primary-light">
-        <div>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-primary-light">
+        <div className="min-w-0">
           <h1 className="text-2xl font-bold text-text-primary flex items-center gap-2">
             <CalendarIcon className="h-6 w-6 text-primary" /> {mostrarCancelados ? 'Sessões Canceladas' : 'Agenda de Pendências'}
           </h1>
@@ -127,7 +127,7 @@ export function AgendaList() {
         )}
       </button>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-primary-light min-h-[400px]">
+      <div className="bg-white rounded-2xl shadow-sm border border-primary-light min-h-[25rem]">
         {loading ? (
           <div className="flex justify-center items-center h-64 text-text-secondary font-medium">Carregando...</div>
         ) : sessoesExibidas.length === 0 ? (
@@ -148,21 +148,21 @@ export function AgendaList() {
               const processando = atualizandoStatusId === sessao.id;
               return (
                 <div key={sessao.id} className={`p-6 hover:bg-primary-light/40 transition-colors flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 group ${statusInfo.cardClass}`}>
-                  <div className="flex gap-4 items-center">
+                  <div className="flex gap-4 items-center min-w-0 w-full sm:w-auto">
                     <div className="h-16 w-16 bg-primary-light border border-primary-light rounded-2xl flex flex-col items-center justify-center flex-shrink-0">
                       <span className="text-xs font-bold text-primary uppercase">{dataObj.toLocaleDateString('pt-BR', { month: 'short' })}</span>
                       <span className="text-2xl font-black text-primary-hover leading-none">{dataObj.getDate()}</span>
                     </div>
-                    <div>
+                    <div className="min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className="text-lg font-bold text-text-primary">{sessao.tituloSessao}</h3>
+                        <h3 className="text-lg font-bold text-text-primary break-words min-w-0">{sessao.tituloSessao}</h3>
                         <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${statusInfo.badgeClass}`}>
                           {statusInfo.label}
                         </span>
                       </div>
-                      <div className="flex items-center gap-3 text-sm text-text-secondary font-medium mt-1">
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-text-secondary font-medium mt-1">
                         <span className="flex items-center gap-1"><Clock className="h-4 w-4"/> {dataObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
-                        <span className="flex items-center gap-1 bg-primary-light px-2 py-0.5 rounded-md text-text-primary"><User className="h-4 w-4"/> {sessao.aprendente.nomeCompleto}</span>
+                        <span className="flex items-center gap-1 bg-primary-light px-2 py-0.5 rounded-md text-text-primary min-w-0 break-words"><User className="h-4 w-4 flex-shrink-0"/> {sessao.aprendente.nomeCompleto}</span>
                       </div>
                     </div>
                   </div>
@@ -184,6 +184,15 @@ export function AgendaList() {
                           <X className="h-4 w-4" /> Cancelar
                         </button>
                       </>
+                    )}
+                    {!mostrarCancelados && (
+                      <button
+                        onClick={() => navigate(`/agenda/${sessao.id}/editar`)}
+                        className="flex items-center gap-1 px-3 py-2.5 text-sm font-semibold text-text-secondary hover:text-primary hover:bg-primary-light rounded-lg transition-colors"
+                        aria-label={`Editar sessão ${sessao.tituloSessao}`}
+                      >
+                        <Pencil className="h-4 w-4" /> Editar
+                      </button>
                     )}
                     <button
                       onClick={() => setSessaoParaExcluir(sessao)}

@@ -10,10 +10,11 @@ import { getErrorMessage, getSafeErrorLog } from '../../services/apiError';
 import { useToast } from '../../hooks/useToast';
 import { Button } from '../../components/ui/Button';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { LIMITES } from '../../constants/limits';
 
 interface ItemChecklist {
   id: string;
-  nome: string; 
+  descricao: string;
   realizado: boolean;
 }
 
@@ -260,18 +261,18 @@ export function SessaoAtiva() {
   return (
     <div className="max-w-5xl mx-auto space-y-6 fade-in pb-12 relative">
       
-      <div className="flex flex-col lg:flex-row lg:flex-wrap xl:flex-nowrap lg:items-center justify-between gap-4 bg-white p-5 rounded-2xl shadow-sm border border-primary-light sticky top-4 z-30">
-        <div className="flex items-center gap-4 max-xl:min-w-0">
+      <div className="flex flex-col lg:flex-row lg:flex-wrap lg:items-center justify-between gap-4 bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-primary-light sticky top-4 z-30">
+        <div className="flex items-center gap-4 min-w-0">
           <button onClick={() => navigate('/agenda')} className="p-2 text-text-secondary hover:text-primary hover:bg-primary-light rounded-xl transition-all" aria-label="Voltar para a agenda">
             <ArrowLeft className="h-6 w-6" />
           </button>
-          <div className="max-xl:min-w-0">
+          <div className="min-w-0">
             <h1 className="text-xl font-black text-text-primary leading-tight break-words">{atendimento.tituloSessao}</h1>
             <p className="text-sm text-text-secondary font-medium">Aprendente: <span className="text-primary">{atendimento.aprendente.nomeCompleto}</span></p>
           </div>
         </div>
 
-        <div className="flex flex-wrap xl:flex-nowrap gap-3 lg:ml-auto">
+        <div className="flex flex-wrap gap-3 lg:ml-auto">
           <button
             onClick={() => setModalExcluirOpen(true)}
             className="p-2.5 text-text-secondary hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
@@ -282,14 +283,14 @@ export function SessaoAtiva() {
           </button>
           {!isFinalizada ? (
             <>
-              <Button variant="outline" onClick={handlePausar} isLoading={loadingAcao} className="max-xl:w-auto max-xl:flex-auto border-primary/30 text-primary hover:bg-primary-light">
+              <Button variant="outline" onClick={handlePausar} isLoading={loadingAcao} className="w-auto flex-auto border-primary/30 text-primary hover:bg-primary-light">
                 <Save className="h-4 w-4 mr-2" /> Salvar e Pausar
               </Button>
               <Button
                 variant="outline"
                 onClick={() => setModalFaltaOpen(true)}
                 isLoading={loadingAcao}
-                className="max-xl:w-auto max-xl:flex-auto border-amber-200 text-amber-700 hover:bg-amber-50"
+                className="w-auto flex-auto border-amber-200 text-amber-700 hover:bg-amber-50"
                 title="O aprendente não compareceu à sessão"
               >
                 <UserX className="h-4 w-4 mr-2" /> Marcar Falta
@@ -298,12 +299,12 @@ export function SessaoAtiva() {
                 variant="outline"
                 onClick={() => setModalCancelarOpen(true)}
                 isLoading={loadingAcao}
-                className="max-xl:w-auto max-xl:flex-auto border-slate-200 text-slate-600 hover:bg-slate-50"
+                className="w-auto flex-auto border-slate-200 text-slate-600 hover:bg-slate-50"
                 title="A sessão não vai ocorrer (decisão do terapeuta ou impedimento)"
               >
                 <Ban className="h-4 w-4 mr-2" /> Cancelar
               </Button>
-              <Button onClick={() => setModalEncerrarOpen(true)} className="max-xl:w-auto max-xl:flex-auto bg-green-600 hover:bg-green-700 shadow-lg shadow-green-600/20">
+              <Button onClick={() => setModalEncerrarOpen(true)} className="w-auto flex-auto bg-green-600 hover:bg-green-700 shadow-lg shadow-green-600/20">
                 <CheckCheck className="h-5 w-5 mr-2" /> Encerrar Sessão
               </Button>
             </>
@@ -312,7 +313,7 @@ export function SessaoAtiva() {
               <div className={`px-4 py-2 rounded-xl font-bold flex items-center gap-2 ${finalizadoInfo.badgeClass}`}>
                 <finalizadoInfo.Icon className="h-5 w-5" /> {finalizadoInfo.label}
               </div>
-              <Button onClick={() => setModalReabrirOpen(true)} isLoading={loadingAcao} className="max-xl:w-auto max-xl:flex-auto bg-orange-500 hover:bg-orange-600 shadow-lg shadow-orange-500/20 text-white">
+              <Button onClick={() => setModalReabrirOpen(true)} isLoading={loadingAcao} className="w-auto flex-auto bg-orange-500 hover:bg-orange-600 shadow-lg shadow-orange-500/20 text-white">
                 <Unlock className="h-5 w-5 mr-2" /> Reabrir Sessão
               </Button>
             </>
@@ -321,18 +322,23 @@ export function SessaoAtiva() {
       </div>
 
       {!isFinalizada && (
-        <form onSubmit={handleAddAtividade} className="bg-gradient-to-br from-primary to-primary-hover p-5 md:p-6 rounded-3xl shadow-xl shadow-primary/10 flex flex-col md:flex-row gap-4 items-end">
-          <div className="flex-1 w-full">
+        <form onSubmit={handleAddAtividade} className="bg-gradient-to-br from-primary to-primary-hover p-5 md:p-6 rounded-3xl shadow-xl shadow-primary/10 flex flex-col md:flex-row gap-4 items-stretch md:items-start">
+          <div className="flex-1 w-full min-w-0">
             <label htmlFor="sessaoativa-nova-atividade" className="text-xs font-black text-primary-light uppercase tracking-widest ml-1 mb-2 block">Nova Atividade para esta Sessão</label>
             <input
               id="sessaoativa-nova-atividade"
               type="text"
               value={novoTitulo}
               onChange={(e) => setNovoTitulo(e.target.value)}
-              className="w-full bg-white/10 border border-white/20 rounded-xl py-3 px-4 outline-none focus:bg-white focus:text-text-primary transition-all text-white placeholder-white/50 font-medium"
+              maxLength={LIMITES.TITULO}
+              aria-describedby="sessaoativa-nova-atividade-contador"
+              className="w-full min-w-0 bg-white/10 border border-white/20 rounded-xl py-3 px-4 outline-none focus:bg-white focus:text-text-primary transition-all text-white placeholder-white/50 font-medium"
               placeholder="Ex: Identificação de Fonemas, Quebra-cabeça Lógico..."
               required
             />
+            <p id="sessaoativa-nova-atividade-contador" className="text-xs text-primary-light text-right mt-1 tabular-nums">
+              {novoTitulo.length}/{LIMITES.TITULO}<span className="sr-only"> caracteres</span>
+            </p>
           </div>
           <div className="w-full md:w-40">
             <label htmlFor="sessaoativa-dificuldade" className="text-xs font-black text-primary-light uppercase tracking-widest ml-1 mb-2 block">Dificuldade</label>
@@ -349,7 +355,7 @@ export function SessaoAtiva() {
               <option value={5} className="text-text-primary">5 - Avançado</option>
             </select>
           </div>
-          <Button type="submit" isLoading={loadingAdd} className="w-full md:w-auto bg-white text-primary hover:bg-primary-light h-[50px] px-6 shadow-lg shadow-black/10">
+          <Button type="submit" isLoading={loadingAdd} className="w-full md:w-auto md:mt-7 bg-white text-primary hover:bg-primary-light min-h-[3.125rem] px-6 shadow-lg shadow-black/10">
             <Plus className="h-5 w-5 mr-2" /> Adicionar
           </Button>
         </form>
@@ -394,8 +400,8 @@ export function SessaoAtiva() {
                     ) : (
                       <Circle className="h-8 w-8 mb-2 text-text-secondary group-hover:text-primary/60 transition-colors" />
                     )}
-                    <span className={`text-[10px] font-black uppercase tracking-widest text-center leading-tight ${item.realizado ? 'text-green-700' : 'text-text-secondary group-hover:text-primary'}`}>
-                      {item.nome}
+                    <span className={`text-[0.625rem] font-black uppercase tracking-widest text-center leading-tight ${item.realizado ? 'text-green-700' : 'text-text-secondary group-hover:text-primary'}`}>
+                      {item.descricao}
                     </span>
                   </button>
                 ))}
@@ -413,10 +419,15 @@ export function SessaoAtiva() {
           id="sessaoativa-parecer"
           value={observacoes}
           onChange={(e) => setObservacoes(e.target.value)}
+          maxLength={LIMITES.TEXTO_LONGO}
+          aria-describedby="sessaoativa-parecer-contador"
           disabled={isFinalizada}
           placeholder={isFinalizada ? "Nenhuma observação registrada." : "Descreva aqui os detalhes do desempenho, comportamento e evolução observados nesta sessão..."}
-          className="w-full bg-background border border-primary-light rounded-2xl p-5 outline-none focus:bg-white focus:border-primary transition-all text-text-primary leading-relaxed h-40 resize-none font-medium placeholder-text-secondary disabled:opacity-70 disabled:bg-primary-light disabled:cursor-not-allowed"
+          className="w-full bg-background border border-primary-light rounded-2xl p-5 outline-none focus:bg-white focus:border-primary transition-all text-text-primary leading-relaxed min-h-[10rem] resize-y break-words font-medium placeholder-text-secondary disabled:opacity-70 disabled:bg-primary-light disabled:cursor-not-allowed"
         />
+        <p id="sessaoativa-parecer-contador" className={`text-xs text-right mt-1 tabular-nums ${observacoes.length >= LIMITES.TEXTO_LONGO ? 'text-red-600 font-semibold' : 'text-text-secondary'}`}>
+          {observacoes.length}/{LIMITES.TEXTO_LONGO}<span className="sr-only"> caracteres</span>
+        </p>
       </div>
 
 
