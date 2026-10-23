@@ -11,12 +11,14 @@ import {
   AlertTriangle,
   Trash2,
   ClipboardList,
+  Pencil,
 } from 'lucide-react';
 import { api } from '../../services/api';
 import { getSafeErrorLog } from '../../services/apiError';
 import { useToast } from '../../hooks/useToast';
 import { Button } from '../../components/ui/Button';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { calcularIdade, formatarDiaBr } from '../../utils/datas';
 
 // Tipagem rigorosa
 interface AtendimentoHist {
@@ -80,18 +82,6 @@ export function AprendenteDetalhes() {
       .finally(() => setExcluindo(false));
   };
 
-  // Função para calcular a idade
-  const calcularIdade = (dataIso: string) => {
-    const nascimento = new Date(dataIso);
-    const hoje = new Date();
-    let idade = hoje.getFullYear() - nascimento.getFullYear();
-    const m = hoje.getMonth() - nascimento.getMonth();
-    if (m < 0 || (m === 0 && hoje.getDate() < nascimento.getDate())) {
-      idade--;
-    }
-    return idade;
-  };
-
   if (loading) {
     return (
       <div className="flex flex-col h-[60dvh] items-center justify-center gap-3">
@@ -119,7 +109,7 @@ export function AprendenteDetalhes() {
   return (
     <div className="max-w-4xl mx-auto space-y-6 fade-in pb-12">
       {/* Cabeçalho */}
-      <div className="flex items-center gap-4 bg-white p-6 rounded-xl border border-primary-light shadow-sm">
+      <div className="flex flex-wrap items-center gap-4 bg-white p-4 sm:p-6 rounded-xl border border-primary-light shadow-sm">
         <button
           onClick={() => navigate('/aprendentes')}
           className="p-2 text-text-secondary hover:text-primary hover:bg-primary-light rounded-lg transition-colors"
@@ -128,12 +118,20 @@ export function AprendenteDetalhes() {
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
-        <div className="flex-1">
-          <h1 className="text-2xl font-bold text-text-primary">{aprendente.nomeCompleto}</h1>
+        <div className="flex-1 min-w-0">
+          <h1 className="text-2xl font-bold text-text-primary break-words">{aprendente.nomeCompleto}</h1>
           <p className="text-text-secondary text-sm mt-1 flex items-center gap-2">
             Paciente ativo desde {new Date(aprendente.criadoEm).toLocaleDateString('pt-BR')}
           </p>
         </div>
+        <button
+          onClick={() => navigate(`/aprendentes/${id}/editar`)}
+          className="p-2.5 text-text-secondary hover:text-primary hover:bg-primary-light rounded-lg transition-colors"
+          title="Editar aprendente"
+          aria-label="Editar aprendente"
+        >
+          <Pencil className="h-5 w-5" />
+        </button>
         <button
           onClick={() => setModalExcluirOpen(true)}
           className="p-2.5 text-text-secondary hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
@@ -142,10 +140,10 @@ export function AprendenteDetalhes() {
         >
           <Trash2 className="h-5 w-5" />
         </button>
-        <Button onClick={() => navigate(`/aprendentes/${id}/pei`)} variant="outline" className="w-auto px-6 hidden sm:flex">
+        <Button onClick={() => navigate(`/aprendentes/${id}/pei`)} variant="outline" className="w-full sm:w-auto px-6">
           <ClipboardList className="h-4 w-4 mr-2" /> Ver PEIs
         </Button>
-        <Button onClick={() => navigate('/agenda/nova')} className="w-auto px-6 hidden sm:flex">
+        <Button onClick={() => navigate('/agenda/nova')} className="w-full sm:w-auto px-6">
           <Calendar className="h-4 w-4 mr-2" /> Agendar Sessão
         </Button>
       </div>
@@ -165,10 +163,10 @@ export function AprendenteDetalhes() {
                 <div>
                   <p className="text-xs font-semibold text-text-secondary uppercase">Idade</p>
                   <p className="text-sm font-medium text-text-primary">
-                    {calcularIdade(aprendente.dataNascimento)} anos
+                    {calcularIdade(aprendente.dataNascimento) ?? '-'} anos
                   </p>
                   <p className="text-xs text-text-secondary">
-                    Nascido em {new Date(aprendente.dataNascimento).toLocaleDateString('pt-BR')}
+                    Nascido em {formatarDiaBr(aprendente.dataNascimento)}
                   </p>
                 </div>
               </li>
@@ -178,7 +176,7 @@ export function AprendenteDetalhes() {
                 </div>
                 <div>
                   <p className="text-xs font-semibold text-text-secondary uppercase">Responsável</p>
-                  <p className="text-sm font-medium text-text-primary">{aprendente.responsavel}</p>
+                  <p className="text-sm font-medium text-text-primary break-words">{aprendente.responsavel}</p>
                 </div>
               </li>
               <li className="flex items-start gap-3">
@@ -211,9 +209,9 @@ export function AprendenteDetalhes() {
               <div className="space-y-4">
                 {aprendente.atendimentos.map((sessao) => (
                   <div key={sessao.id} className="p-4 bg-background rounded-lg border border-primary-light flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center hover:bg-primary-light/50 transition-colors">
-                    <div>
-                      <h4 className="font-bold text-text-primary text-sm mb-1">{sessao.tituloSessao}</h4>
-                      <div className="flex items-center gap-2 text-xs text-text-secondary font-medium">
+                    <div className="min-w-0">
+                      <h4 className="font-bold text-text-primary text-sm mb-1 break-words">{sessao.tituloSessao}</h4>
+                      <div className="flex flex-wrap items-center gap-2 text-xs text-text-secondary font-medium">
                         <Calendar className="h-3.5 w-3.5" />
                         {new Date(sessao.dataAtendimento).toLocaleDateString('pt-BR')} às {new Date(sessao.dataAtendimento).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                       </div>

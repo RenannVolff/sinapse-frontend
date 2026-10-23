@@ -57,6 +57,7 @@ export default function App() {
                 <Route path="/aprendentes" element={<AprendentesList />} />
                 <Route path="/aprendentes/novo" element={<NovoAprendente />} />
                 <Route path="/aprendentes/:id" element={<AprendenteDetalhes />} />
+                <Route path="/aprendentes/:id/editar" element={<NovoAprendente />} />
 
                 <Route path="/aprendentes/:aprendenteId/pei" element={<PeiList />} />
                 <Route path="/aprendentes/:aprendenteId/pei/novo" element={<NovoPei />} />
@@ -67,6 +68,7 @@ export default function App() {
 
                 <Route path="/agenda" element={<AgendaList />} />
                 <Route path="/agenda/nova" element={<NovaSessao />} />
+                <Route path="/agenda/:id/editar" element={<NovaSessao />} />
                 <Route path="/agenda/:id/sessao" element={<SessaoAtiva />} />
 
                 <Route path="/relatorios" element={<Relatorios />} />
