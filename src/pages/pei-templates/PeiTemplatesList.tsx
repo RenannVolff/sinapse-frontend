@@ -62,8 +62,8 @@ export function PeiTemplatesList() {
           <div className="divide-y divide-primary-light">
             {templates.map((template) => (
               <div key={template.id} className="p-5">
-                <p className="font-bold text-text-primary">{template.nome}</p>
-                <p className="text-sm text-text-secondary mt-1 line-clamp-2">{template.dificuldades}</p>
+                <p className="font-bold text-text-primary break-words">{template.nome}</p>
+                <p className="text-sm text-text-secondary mt-1 line-clamp-2 break-words">{template.dificuldades}</p>
               </div>
             ))}
           </div>

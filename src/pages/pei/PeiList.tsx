@@ -4,6 +4,7 @@ import { ArrowLeft, ClipboardList, Plus, ChevronRight, Loader2, Target, Calendar
 import { api } from '../../services/api';
 import { getSafeErrorLog } from '../../services/apiError';
 import { Button } from '../../components/ui/Button';
+import { formatarDiaBr } from '../../utils/datas';
 
 export interface Pei {
   id: string;
@@ -49,7 +50,7 @@ export function PeiList() {
 
       {/* Cabeçalho */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-primary-light shadow-sm">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 min-w-0">
           <button
             onClick={() => navigate(`/aprendentes/${aprendenteId}`)}
             className="p-2 text-text-secondary hover:text-primary hover:bg-primary-light rounded-lg transition-colors"
@@ -58,9 +59,9 @@ export function PeiList() {
           >
             <ArrowLeft className="h-5 w-5" />
           </button>
-          <div>
-            <h1 className="text-2xl font-bold text-text-primary flex items-center gap-2">
-              <ClipboardList className="h-6 w-6 text-primary" />
+          <div className="min-w-0">
+            <h1 className="text-2xl font-bold text-text-primary flex items-center gap-2 break-words">
+              <ClipboardList className="h-6 w-6 text-primary flex-shrink-0" />
               PEIs {aprendente ? `de ${aprendente.nomeCompleto}` : ''}
             </h1>
             <p className="text-text-secondary text-sm mt-1">Planos Educacionais Individualizados registrados para este aprendente.</p>
@@ -103,15 +104,15 @@ export function PeiList() {
                     <p className="font-bold text-text-primary group-hover:text-primary-hover transition-colors truncate">
                       {pei.objetivos}
                     </p>
-                    <div className="flex items-center gap-2 text-xs text-text-secondary font-medium mt-1">
+                    <div className="flex flex-wrap items-center gap-x-2 text-xs text-text-secondary font-medium mt-1">
                       <Calendar className="h-3.5 w-3.5" />
-                      Início em {new Date(pei.dataInicio).toLocaleDateString('pt-BR')}
-                      {pei.dataFim && ` · Fim em ${new Date(pei.dataFim).toLocaleDateString('pt-BR')}`}
+                      Início em {formatarDiaBr(pei.dataInicio)}
+                      {pei.dataFim && ` · Fim em ${formatarDiaBr(pei.dataFim)}`}
                     </div>
                   </div>
                 </div>
                 <button className="flex items-center gap-1 text-sm font-bold text-primary flex-shrink-0">
-                  Ver PEI <ChevronRight className="h-4 w-4" />
+                  <span className="sr-only sm:not-sr-only">Ver PEI</span> <ChevronRight className="h-4 w-4" />
                 </button>
               </div>
             ))}
