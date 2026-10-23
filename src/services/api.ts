@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { getErrorMessage, getSafeErrorLog } from './apiError';
 import { emitToast } from './toastBridge';
 
@@ -9,12 +9,11 @@ export const USER_STORAGE_KEY = '@SinapseEdu:user';
 // em produção a URL do backend tem que vir de VITE_API_URL.
 const apiUrl = import.meta.env.VITE_API_URL;
 
-if (!apiUrl && import.meta.env.PROD) {
-  console.error(
-    '[API Config] VITE_API_URL não definida no build de produção. ' +
-      'Configure-a com a URL do backend (ex.: no painel da Vercel) e gere o build de novo.',
-  );
-}
+// Build de produção sem VITE_API_URL: /backend-api não existe na Vercel (o
+// rewrite devolveria o index.html). Cada chamada falha na hora como erro de
+// rede, e a tela mostra "Não foi possível conectar ao servidor", sem log. O
+// aviso para quem publica sai no log do build (vite.config.ts).
+const apiNaoConfigurada = !apiUrl && import.meta.env.PROD;
 
 export const api = axios.create({
   baseURL: apiUrl || '/backend-api',
@@ -22,6 +21,9 @@ export const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
+    if (apiNaoConfigurada) {
+      return Promise.reject(new AxiosError('API não configurada', AxiosError.ERR_NETWORK, config));
+    }
 
     // O localStorage é a única fonte do token: sem ele, a requisição sai
     // sem Authorization, mesmo que algum valor antigo tenha ficado no config.
@@ -61,7 +63,10 @@ api.interceptors.response.use(
   },
   (error) => {
     // Nunca logar o erro cru: pode carregar dados de aprendente/responsável.
-    console.error('[API Error]', getSafeErrorLog(error));
+    // Só em desenvolvimento, e só status/código (sem rota nem mensagem).
+    if (import.meta.env.DEV) {
+      console.error('[API Error]', getSafeErrorLog(error));
+    }
 
     // Código 2FA errado também volta 401, mas não pode derrubar a sessão.
     const url: string | undefined = error.config?.url;
