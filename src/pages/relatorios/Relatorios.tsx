@@ -11,6 +11,9 @@ import { getErrorMessage, getSafeErrorLog } from '../../services/apiError';
 import { useToast } from '../../hooks/useToast';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
+import { LIMITES } from '../../constants/limits';
+import { diaLocal, formatarDiaBr, hojeIso, ordenarPeriodo } from '../../utils/datas';
+import { coletarErros, validarDataDia, type ErrosCampo } from '../../utils/validacao';
 
 interface AprendenteOpcao {
   id: string;
@@ -23,10 +26,20 @@ interface EvolucaoData {
   score: number;
 }
 
+// Período que o back usou de fato (datas trocadas se vieram invertidas).
+interface PeriodoEfetivo {
+  inicio: string | null;
+  fim: string | null;
+  invertido: boolean;
+}
+
 interface RelatorioResponse {
   resumoIa: string;
   dadosGrafico: EvolucaoData[];
+  periodo?: PeriodoEfetivo;
 }
+
+const AVISO_PERIODO_AJUSTADO = 'Período ajustado automaticamente: a data de início era posterior à de fim.';
 
 type TipoGrafico = 'linha' | 'barra' | 'area';
 
@@ -255,6 +268,12 @@ export function Relatorios() {
   const [aprendenteSelecionado, setAprendenteSelecionado] = useState<string>('');
   const [dataInicio, setDataInicio] = useState<string>('');
   const [dataFim, setDataFim] = useState<string>('');
+  const [avisoPeriodo, setAvisoPeriodo] = useState<string>('');
+  const [errosPeriodo, setErrosPeriodo] = useState<ErrosCampo>({});
+  const [periodoAnalisado, setPeriodoAnalisado] = useState<PeriodoEfetivo | null>(null);
+  // Data impressa no .docx. Não pode ser futura (o back também recusa).
+  const [dataEmissao, setDataEmissao] = useState<string>(() => hojeIso());
+  const [erroEmissao, setErroEmissao] = useState<string>('');
   const [tipoGrafico, setTipoGrafico] = useState<TipoGrafico>('linha');
 
   const [dadosEvolucao, setDadosEvolucao] = useState<EvolucaoData[]>([]);
@@ -317,7 +336,8 @@ export function Relatorios() {
           setDadosAcompanhamento(pontos);
 
           if (res.data.length > 0) {
-            const datasIso = res.data.map((sessao) => sessao.dataAtendimento.slice(0, 10)).sort();
+            // Dia local da sessão (o ISO vem em UTC: 22h de um dia já é o seguinte).
+            const datasIso = res.data.map((sessao) => diaLocal(new Date(sessao.dataAtendimento))).sort();
             setIntervaloAcompanhamento({ inicio: datasIso[0], fim: datasIso[datasIso.length - 1] });
           } else {
             setIntervaloAcompanhamento(null);
@@ -337,22 +357,55 @@ export function Relatorios() {
     buscarAcompanhamento();
   }, [aprendenteSelecionado]);
 
+  // Escolheu início depois do fim (ou o contrário): troca os dois campos na
+  // hora e avisa, em vez de deixar o back devolver um período vazio.
+  const alterarPeriodo = (campo: 'inicio' | 'fim', valor: string) => {
+    const inicio = campo === 'inicio' ? valor : dataInicio;
+    const fim = campo === 'fim' ? valor : dataFim;
+    const ordenado = ordenarPeriodo(inicio, fim);
+    setDataInicio(ordenado.inicio);
+    setDataFim(ordenado.fim);
+    setAvisoPeriodo(ordenado.invertido ? AVISO_PERIODO_AJUSTADO : '');
+    setErrosPeriodo({});
+  };
+
   const handleGerarRelatorio = (e: FormEvent) => {
     e.preventDefault();
-    
-    if (!aprendenteSelecionado || !dataInicio || !dataFim) {
-      setError('Por favor, preencha o aprendente e o período selecionado.');
+
+    if (!aprendenteSelecionado) {
+      setError('Selecione o aprendente do relatório.');
+      return;
+    }
+
+    const erros = coletarErros({
+      inicio: validarDataDia('Data de início', dataInicio, { minimo: LIMITES.DATA_MIN, maximo: LIMITES.DATA_MAX }),
+      fim: validarDataDia('Data de fim', dataFim, { minimo: LIMITES.DATA_MIN, maximo: LIMITES.DATA_MAX }),
+    });
+    setErrosPeriodo(erros);
+    if (Object.keys(erros).length > 0) {
+      setError('');
       return;
     }
 
     setLoadingRelatorio(true);
     setError('');
 
-    api.get<RelatorioResponse>(`/aprendentes/${aprendenteSelecionado}/relatorio-ia?inicio=${dataInicio}&fim=${dataFim}`)
+    api.get<RelatorioResponse>(`/aprendentes/${aprendenteSelecionado}/relatorio-ia`, {
+      params: { inicio: dataInicio, fim: dataFim },
+    })
       .then((res) => {
         setDadosEvolucao(res.data.dadosGrafico);
         setResumoIa(res.data.resumoIa);
         setResumoIaAprendenteId(aprendenteSelecionado);
+
+        // Mostra e passa a usar o período que o back efetivamente analisou.
+        const periodo = res.data.periodo ?? null;
+        setPeriodoAnalisado(periodo);
+        if (periodo?.inicio && periodo.fim) {
+          setDataInicio(periodo.inicio);
+          setDataFim(periodo.fim);
+          if (periodo.invertido) setAvisoPeriodo(AVISO_PERIODO_AJUSTADO);
+        }
       })
       .catch((err) => {
         console.error('[Relatorios] Erro ao gerar relatório:', getSafeErrorLog(err));
@@ -385,22 +438,33 @@ export function Relatorios() {
       return;
     }
 
+    const erroDataEmissao = validarDataDia('Data de emissão', dataEmissao, {
+      naoFutura: true,
+      minimo: LIMITES.DATA_MIN,
+    });
+    setErroEmissao(erroDataEmissao ?? '');
+    if (erroDataEmissao) {
+      document.getElementById('relatorios-data-emissao')?.focus();
+      return;
+    }
+
     setExportandoDocx(true);
 
     try {
       let textoResumo = resumoIaAprendenteId === aprendenteSelecionado ? resumoIa : '';
+      const periodoExportado = ordenarPeriodo(
+        dataInicio || intervaloAcompanhamento?.inicio || '',
+        dataFim || intervaloAcompanhamento?.fim || '',
+      );
 
       if (!textoResumo) {
-        const inicio = dataInicio || intervaloAcompanhamento?.inicio;
-        const fim = dataFim || intervaloAcompanhamento?.fim;
-
-        if (!inicio || !fim) {
+        if (!periodoExportado.inicio || !periodoExportado.fim) {
           throw new Error('SEM_INTERVALO');
         }
 
-        const res = await api.get<RelatorioResponse>(
-          `/aprendentes/${aprendenteSelecionado}/relatorio-ia?inicio=${inicio}&fim=${fim}`
-        );
+        const res = await api.get<RelatorioResponse>(`/aprendentes/${aprendenteSelecionado}/relatorio-ia`, {
+          params: { inicio: periodoExportado.inicio, fim: periodoExportado.fim },
+        });
         textoResumo = res.data.resumoIa;
         setResumoIa(textoResumo);
         setResumoIaAprendenteId(aprendenteSelecionado);
@@ -422,6 +486,9 @@ export function Relatorios() {
       const payload = {
         nomeAprendente,
         resumoIa: textoResumo,
+        dataEmissao,
+        periodoInicio: periodoExportado.inicio || undefined,
+        periodoFim: periodoExportado.fim || undefined,
         graficos: [
           { titulo: 'Acompanhamento AB-ABAB', imagemBase64: imagemAbAbab },
           { titulo: 'Média por Período', imagemBase64: imagemCiclos },
@@ -589,7 +656,7 @@ export function Relatorios() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:inline-flex items-center gap-1 p-1 bg-white border border-primary-light rounded-lg shadow-sm">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-wrap lg:w-fit items-center gap-1 p-1 bg-white border border-primary-light rounded-lg shadow-sm">
         <button
           type="button"
           onClick={() => setModo('ia')}
@@ -651,12 +718,40 @@ export function Relatorios() {
           </div>
 
           {modo === 'ia' && (
-            <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Input label="Data de Início" type="date" value={dataInicio} onChange={(e) => setDataInicio(e.target.value)} icon={<CalendarIcon className="h-5 w-5" />} required />
-              <Input label="Data de Fim" type="date" value={dataFim} onChange={(e) => setDataFim(e.target.value)} icon={<CalendarIcon className="h-5 w-5" />} required />
+            <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <Input
+                label="Data de Início"
+                name="inicio"
+                type="date"
+                value={dataInicio}
+                onChange={(e) => alterarPeriodo('inicio', e.target.value)}
+                icon={<CalendarIcon className="h-5 w-5" />}
+                min={LIMITES.DATA_MIN}
+                max={LIMITES.DATA_MAX}
+                error={errosPeriodo.inicio}
+                required
+              />
+              <Input
+                label="Data de Fim"
+                name="fim"
+                type="date"
+                value={dataFim}
+                onChange={(e) => alterarPeriodo('fim', e.target.value)}
+                icon={<CalendarIcon className="h-5 w-5" />}
+                min={LIMITES.DATA_MIN}
+                max={LIMITES.DATA_MAX}
+                error={errosPeriodo.fim}
+                required
+              />
             </div>
           )}
         </div>
+
+        {/* Aviso discreto, anunciado por leitor de tela, quando o período é trocado. */}
+        <p role="status" aria-live="polite" className={modo === 'ia' && avisoPeriodo ? 'flex items-center gap-2 text-sm text-text-secondary' : 'sr-only'}>
+          {modo === 'ia' && avisoPeriodo && <Info className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />}
+          {modo === 'ia' ? avisoPeriodo : ''}
+        </p>
 
         {modo === 'ia' && error && (
           <div className="p-3 bg-red-50 text-red-600 text-sm font-medium rounded-lg border border-red-100">
@@ -670,8 +765,27 @@ export function Relatorios() {
           </div>
         )}
 
+        {/* Data impressa no documento Word; vale para qualquer modo. */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Input
+            id="relatorios-data-emissao"
+            label="Data de emissão (Word)"
+            name="dataEmissao"
+            type="date"
+            value={dataEmissao}
+            onChange={(e) => {
+              setDataEmissao(e.target.value);
+              setErroEmissao('');
+            }}
+            icon={<CalendarIcon className="h-5 w-5" />}
+            min={LIMITES.DATA_MIN}
+            max={hojeIso()}
+            error={erroEmissao}
+          />
+        </div>
+
         {modo === 'ia' && (
-          <div className="flex flex-col md:flex-row gap-4 md:gap-0 justify-between items-stretch md:items-center pt-2 border-t border-primary-light mt-6">
+          <div className="flex flex-col md:flex-row gap-4 justify-between items-stretch md:items-center pt-2 border-t border-primary-light mt-6">
             <div className="flex items-center gap-2">
               <Settings2 className="h-5 w-5 text-text-secondary" />
               <label htmlFor="relatorios-tipo-grafico" className="sr-only">Tipo de gráfico</label>
@@ -707,7 +821,12 @@ export function Relatorios() {
                 <Sparkles className="h-5 w-5 text-primary" />
                 Relatório Automático Sistêmico
               </h3>
-              <p className="text-text-primary leading-relaxed font-medium">
+              {periodoAnalisado?.inicio && periodoAnalisado.fim && (
+                <p className="text-sm text-text-secondary mb-3">
+                  Período analisado: {formatarDiaBr(periodoAnalisado.inicio)} a {formatarDiaBr(periodoAnalisado.fim)}
+                </p>
+              )}
+              <p className="text-text-primary leading-relaxed font-medium break-words whitespace-pre-line">
                 {resumoIa}
               </p>
             </div>
@@ -720,7 +839,7 @@ export function Relatorios() {
             </div>
 
             {dadosEvolucao.length === 0 ? (
-              <div className="flex items-center justify-center h-[300px] text-text-secondary font-medium">
+              <div className="flex items-center justify-center min-h-[18.75rem] text-text-secondary font-medium">
                 Não há dados matemáticos consolidados para este período.
               </div>
             ) : (
@@ -744,11 +863,11 @@ export function Relatorios() {
             </div>
 
             {loadingAcompanhamento ? (
-              <div className="flex items-center justify-center h-[300px] text-text-secondary font-medium">
+              <div className="flex items-center justify-center min-h-[18.75rem] text-text-secondary font-medium">
                 Carregando histórico...
               </div>
             ) : dadosAcompanhamento.length === 0 ? (
-              <div className="flex items-center justify-center h-[300px] text-text-secondary font-medium">
+              <div className="flex items-center justify-center min-h-[18.75rem] text-text-secondary font-medium">
                 Não há atendimentos registrados para este aprendente.
               </div>
             ) : (
@@ -790,11 +909,11 @@ export function Relatorios() {
             </div>
 
             {loadingAcompanhamento ? (
-              <div className="flex items-center justify-center h-[300px] text-text-secondary font-medium">
+              <div className="flex items-center justify-center min-h-[18.75rem] text-text-secondary font-medium">
                 Carregando histórico...
               </div>
             ) : ciclosAcompanhamento.length === 0 ? (
-              <div className="flex items-center justify-center h-[300px] text-text-secondary font-medium">
+              <div className="flex items-center justify-center min-h-[18.75rem] text-text-secondary font-medium">
                 Não há atendimentos registrados para este aprendente.
               </div>
             ) : (
@@ -836,15 +955,15 @@ export function Relatorios() {
             </div>
 
             {loadingAcompanhamento ? (
-              <div className="flex items-center justify-center h-[300px] text-text-secondary font-medium">
+              <div className="flex items-center justify-center min-h-[18.75rem] text-text-secondary font-medium">
                 Carregando histórico...
               </div>
             ) : dadosAcompanhamento.length === 0 ? (
-              <div className="flex items-center justify-center h-[300px] text-text-secondary font-medium">
+              <div className="flex items-center justify-center min-h-[18.75rem] text-text-secondary font-medium">
                 Não há atendimentos registrados para este aprendente.
               </div>
             ) : dadosAcompanhamento.length < 3 ? (
-              <div className="flex items-center gap-2 justify-center h-[300px] text-text-secondary font-medium text-center px-6">
+              <div className="flex items-center gap-2 justify-center min-h-[18.75rem] text-text-secondary font-medium text-center px-6">
                 <Info className="h-4 w-4 shrink-0" />
                 São necessárias pelo menos 3 sessões registradas para gerar a análise de regressão linear.
               </div>
