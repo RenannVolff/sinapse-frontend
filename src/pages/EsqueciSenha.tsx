@@ -4,6 +4,7 @@ import { BrainCircuit, Mail, Loader2, MailCheck, AlertCircle } from 'lucide-reac
 import { api } from '../services/api';
 import { getRateLimitMessage, getSafeErrorLog } from '../services/apiError';
 import { SynapseBackground } from '../components/ui/SynapseBackground';
+import { LIMITES } from '../constants/limits';
 
 export function EsqueciSenha() {
   const [email, setEmail] = useState('');
@@ -36,7 +37,7 @@ export function EsqueciSenha() {
     <div className="min-h-screen min-h-dvh relative overflow-hidden flex items-center justify-center bg-gradient-to-br from-[#0F2B29] via-[#153F3B] to-[#1F5A56] p-4 max-lg:pb-[calc(var(--cookie-bar-altura,0px)+1rem)]">
       <SynapseBackground className="absolute inset-0 w-full h-full text-white/[0.12]" />
 
-      <div className="relative z-10 w-full max-w-[420px] animate-in slide-in-from-bottom-8 duration-700 fade-in zoom-in-95">
+      <div className="relative z-10 w-full max-w-[26.25rem] animate-in slide-in-from-bottom-8 duration-700 fade-in zoom-in-95">
         <div className="bg-white/95 backdrop-blur-xl rounded-[2rem] shadow-2xl shadow-black/50 border border-white/20 p-8 sm:p-10">
 
           <div className="flex flex-col items-center mb-8 text-center">
@@ -75,6 +76,7 @@ export function EsqueciSenha() {
                   <input
                     id="esquecisenha-email"
                     type="email"
+                    maxLength={LIMITES.EMAIL_LOGIN}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     disabled={loading}

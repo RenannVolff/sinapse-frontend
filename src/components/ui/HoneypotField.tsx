@@ -19,6 +19,7 @@ export function HoneypotField({ value, onChange }: HoneypotFieldProps) {
         type="text"
         tabIndex={-1}
         autoComplete="off"
+        maxLength={500}
         value={value}
         onChange={(e) => onChange(e.target.value)}
       />

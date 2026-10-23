@@ -8,6 +8,7 @@ import { api } from '../services/api';
 import { getErrorMessage, getRateLimitMessage, getSafeErrorLog } from '../services/apiError';
 import { SynapseBackground } from '../components/ui/SynapseBackground';
 import { HoneypotField } from '../components/ui/HoneypotField';
+import { LIMITES } from '../constants/limits';
 
 export function Login() {
   const navigate = useNavigate();
@@ -51,6 +52,9 @@ export function Login() {
         const limite = getRateLimitMessage(err);
         if (limite) {
           setError(limite);
+        } else if (isAxiosError(err) && !err.response) {
+          // Sem resposta do servidor (rede ou back não configurado): não é senha errada.
+          setError(getErrorMessage(err));
         } else if (isAxiosError(err) && err.response?.status === 403) {
           setEmailNaoVerificado(true);
           setError('Confirme seu e-mail antes de entrar.');
@@ -109,7 +113,7 @@ export function Login() {
 
       <SynapseBackground className="absolute inset-0 w-full h-full text-white/[0.12]" />
 
-      <div className="relative z-10 w-full max-w-[420px] animate-in slide-in-from-bottom-8 duration-700 fade-in zoom-in-95">
+      <div className="relative z-10 w-full max-w-[26.25rem] animate-in slide-in-from-bottom-8 duration-700 fade-in zoom-in-95">
         <div className="bg-white/95 backdrop-blur-xl rounded-[2rem] shadow-2xl shadow-black/50 border border-white/20 p-8 sm:p-10">
 
           <div className="flex flex-col items-center mb-10">
@@ -152,7 +156,7 @@ export function Login() {
                     autoFocus
                     autoComplete="one-time-code"
                     inputMode={usandoBackup ? 'text' : 'numeric'}
-                    maxLength={20}
+                    maxLength={LIMITES.CODIGO_2FA}
                     placeholder={usandoBackup ? 'XXXXXXXX' : '000000'}
                     className="w-full bg-background border-2 border-primary-light rounded-xl py-3.5 pl-11 pr-4 outline-none text-text-primary font-bold tracking-[0.3em] transition-all duration-300 focus:border-primary focus:bg-white focus:ring-4 focus:ring-primary/10"
                   />
@@ -218,6 +222,7 @@ export function Login() {
                 <input
                   id="login-email"
                   type="email"
+                  maxLength={LIMITES.EMAIL_LOGIN}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={loading}
@@ -237,6 +242,7 @@ export function Login() {
                 <input
                   id="login-senha-de-acesso"
                   type="password"
+                  maxLength={LIMITES.SENHA_LOGIN_MAX}
                   value={senha}
                   onChange={(e) => setSenha(e.target.value)}
                   disabled={loading}
@@ -304,7 +310,7 @@ export function Login() {
                 Cadastre-se aqui
               </Link>
             </p>
-            <p className="text-[10px] text-text-secondary font-bold tracking-widest uppercase">
+            <p className="text-[0.625rem] text-text-secondary font-bold tracking-widest uppercase">
               Acesso exclusivo e monitorado
             </p>
           </div>
