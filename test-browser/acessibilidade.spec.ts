@@ -119,7 +119,7 @@ test.describe('B. Acessibilidade — telas autenticadas', () => {
   test('lista de aprendentes', async ({ page }, testInfo) => {
     await page.goto('/aprendentes');
     await aguardarTela(page, 'Gestão de Aprendentes');
-    await expect(page.getByRole('cell', { name: 'Aprendente Fictício A11y' })).toBeVisible();
+    await expect(page.getByRole('cell', { name: 'Aprendente Fictício Acessível', exact: true })).toBeVisible();
     await auditar(page, testInfo, 5, 'Lista de aprendentes', { comBannerCookies: false });
   });
 
@@ -139,7 +139,7 @@ test.describe('B. Acessibilidade — telas autenticadas', () => {
   test('nova sessão (com a grade de horários aberta)', async ({ page }, testInfo) => {
     await page.goto('/agenda/nova');
     await aguardarTela(page, 'Agendar Nova Sessão');
-    await page.locator('select').selectOption({ label: 'Aprendente Fictício A11y' });
+    await page.locator('select').selectOption({ label: 'Aprendente Fictício Acessível' });
     // Dia da sessão semeada: a grade mostra horários livres e ocupados.
     const dia = horariosFuturosNoMes()[0]?.data;
     if (dia) {
@@ -154,7 +154,7 @@ test.describe('B. Acessibilidade — telas autenticadas', () => {
     async function abrirRelatorios(page: Page) {
       await page.goto('/relatorios');
       await aguardarTela(page, 'Relatório Analítico de Evolução');
-      await page.locator('form select').first().selectOption({ label: 'Aprendente Fictício A11y' });
+      await page.locator('form select').first().selectOption({ label: 'Aprendente Fictício Acessível' });
       await expect(page.getByRole('button', { name: 'Exportar para Word (.docx)' })).toBeEnabled();
     }
 

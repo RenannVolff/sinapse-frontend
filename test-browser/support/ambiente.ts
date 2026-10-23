@@ -92,6 +92,9 @@ export function ambienteBackendTeste(): Record<string, string> {
     GMAIL_USER: '',
     GMAIL_APP_PASSWORD: '',
     FRONTEND_URL: URL_FRONTEND,
+    // O cadastro confere se o domínio do e-mail existe (DNS/MX); os domínios
+    // fictícios da suíte não existem. Mesma chave que a suíte e2e do back usa.
+    VALIDAR_DNS_EMAIL: 'false',
   };
 }
 

@@ -104,7 +104,7 @@ const TELAS: Tela[] = [
     rota: () => '/aprendentes',
     titulo: 'Gestão de Aprendentes',
     preparar: async (page) => {
-      await expect(page.getByText('Aprendente Fictício A11y').first()).toBeVisible();
+      await expect(page.getByText('Aprendente Fictício Acessível').first()).toBeVisible();
     },
     modais: [confirmExcluirAprendente],
   },
@@ -114,10 +114,10 @@ const TELAS: Tela[] = [
     tela: 'Detalhes do aprendente',
     autenticada: true,
     rota: (ids) => `/aprendentes/${ids.aprendenteId}`,
-    titulo: 'Aprendente Fictício A11y',
+    titulo: 'Aprendente Fictício Acessível',
     modais: [confirmExcluirAprendente],
   },
-  { slug: 'pei-lista', tela: 'PEIs do aprendente', autenticada: true, rota: (ids) => `/aprendentes/${ids.aprendenteId}/pei`, titulo: /PEIs de Aprendente Fictício A11y/ },
+  { slug: 'pei-lista', tela: 'PEIs do aprendente', autenticada: true, rota: (ids) => `/aprendentes/${ids.aprendenteId}/pei`, titulo: /PEIs de Aprendente Fictício Acessível/ },
   { slug: 'pei-novo', tela: 'Novo PEI', autenticada: true, rota: (ids) => `/aprendentes/${ids.aprendenteId}/pei/novo`, titulo: 'Novo PEI' },
   { slug: 'pei-detalhes', tela: 'Detalhes do PEI', autenticada: true, rota: (ids) => `/pei/${ids.peiId}`, titulo: 'Plano Educacional Individualizado' },
   {
@@ -222,7 +222,7 @@ const TELAS: Tela[] = [
 ];
 
 async function selecionarAprendente(page: Page) {
-  await page.locator('form select').first().selectOption({ label: 'Aprendente Fictício A11y' });
+  await page.locator('form select').first().selectOption({ label: 'Aprendente Fictício Acessível' });
   await expect(page.getByRole('button', { name: 'Exportar para Word (.docx)' })).toBeEnabled();
 }
 

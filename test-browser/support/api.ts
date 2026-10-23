@@ -17,8 +17,17 @@ export function novoIp(): string {
   return `10.${base}.${(contadorIp >> 8) & 255}.${contadorIp & 255}`;
 }
 
+// Nome de pessoa só aceita letras, espaço, hífen e apóstrofo: troca cada
+// dígito de um sufixo único por uma letra (0→a ... 9→j).
+export function emLetras(texto: string): string {
+  return texto.replace(/\d/g, (d) => 'abcdefghij'[Number(d)]);
+}
+
+// O cadastro aceita e-mail de até 50 caracteres: data e sorteio em base 36
+// para caber junto com o domínio da suíte (24 caracteres).
 export function emailUnico(prefixo: string): string {
-  return `${prefixo}.${Date.now()}.${Math.floor(Math.random() * 1e6)}@${DOMINIO_EMAIL_SUITE}`;
+  const sufixo = `${Date.now().toString(36)}${Math.floor(Math.random() * 1296).toString(36)}`;
+  return `${prefixo.slice(0, 12)}.${sufixo}@${DOMINIO_EMAIL_SUITE}`;
 }
 
 export async function chamarApi<T = unknown>(

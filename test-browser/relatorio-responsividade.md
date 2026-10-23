@@ -1,6 +1,6 @@
 # Relatório de responsividade — Sinapse Edu
 
-Gerado automaticamente por `npm run test:browser` (`responsividade.spec.ts`) em 21/10/2026 às 00:19. Chromium, larguras `320x568`, `360x740`, `390x844`, `768x1024`, `1024x768`, `1366x768`, `1920x1080`. Dados exibidos fictícios, criados pela suíte no banco de teste.
+Gerado automaticamente por `npm run test:browser` (`responsividade.spec.ts`) em 22/10/2026 às 17:15. Chromium, larguras `320x568`, `360x740`, `390x844`, `768x1024`, `1024x768`, `1366x768`, `1920x1080`. Dados exibidos fictícios, criados pela suíte no banco de teste.
 
 Em cada tela e largura a suíte confere:
 

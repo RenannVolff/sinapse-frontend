@@ -33,7 +33,7 @@ export default async function globalSetup(): Promise<void> {
   // Dados para as telas auditadas não aparecerem vazias: um aprendente com
   // histórico (gráficos e regressão nos Relatórios), uma sessão no mês
   // corrente (Agenda) e um molde de PEI (Novo PEI).
-  const aprendente = await criarAprendente(a11y.token, 'Aprendente Fictício A11y');
+  const aprendente = await criarAprendente(a11y.token, 'Aprendente Fictício Acessível');
   await semearHistorico(a11y.token, aprendente.id, [1, 3, 4]);
   const [horarioAgenda] = horariosFuturosNoMes();
   if (horarioAgenda) {

@@ -229,7 +229,7 @@ test.describe('C. Idioma — telas autenticadas', () => {
   test('lista de aprendentes', async ({ page }, testInfo) => {
     await page.goto('/aprendentes');
     await aguardarTela(page, 'Gestão de Aprendentes');
-    await expect(page.getByRole('cell', { name: 'Aprendente Fictício A11y' })).toBeVisible();
+    await expect(page.getByRole('cell', { name: 'Aprendente Fictício Acessível', exact: true })).toBeVisible();
     await verificarIdioma(page, testInfo);
   });
 
@@ -242,7 +242,7 @@ test.describe('C. Idioma — telas autenticadas', () => {
   test('detalhes do aprendente (com o diálogo de exclusão aberto)', async ({ page }, testInfo) => {
     const { a11y } = lerEstado();
     await page.goto(`/aprendentes/${a11y.aprendenteId}`);
-    await aguardarTela(page, 'Aprendente Fictício A11y');
+    await aguardarTela(page, 'Aprendente Fictício Acessível');
     await page.getByRole('button', { name: 'Excluir aprendente' }).click();
     await expect(page.getByRole('heading', { name: 'Excluir aprendente?' })).toBeVisible();
     await verificarIdioma(page, testInfo);
@@ -251,7 +251,7 @@ test.describe('C. Idioma — telas autenticadas', () => {
   test('PEIs do aprendente', async ({ page }, testInfo) => {
     const { a11y } = lerEstado();
     await page.goto(`/aprendentes/${a11y.aprendenteId}/pei`);
-    await aguardarTela(page, /PEIs de Aprendente Fictício A11y/);
+    await aguardarTela(page, /PEIs de Aprendente Fictício Acessível/);
     await verificarIdioma(page, testInfo);
   });
 
@@ -304,7 +304,7 @@ test.describe('C. Idioma — telas autenticadas', () => {
     async function abrirRelatorios(page: Page) {
       await page.goto('/relatorios');
       await aguardarTela(page, 'Relatório Analítico de Evolução');
-      await page.locator('form select').first().selectOption({ label: 'Aprendente Fictício A11y' });
+      await page.locator('form select').first().selectOption({ label: 'Aprendente Fictício Acessível' });
       await expect(page.getByRole('button', { name: 'Exportar para Word (.docx)' })).toBeEnabled();
     }
 

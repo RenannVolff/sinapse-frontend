@@ -1,6 +1,6 @@
 # Relatório de acessibilidade — Sinapse Edu
 
-Gerado automaticamente por `npm run test:browser` em 21/10/2026 às 00:19. Ferramenta: axe-core 4.13.0 (via @axe-core/playwright, textos em pt-BR), Chromium, viewport 1280×800. Regras: tags `wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`, `wcag22aa` (WCAG 2.2 nível AA).
+Gerado automaticamente por `npm run test:browser` em 22/10/2026 às 17:15. Ferramenta: axe-core 4.13.0 (via @axe-core/playwright, textos em pt-BR), Chromium, viewport 1280×800. Regras: tags `wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`, `wcag22aa` (WCAG 2.2 nível AA).
 
 Telas públicas (login, cadastro, esqueci a senha) são auditadas como no primeiro acesso, com o banner de cookies aberto; é nelas que o banner entra na análise. Telas autenticadas são auditadas depois de o banner ser respondido ("Rejeitar não essenciais"), como o usuário as vê no dia a dia: com o banner aberto o axe deixa de reportar ao menos uma regra do sistema (verificado na auditoria inicial com `aria-hidden-focus` em Relatórios). Os dados exibidos (aprendente, sessões, molde de PEI) são fictícios, criados pela própria suíte no banco de teste.
 
@@ -23,19 +23,19 @@ Telas públicas (login, cadastro, esqueci a senha) são auditadas como no primei
 | Tela | Rota | Crítico | Sério | Moderado | Menor | Elementos | Regras aprovadas |
 |---|---|---:|---:|---:|---:|---:|---:|
 | Login | `/` | 0 | 0 | 0 | 0 | 0 | 26 |
-| Cadastro | `/cadastro` | 0 | 0 | 0 | 0 | 0 | 26 |
+| Cadastro | `/cadastro` | 0 | 0 | 0 | 0 | 0 | 27 |
 | Esqueci a senha | `/esqueci-senha` | 0 | 0 | 0 | 0 | 0 | 25 |
 | Dashboard | `/dashboard` | 0 | 0 | 0 | 0 | 0 | 25 |
 | Lista de aprendentes | `/aprendentes` | 0 | 0 | 0 | 0 | 0 | 27 |
-| Novo aprendente | `/aprendentes/novo` | 0 | 0 | 0 | 0 | 0 | 25 |
+| Novo aprendente | `/aprendentes/novo` | 0 | 0 | 0 | 0 | 0 | 26 |
 | Agenda | `/agenda` | 0 | 0 | 0 | 0 | 0 | 23 |
 | Nova sessão | `/agenda/nova` | 0 | 0 | 0 | 0 | 0 | 27 |
 | Relatórios — Relatório com IA | `/relatorios` | 0 | 0 | 0 | 0 | 0 | 26 |
-| Relatórios — Acompanhamento (AB-ABAB) | `/relatorios` | 0 | 0 | 0 | 0 | 0 | 27 |
-| Relatórios — Média por Período | `/relatorios` | 0 | 0 | 0 | 0 | 0 | 27 |
-| Relatórios — Regressão Linear | `/relatorios` | 0 | 0 | 0 | 0 | 0 | 27 |
+| Relatórios — Acompanhamento (AB-ABAB) | `/relatorios` | 0 | 0 | 0 | 0 | 0 | 28 |
+| Relatórios — Média por Período | `/relatorios` | 0 | 0 | 0 | 0 | 0 | 28 |
+| Relatórios — Regressão Linear | `/relatorios` | 0 | 0 | 0 | 0 | 0 | 28 |
 | Novo PEI | `/aprendentes/:id/pei/novo` | 0 | 0 | 0 | 0 | 0 | 26 |
-| Configurações | `/configuracoes` | 0 | 0 | 0 | 0 | 0 | 25 |
+| Configurações | `/configuracoes` | 0 | 0 | 0 | 0 | 0 | 26 |
 
 ## Violações do sistema por tela
 
@@ -120,13 +120,14 @@ A partir do carregamento da página, a tecla Tab é pressionada repetidamente. P
 
 ### Teclado — Cadastro
 
-- **Ordem dos campos:** correta — `campo "Ex: Dr. João Silva"` → `campo "seu@email.com.br"` → `campo "Mín. 8 caracteres"` → `campo "Repita a senha"` → `botão "Cadastrar e Acessar"` → `link "Entre aqui"`
+- **Ordem dos campos:** DIFERENTE da esperada — `campo "Ex: João Silva"` → `campo "seu@email.com.br"` → `campo "Mín. 8 caracteres"` → `campo "Repita a senha"` → `botão "Cadastrar e Acessar"` → `link "Entre aqui"`
+  - Esperada: `campo "Ex: Dr. João Silva"` → `campo "seu@email.com.br"` → `campo "Mín. 8 caracteres"` → `campo "Repita a senha"` → `botão "Cadastrar e Acessar"` → `link "Entre aqui"`
 - **Foco visível:** presente em todas as paradas do sistema
 - **Ciclo do Tab:** depois da parada 9, o foco volta para `botão "Aceitar todos" (<button>)` — o foco fica preso dentro do widget "Banner de cookies (vanilla-cookieconsent)" até o usuário agir nele.
 
 | # | Elemento focado | Foco visível | Origem |
 |---:|---|---|---|
-| 1 | campo "Ex: Dr. João Silva" (<input type=text>) | sim | sistema |
+| 1 | campo "Ex: João Silva" (<input type=text>) | sim | sistema |
 | 2 | campo "seu@email.com.br" (<input type=email>) | sim | sistema |
 | 3 | campo "Mín. 8 caracteres" (<input type=password>) | sim | sistema |
 | 4 | campo "Repita a senha" (<input type=password>) | sim | sistema |

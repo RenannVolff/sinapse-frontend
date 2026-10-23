@@ -2,7 +2,7 @@ import * as fs from 'node:fs';
 import type { Page } from '@playwright/test';
 import { test, expect, aguardarTela } from './support/fixtures';
 import { SENHA_PADRAO, URL_FRONTEND, arquivoSessao, lerEstado } from './support/ambiente';
-import { criarAprendente, criarAtendimento, emailUnico, semearHistorico } from './support/api';
+import { criarAprendente, criarAtendimento, emailUnico, emLetras, semearHistorico } from './support/api';
 import { horariosFuturosNoMes } from './support/horarios';
 import { gerarCodigoTotp } from './support/totp';
 
@@ -38,7 +38,7 @@ test.describe('A. Fluxo entre páginas', () => {
 
     await page.goto('/cadastro');
     await aguardarTela(page, 'Crie sua conta');
-    await page.getByPlaceholder('Ex: Dr. João Silva').fill('Terapeuta Cadastro');
+    await page.getByPlaceholder('Ex: João Silva').fill('Terapeuta Cadastro');
     await page.getByPlaceholder('seu@email.com.br').fill(email);
     await page.getByPlaceholder('Mín. 8 caracteres').fill(SENHA_PADRAO);
     await page.getByPlaceholder('Repita a senha').fill(SENHA_PADRAO);
@@ -85,7 +85,7 @@ test.describe('A. Fluxo entre páginas', () => {
   test('jornada principal: login → dashboard → aprendente → sessão → agenda → PEI por molde → Relatórios (4 modos) → exportação .docx', async ({ page }, testInfo) => {
     const { fluxo } = lerEstado();
     const sufixo = Date.now().toString().slice(-5);
-    const nomeAprendente = `Aprendente Fluxo ${sufixo}`;
+    const nomeAprendente = `Aprendente Fluxo ${emLetras(sufixo)}`;
     const tituloSessao = `Sessão de leitura ${sufixo}`;
     const nomeMolde = `Molde de leitura ${sufixo}`;
 
@@ -119,7 +119,7 @@ test.describe('A. Fluxo entre páginas', () => {
 
       await expect(page.getByText('Aprendente cadastrado com sucesso!')).toBeVisible();
       await expect(page).toHaveURL(`${URL_FRONTEND}/aprendentes`, { timeout: 10_000 });
-      await expect(page.getByRole('cell', { name: nomeAprendente })).toBeVisible();
+      await expect(page.getByRole('cell', { name: nomeAprendente, exact: true })).toBeVisible();
     });
 
     await test.step('agendar sessão pela grade de horários', async () => {
@@ -190,7 +190,7 @@ test.describe('A. Fluxo entre páginas', () => {
 
     await test.step('criar PEI do aprendente a partir do molde', async () => {
       await menuLateral(page).getByRole('link', { name: 'Meus Aprendentes' }).click();
-      await page.getByRole('cell', { name: nomeAprendente }).click();
+      await page.getByRole('cell', { name: nomeAprendente, exact: true }).click();
       await aguardarTela(page, nomeAprendente);
       await page.getByRole('button', { name: 'Ver PEIs' }).click();
       await aguardarTela(page, `PEIs de ${nomeAprendente}`);
@@ -300,7 +300,7 @@ test.describe('A. Fluxo entre páginas', () => {
 
       await page.goto('/dashboard');
       const token = await tokenDaPagina(page);
-      const { id: aprendenteId } = await criarAprendente(token, `Aprendente Cancelamento ${Date.now().toString().slice(-5)}`);
+      const { id: aprendenteId } = await criarAprendente(token, `Aprendente Cancelamento ${emLetras(Date.now().toString().slice(-5))}`);
       // O último horário do mês: longe do primeiro, usado pela jornada principal.
       await criarAtendimento(token, aprendenteId, horarios[horarios.length - 1].inicio, titulo);
 
