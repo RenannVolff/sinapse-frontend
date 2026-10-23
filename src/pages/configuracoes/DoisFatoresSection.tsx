@@ -7,6 +7,7 @@ import { api } from '../../services/api';
 import { getErrorMessage, getSafeErrorLog } from '../../services/apiError';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
+import { LIMITES } from '../../constants/limits';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 
 type Etapa = 'inativo' | 'configurando' | 'codigosBackup' | 'ativo';
@@ -207,11 +208,12 @@ export function DoisFatoresSection() {
           <Input
             label="Código do app autenticador"
             value={codigo}
-            onChange={(e) => setCodigo(e.target.value)}
+            onChange={(e) => setCodigo(e.target.value.replace(/\D/g, ''))}
             placeholder="000000"
             inputMode="numeric"
             autoComplete="one-time-code"
             maxLength={6}
+            showCounter
             icon={<KeyRound className="h-5 w-5" />}
             className="tracking-[0.3em] font-bold"
             required
@@ -305,6 +307,8 @@ export function DoisFatoresSection() {
             onChange={(e) => setSenhaAtual(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter') handleDesativar(); }}
             autoComplete="current-password"
+            maxLength={LIMITES.SENHA_LOGIN_MAX}
+            showCounter
             icon={<Lock className="h-5 w-5" />}
             autoFocus
             error={erroDesativar || undefined}
