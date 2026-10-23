@@ -85,7 +85,7 @@ export function Header() {
           >
             <Bell className="h-5 w-5" />
             {naoLidasCount > 0 && (
-              <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 flex items-center justify-center text-[10px] font-bold bg-red-500 text-white rounded-full border border-white">
+              <span className="absolute -top-1 -right-1 min-w-[1.125rem] h-[1.125rem] px-1 flex items-center justify-center text-[0.625rem] font-bold bg-red-500 text-white rounded-full border border-white">
                 {naoLidasCount > 9 ? '9+' : naoLidasCount}
               </span>
             )}

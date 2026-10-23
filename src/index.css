@@ -23,3 +23,10 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   @apply bg-slate-400;
 }
+/* Escala de fonte alta (painel de acessibilidade) em tela estreita: palavra
+   longa num título quebra (com hífen em pt-BR) em vez de vazar da caixa.
+   "anywhere" também vale para o texto solto dentro de títulos flex com ícone. */
+h1, h2, h3, h4 {
+  overflow-wrap: anywhere;
+  hyphens: auto;
+}

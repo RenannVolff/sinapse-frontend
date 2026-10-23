@@ -18,7 +18,7 @@ export function Sidebar() {
           <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-1">
             Sistema Seguro
           </p>
-          <p className="text-[10px] text-text-secondary">v1.0.0 (Estável)</p>
+          <p className="text-[0.625rem] text-text-secondary">v1.0.0 (Estável)</p>
         </div>
       </div>
     </aside>
