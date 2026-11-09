@@ -1,19 +1,26 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Plus, Users, ChevronRight, Loader2, User, Trash2, Pencil } from 'lucide-react';
+import { Plus, Users, ChevronRight, Loader2, User, Trash2, Pencil } from 'lucide-react';
 import { api } from '../../services/api';
 import { getSafeErrorLog } from '../../services/apiError';
+import {
+  listarAprendentes,
+  type Aprendente,
+  type OrdenacaoAprendente,
+} from '../../services/aprendentes';
 import { useToast } from '../../hooks/useToast';
 import { Button } from '../../components/ui/Button';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { SearchBar } from '../../components/ui/SearchBar';
+import { SortableHeader } from '../../components/ui/SortableHeader';
 import { LIMITES } from '../../constants/limits';
+import { ordenarAprendentes, type DirecaoOrdenacao } from '../../utils/ordenacao';
 
-export interface Aprendente {
-  id: string;
-  nomeCompleto: string;
-  responsavel: string;
-  contato: string;
-}
+const COLUNAS: { campo: OrdenacaoAprendente; rotulo: string }[] = [
+  { campo: 'name', rotulo: 'Aprendente' },
+  { campo: 'guardianName', rotulo: 'Responsável' },
+  { campo: 'contact', rotulo: 'Contato' },
+];
 
 export function AprendentesList() {
   const navigate = useNavigate();
@@ -21,15 +28,38 @@ export function AprendentesList() {
   const [aprendentes, setAprendentes] = useState<Aprendente[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [busca, setBusca] = useState<string>('');
+  const [sortBy, setSortBy] = useState<OrdenacaoAprendente>('name');
+  const [order, setOrder] = useState<DirecaoOrdenacao>('asc');
   const [aprendenteParaExcluir, setAprendenteParaExcluir] = useState<Aprendente | null>(null);
   const [excluindo, setExcluindo] = useState<boolean>(false);
 
+  // A cada troca de ordenação a lista é pedida de novo à API (sortBy/order).
+  // Enquanto isso, a lista atual continua na tela já reordenada no cliente,
+  // sem spinner; o spinner só aparece na primeira carga. `ativo` descarta a
+  // resposta de um pedido que ficou para trás após cliques rápidos.
   useEffect(() => {
-    api.get<Aprendente[]>('/aprendentes')
-      .then((response) => setAprendentes(response.data))
+    let ativo = true;
+    listarAprendentes({ sortBy, order })
+      .then((lista) => {
+        if (ativo) setAprendentes(lista);
+      })
       .catch((error) => console.error('[AprendentesList] Erro ao buscar aprendentes:', getSafeErrorLog(error)))
-      .finally(() => setLoading(false));
-  }, []);
+      .finally(() => {
+        if (ativo) setLoading(false);
+      });
+    return () => {
+      ativo = false;
+    };
+  }, [sortBy, order]);
+
+  const handleOrdenar = (campo: OrdenacaoAprendente) => {
+    if (campo === sortBy) {
+      setOrder((atual) => (atual === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortBy(campo);
+      setOrder('asc');
+    }
+  };
 
   const handleExcluirAprendente = () => {
     if (!aprendenteParaExcluir) return;
@@ -45,8 +75,12 @@ export function AprendentesList() {
       .finally(() => setExcluindo(false));
   };
 
-  const aprendentesFiltrados = aprendentes.filter((aprendente) =>
-    aprendente.nomeCompleto.toLowerCase().includes(busca.toLowerCase())
+  const aprendentesFiltrados = useMemo(
+    () =>
+      ordenarAprendentes(aprendentes, sortBy, order).filter((aprendente) =>
+        aprendente.nomeCompleto.toLowerCase().includes(busca.toLowerCase())
+      ),
+    [aprendentes, sortBy, order, busca],
   );
 
   return (
@@ -68,23 +102,14 @@ export function AprendentesList() {
       </div>
 
       {/* Barra de Pesquisa Premium */}
-      <div className="bg-white p-2 pl-4 rounded-2xl border border-primary-light shadow-sm flex items-center focus-within:border-primary focus-within:ring-4 focus-within:ring-primary/10 transition-all">
-        <Search className="h-5 w-5 text-text-secondary" />
-        <input
-          type="text"
-          placeholder="Buscar aprendente pelo nome..."
-          aria-label="Buscar aprendente pelo nome"
-          value={busca}
-          onChange={(e) => setBusca(e.target.value)}
-          maxLength={LIMITES.NOME_PESSOA}
-          className="flex-1 min-w-0 bg-transparent border-none py-3 px-4 outline-none text-text-primary placeholder-text-secondary"
-        />
-        <div className="pr-4 hidden md:block">
-          <span className="px-3 py-1 bg-primary-light text-text-primary text-xs font-bold rounded-full">
-            {aprendentesFiltrados.length} Registros
-          </span>
-        </div>
-      </div>
+      <SearchBar
+        value={busca}
+        onChange={setBusca}
+        placeholder="Buscar aprendente pelo nome..."
+        ariaLabel="Buscar aprendente pelo nome"
+        maxLength={LIMITES.NOME_PESSOA}
+        totalRegistros={aprendentesFiltrados.length}
+      />
 
       {/* Tabela de Dados */}
       <div className="bg-white rounded-2xl border border-primary-light shadow-sm overflow-hidden">
@@ -106,10 +131,17 @@ export function AprendentesList() {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-background/50 border-b border-primary-light text-xs text-text-secondary uppercase tracking-wider">
-                  <th className="p-5 font-bold">Aprendente</th>
-                  <th className="p-5 font-bold">Responsável</th>
-                  <th className="p-5 font-bold">Contato</th>
-                  <th className="p-5 font-bold text-right">Ação</th>
+                  {COLUNAS.map(({ campo, rotulo }) => (
+                    <SortableHeader
+                      key={campo}
+                      ativo={sortBy === campo}
+                      direcao={order}
+                      onOrdenar={() => handleOrdenar(campo)}
+                    >
+                      {rotulo}
+                    </SortableHeader>
+                  ))}
+                  <th scope="col" className="p-5 font-bold text-right">Ação</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-primary-light">

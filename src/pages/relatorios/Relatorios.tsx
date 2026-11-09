@@ -8,6 +8,7 @@ import { isAxiosError } from 'axios';
 import { toPng } from 'html-to-image';
 import { api } from '../../services/api';
 import { getErrorMessage, getSafeErrorLog } from '../../services/apiError';
+import { listarAprendentes } from '../../services/aprendentes';
 import { useToast } from '../../hooks/useToast';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
@@ -299,9 +300,11 @@ export function Relatorios() {
   const refGraficoRegressao = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    api.get<AprendenteOpcao[]>('/aprendentes')
-      .then((res) => {
-        setAprendentes(res.data);
+    // Ordem alfabética pelo nome: a API já devolve assim (sortBy=name) e o
+    // serviço reordena no cliente por garantia (pt-BR, sem caixa/acento).
+    listarAprendentes({ sortBy: 'name', order: 'asc' })
+      .then((lista: AprendenteOpcao[]) => {
+        setAprendentes(lista);
         setError('');
       })
       .catch((err) => {

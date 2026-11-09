@@ -65,6 +65,7 @@ export default function App() {
 
                 <Route path="/pei-templates" element={<PeiTemplatesList />} />
                 <Route path="/pei-templates/novo" element={<NovoPeiTemplate />} />
+                <Route path="/pei-templates/:id/editar" element={<NovoPeiTemplate />} />
 
                 <Route path="/agenda" element={<AgendaList />} />
                 <Route path="/agenda/nova" element={<NovaSessao />} />
