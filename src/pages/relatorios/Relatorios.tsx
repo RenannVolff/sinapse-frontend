@@ -44,6 +44,61 @@ const AVISO_PERIODO_AJUSTADO = 'Período ajustado automaticamente: a data de in�
 
 type TipoGrafico = 'linha' | 'barra' | 'area';
 
+// Contrato do back para o estilo de cada gráfico no .docx. Chave ausente =
+// estilo padrão do back.
+type ChartTypeRelatorio = 'line' | 'bar' | 'area';
+
+interface ChartTypesRelatorio {
+  acompanhamento?: ChartTypeRelatorio;
+  media?: ChartTypeRelatorio;
+  regressao?: ChartTypeRelatorio;
+}
+
+interface GraficoExportado {
+  titulo: string;
+  imagemBase64: string;
+}
+
+interface ExportarDocxPayload {
+  nomeAprendente: string;
+  resumoIa: string;
+  dataEmissao: string;
+  periodoInicio?: string;
+  periodoFim?: string;
+  graficos: GraficoExportado[];
+  chartTypes?: ChartTypesRelatorio;
+}
+
+// Título do gráfico extra (Evolução, no tipo do seletor) no .docx.
+const ROTULO_TIPO_GRAFICO: Record<TipoGrafico, string> = {
+  linha: 'Linha',
+  barra: 'Barras',
+  area: 'Área',
+};
+
+// Quadros máximos de espera para o gráfico extra aparecer no DOM depois de
+// os dados chegarem (~0,5 s a 60 fps).
+const MAX_QUADROS_ESPERA_GRAFICO = 30;
+
+const TIPO_GRAFICO_PARA_CHART_TYPE: Record<TipoGrafico, ChartTypeRelatorio> = {
+  linha: 'line',
+  barra: 'bar',
+  area: 'area',
+};
+
+// Só entram os gráficos com tipo selecionado; sem nenhum, devolve undefined
+// e o campo nem vai no body.
+function montarChartTypes(
+  selecionados: Partial<Record<keyof ChartTypesRelatorio, TipoGrafico>>,
+): ChartTypesRelatorio | undefined {
+  const chartTypes: ChartTypesRelatorio = {};
+  (Object.keys(selecionados) as (keyof ChartTypesRelatorio)[]).forEach((chave) => {
+    const tipo = selecionados[chave];
+    if (tipo) chartTypes[chave] = TIPO_GRAFICO_PARA_CHART_TYPE[tipo];
+  });
+  return Object.keys(chartTypes).length > 0 ? chartTypes : undefined;
+}
+
 type ModoRelatorio = 'ia' | 'acompanhamento' | 'media-periodo' | 'regressao';
 
 type Fase = 'LINHA_BASE' | 'INTERVENCAO';
@@ -236,8 +291,11 @@ function GraficoRegressao({ dados, dimensao }: { dados: PontoRegressao[]; dimens
         <Tooltip
           contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
           labelStyle={{ fontWeight: 'bold', color: '#1E293B', marginBottom: '4px' }}
-          formatter={(value: number | undefined, name, item) => {
+          formatter={(value: number | string | undefined, name, item) => {
             if (value === undefined) return ['-', name];
+            // O Scatter também manda o valor do eixo X (a data) no payload do
+            // tooltip: o "%" só vale para pontuação/tendência, que são números.
+            if (typeof value !== 'number') return null;
             if (name === 'previsto') {
               return [`${Math.round(value)}%`, 'Tendência (regressão)'];
             }
@@ -298,6 +356,7 @@ export function Relatorios() {
   const refGraficoAbAbab = useRef<HTMLDivElement>(null);
   const refGraficoCiclos = useRef<HTMLDivElement>(null);
   const refGraficoRegressao = useRef<HTMLDivElement>(null);
+  const refGraficoEvolucao = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Ordem alfabética pelo nome: a API já devolve assim (sortBy=name) e o
@@ -436,6 +495,25 @@ export function Relatorios() {
     return base64;
   }
 
+  // Gráfico extra do .docx: o de Evolução no tipo do seletor. É opcional;
+  // sem dados, sem render ou captura vazia, devolve null e o relatório sai
+  // só com os 3 gráficos de sempre.
+  async function capturarGraficoEvolucao(): Promise<GraficoExportado | null> {
+    for (let quadro = 0; quadro < MAX_QUADROS_ESPERA_GRAFICO; quadro++) {
+      if (refGraficoEvolucao.current?.querySelector('.recharts-surface')) break;
+      await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+    }
+    if (!refGraficoEvolucao.current?.querySelector('.recharts-surface')) return null;
+
+    try {
+      const imagemBase64 = await capturarGraficoBase64(refGraficoEvolucao.current);
+      return { titulo: `Evolução (${ROTULO_TIPO_GRAFICO[tipoGrafico]})`, imagemBase64 };
+    } catch (err) {
+      console.error('[Relatorios] Gráfico de evolução não capturado; exportando sem ele:', getSafeErrorLog(err));
+      return null;
+    }
+  }
+
   const handleExportarDocx = async () => {
     if (!aprendenteSelecionado || dadosAcompanhamento.length === 0) {
       return;
@@ -469,6 +547,8 @@ export function Relatorios() {
           params: { inicio: periodoExportado.inicio, fim: periodoExportado.fim },
         });
         textoResumo = res.data.resumoIa;
+        // Os dados vêm junto do resumo; o gráfico extra (Evolução) precisa deles.
+        setDadosEvolucao(res.data.dadosGrafico);
         setResumoIa(textoResumo);
         setResumoIaAprendenteId(aprendenteSelecionado);
       }
@@ -484,9 +564,16 @@ export function Relatorios() {
         capturarGraficoBase64(refGraficoRegressao.current),
       ]);
 
+      const graficoExtra = await capturarGraficoEvolucao();
+
       const nomeAprendente = aprendentes.find((a) => a.id === aprendenteSelecionado)?.nomeCompleto ?? '';
 
-      const payload = {
+      // Acompanhamento, Média por Período e Regressão ainda não têm seletor de
+      // tipo na tela, então nenhuma chave é enviada (comportamento atual). Ao
+      // criar um seletor, passe o estado dele aqui, ex.: { acompanhamento: tipo }.
+      const chartTypes = montarChartTypes({});
+
+      const payload: ExportarDocxPayload = {
         nomeAprendente,
         resumoIa: textoResumo,
         dataEmissao,
@@ -496,7 +583,9 @@ export function Relatorios() {
           { titulo: 'Acompanhamento AB-ABAB', imagemBase64: imagemAbAbab },
           { titulo: 'Média por Período', imagemBase64: imagemCiclos },
           { titulo: 'Regressão Linear', imagemBase64: imagemRegressao },
+          ...(graficoExtra ? [graficoExtra] : []),
         ],
+        ...(chartTypes ? { chartTypes } : {}),
       };
 
       const response = await api.post(`/aprendentes/${aprendenteSelecionado}/exportar-docx`, payload, {
@@ -533,7 +622,9 @@ export function Relatorios() {
     }
   };
 
-  const renderizarGrafico = () => {
+  // `animado = false` é para a cópia oculta da exportação: sem animação, o
+  // gráfico já nasce completo e a captura não pega um quadro intermediário.
+  const renderizarGrafico = (animado = true) => {
     const commonProps = {
       data: dadosEvolucao,
       margin: { top: 10, right: 10, left: -20, bottom: 0 }
@@ -557,14 +648,14 @@ export function Relatorios() {
         return (
           <BarChart {...commonProps}>
             {EixosETootip}
-            <Bar dataKey="score" fill="#2563EB" radius={[4, 4, 0, 0]} barSize={40} animationDuration={1500} />
+            <Bar dataKey="score" fill="#2563EB" radius={[4, 4, 0, 0]} barSize={40} isAnimationActive={animado} animationDuration={1500} />
           </BarChart>
         );
       case 'area':
         return (
           <AreaChart {...commonProps}>
             {EixosETootip}
-            <Area type="monotone" dataKey="score" stroke="#2563EB" fill="#DBEAFE" strokeWidth={3} animationDuration={1500} />
+            <Area type="monotone" dataKey="score" stroke="#2563EB" fill="#DBEAFE" strokeWidth={3} isAnimationActive={animado} animationDuration={1500} />
           </AreaChart>
         );
       case 'linha':
@@ -572,7 +663,7 @@ export function Relatorios() {
         return (
           <LineChart {...commonProps}>
             {EixosETootip}
-            <Line type="monotone" dataKey="score" stroke="#2563EB" strokeWidth={4} dot={{ fill: '#2563EB', strokeWidth: 3, r: 6, stroke: '#fff' }} activeDot={{ r: 8, strokeWidth: 0, fill: '#1D4ED8' }} animationDuration={1500} />
+            <Line type="monotone" dataKey="score" stroke="#2563EB" strokeWidth={4} dot={{ fill: '#2563EB', strokeWidth: 3, r: 6, stroke: '#fff' }} activeDot={{ r: 8, strokeWidth: 0, fill: '#1D4ED8' }} isAnimationActive={animado} animationDuration={1500} />
           </LineChart>
         );
     }
@@ -644,7 +735,7 @@ export function Relatorios() {
             left: '-9999px',
             zIndex: -1,
             width: EXPORT_WRAPPER.width,
-            height: EXPORT_WRAPPER.height * 3,
+            height: EXPORT_WRAPPER.height * 4,
           }}
         >
           <div ref={refGraficoAbAbab} style={estiloWrapperExport}>
@@ -656,6 +747,14 @@ export function Relatorios() {
           <div ref={refGraficoRegressao} style={estiloWrapperExport}>
             <GraficoRegressao dados={dadosRegressao} dimensao={EXPORT_GRAFICO} />
           </div>
+          {/* Extra: Evolução no tipo do seletor. Só existe com dados do aprendente atual. */}
+          {dadosEvolucao.length > 0 && resumoIaAprendenteId === aprendenteSelecionado && (
+            <div ref={refGraficoEvolucao} style={estiloWrapperExport}>
+              <ResponsiveContainer {...propsContainer(EXPORT_GRAFICO)}>
+                {renderizarGrafico(false)}
+              </ResponsiveContainer>
+            </div>
+          )}
         </div>
       )}
 
