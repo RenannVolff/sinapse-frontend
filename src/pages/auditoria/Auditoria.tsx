@@ -3,7 +3,7 @@ import { History, Loader2, ShieldCheck } from 'lucide-react';
 import { api } from '../../services/api';
 import { getSafeErrorLog } from '../../services/apiError';
 
-type AcaoAuditoria = 'CREATE' | 'UPDATE' | 'DELETE' | string;
+type AcaoAuditoria = 'CREATE' | 'UPDATE' | 'DELETE' | 'READ' | string;
 
 interface AuditLog {
   id: string;
@@ -17,12 +17,14 @@ const ACAO_BADGE: Record<string, string> = {
   CREATE: 'bg-green-50 text-green-700 border-green-100',
   UPDATE: 'bg-blue-50 text-blue-700 border-blue-100',
   DELETE: 'bg-red-50 text-red-700 border-red-100',
+  READ: 'bg-yellow-50 text-yellow-700 border-yellow-100',
 };
 
 const ACAO_LABEL: Record<string, string> = {
   CREATE: 'Criação',
   UPDATE: 'Edição',
   DELETE: 'Exclusão',
+  READ: 'Leitura',
 };
 
 export function Auditoria() {
